@@ -29,16 +29,16 @@ int Parser::expect(Token t) {
 }
 
 void Parser::error(int argc, ...) {
-    fprintf(stderr, "Syntax error at line %i, column %i: expected ", tokeniser.getLine(), tokeniser.getColumn());
-    va_list args;
-    va_start(args, argc);
+    fprintf(stderr, "Syntax error at line %i, column %i: expected", tokeniser.getLine(), tokeniser.getColumn());
+    va_list argv;
+    va_start(argv, argc);
     for (int i=0; i<argc; i++) {
-        int token = va_arg(args, int);
+        int token = va_arg(argv, int);
         if (token >= Tk_MIN && token < Tk_MAX) {
-            fprintf(stderr, "`%s', ", Tokeniser::tokenDescriptions[va_arg(args, int)]);
+            fprintf(stderr, " `%s',", Tokeniser::tokenDescriptions[va_arg(argv, int)]);
         }
     }
-    va_end(args);
+    va_end(argv);
     fprintf(stderr, " got `%s'\n", Tokeniser::tokenDescriptions[this->token]);
 }
 
@@ -60,11 +60,12 @@ void Parser::unit(void) {
 
 // <statement> ::= "print" <expression> [ "," <expression> ]... [ ";" <expression> [ "," <expression> ]... ]... [ ";" ]
 //               | "input" <identifier> [ "," <identifier> ]...
-//               | [ "let" ] <identifier> "=" <expression>
+//               | [ "let" ] <identifier> [ "[" <expression> "]" ] "=" <expression>
 //               | [ "call" ] <identifier> "(" <param-list> ")"
 //               | "if" <expression> "then" <block> [ "elseif" <expression> "then" <block> ]... [ "else" <block> ] "end" "if"
 //               | "do" <do-body>
 //               | "for" <identifier> "=" <expression> "to" <expression> [ "step" <expression> ] <block> "next" [ <identifier> ]
+//               | "end"
 void Parser::statement(void) {
     if (accept(TkPRINT)) {
         do {
@@ -82,6 +83,10 @@ void Parser::statement(void) {
     else if (accept(TkLET)) {
         expect(TkIDENTIFIER);
         expect(TkEQUALS);
+        if (accept(TkLBRACKET)) {
+            expression();
+            expect(TkRBRACKET);
+        }
         expression();
     }
     else if (accept(TkCALL)) {
@@ -98,8 +103,14 @@ void Parser::statement(void) {
             paramList();
             expect(TkRPAREN);
         }
+        else if (accept(TkLBRACKET)) {
+            expression();
+            expect(TkRBRACKET);
+            expect(TkEQUALS);
+            expression();
+        }
         else {
-            error(2, TkEQUALS, TkLPAREN);
+            error(3, TkEQUALS, TkLPAREN, TkLBRACKET);
         }
     }
     else if (accept(TkIF)) {
@@ -133,8 +144,11 @@ void Parser::statement(void) {
         expect(TkNEXT);
         accept(TkIDENTIFIER);
     }
+    else if (accept(TkEND)) {
+        ;  // FIXME exit!
+    }
     else {
-        error(8, TkPRINT, TkINPUT, TkLET, TkCALL, TkIDENTIFIER, TkIF, TkDO, TkFOR);
+        error(9, TkPRINT, TkINPUT, TkLET, TkCALL, TkIDENTIFIER, TkIF, TkDO, TkFOR, TkEND);
         token = tokeniser.getToken();
     }
 }
@@ -215,7 +229,7 @@ void Parser::paramList(void) {
 }
 
 // <primary-expression> ::= <identifier> "(" <param-list> ")"
-//                        | <identifier> "[" <literal> "]"
+//                        | <identifier> "[" <expression> "]"
 //                        | <identifier>  
 //                        | "(" <expression> ")"
 //                        | <literal>
@@ -226,7 +240,7 @@ void Parser::primaryExpression(void) {
             expect(TkRPAREN);
         }
         else if (accept(TkLBRACKET)) {
-            expect(TkLITERAL);  // FIXME array index must be an integer though!  though all variant values can cast to one
+            expression();
             expect(TkRBRACKET);
         }
         else {

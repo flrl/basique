@@ -107,7 +107,12 @@ Token Tokeniser::getToken(void) {
         case '[':   token = TkLBRACKET;     break;
         case ']':   token = TkRBRACKET;     break;
         case ':':   token = TkCOLON;        break;
-        case '\n':  token = TkEOL;          break;
+        case '\n':  
+            token = TkEOL;
+            while (peekChar() == '\n')  {
+                getChar();  // consume \n+ as if it were \n   
+            }
+            break;
         case '=':   token = TkEQUALS;       break;
         case '>':
             if (peekChar() == '=') {
