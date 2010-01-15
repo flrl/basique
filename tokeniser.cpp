@@ -285,10 +285,11 @@ void Tokeniser::skipWhitespace(void) {
                 break;
                 
             case '\'':
-                // consume comments until end of line
-                do {
-                    ch = getChar();
-                } while (ch != EOF && ch != '\n');
+                // consume comments until (but not including) end of line
+                getChar();
+                while ((ch = peekChar()) != EOF && ch != '\n') {
+                    getChar();
+                }
                 break;
                 
             case '_':
