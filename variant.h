@@ -9,6 +9,8 @@
 #ifndef _VARIANT_H
 #define _VARIANT_H
 
+#include <cstdlib>
+
 enum VariantType {
     is_undef, is_bool, is_int, is_double, is_string,
 };
