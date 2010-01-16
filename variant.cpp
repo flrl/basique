@@ -163,3 +163,24 @@ void Variant::setStringValue(const char *s) {
         this->type = is_undef;
     }
 }
+
+void Variant::setDefaultValueForType(VariantType type){
+    switch (type) {
+        case is_bool:
+            setBoolValue(false);
+            break;
+        case is_int:
+            setIntValue(0);
+            break;
+        case is_double:
+            setDoubleValue(0.0);
+            break;
+        case is_string:
+            setStringValue("");
+            break;
+        case is_undef:
+        default:
+            type = is_undef;
+    }
+}
+
