@@ -49,4 +49,25 @@ private:
     }
 };
 
+
+
+// FIXME operator overloads
+
+/*
+ types are bool, int, double, string, undef
+ categories are "numeric" (int, double) or "string" (string) or ???
+ operators generally keep the type of their left hand side, thus:
+    int i + string s == i + atoi(s)
+ if both arguments are numeric and either is a double, the result is a double
+ if the left operand is numeric and the right a string, the string is parsed to a numeric value
+ if the left operand is a string, the right operand is converted to a string (eg sprintf)
+ if either operand is undef, the result is undef (?? FIXME)
+ 
+ the usual numeric operators are valid in numeric contexts
+ in string context, + performs concatenation, - / * are invalid
+ numeric operators first convert bools to ints (?? FIXME)
+ 
+ */
+
+
 #endif

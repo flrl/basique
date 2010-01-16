@@ -65,6 +65,7 @@ void Parser::unit(void) {
 //               | "if" <expression> "then" <block> [ "elseif" <expression> "then" <block> ]... [ "else" <block> ] "end" "if"
 //               | "do" <do-body>
 //               | "for" <identifier> "=" <expression> "to" <expression> [ "step" <expression> ] <block> "next" [ <identifier> ]
+//               | "dim" <dim-body> [ "," <dim-body> ]...
 //               | "end"
 void Parser::statement(void) {
     if (accept(TkPRINT)) {
@@ -144,12 +145,29 @@ void Parser::statement(void) {
         expect(TkNEXT);
         accept(TkIDENTIFIER);
     }
+    else if (accept(TkDIM)) {
+        do {
+            dimBody();
+        } while (accept(TkCOMMA));
+    }
     else if (accept(TkEND)) {
         ;  // FIXME exit!
     }
     else {
         error(9, TkPRINT, TkINPUT, TkLET, TkCALL, TkIDENTIFIER, TkIF, TkDO, TkFOR, TkEND);
         token = tokeniser.getToken();
+    }
+}
+
+// <dim-body> ::= <identifier> [ "[" <expression> [ "," <expression> ] "]" ]
+void Parser::dimBody(void) {
+    expect(TkIDENTIFIER);
+    if (accept(TkLBRACKET)) {
+        expression();
+        if (accept(TkCOMMA)) {
+            expression();
+        }
+        expect(TkRBRACKET);
     }
 }
 
@@ -229,7 +247,7 @@ void Parser::paramList(void) {
 }
 
 // <primary-expression> ::= <identifier> "(" <param-list> ")"
-//                        | <identifier> "[" <expression> "]"
+//                        | <identifier> "[" <expression> [ "," <expression> ] "]"
 //                        | <identifier>  
 //                        | "(" <expression> ")"
 //                        | <literal>
@@ -241,6 +259,9 @@ void Parser::primaryExpression(void) {
         }
         else if (accept(TkLBRACKET)) {
             expression();
+            if (accept(TkCOMMA)) {
+                expression();
+            }
             expect(TkRBRACKET);
         }
         else {

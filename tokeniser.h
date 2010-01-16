@@ -39,7 +39,7 @@ enum Token {
     TkDO, TkLOOP, TkWHILE, TkUNTIL, TkWEND,
     TkFOR, TkTO, TkSTEP, TkNEXT,
     TkFUNCTION, TkAS, TkRETURN, TkSUB, TkCALL,
-    TkINTEGER, TkREAL, TkSTRING,
+    TkDIM, TkINTEGER, TkREAL, TkSTRING, TkVARIANT,
     
     /* that's all, folks */
     Tk_MAX,
