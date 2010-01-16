@@ -27,6 +27,7 @@ private:
     
     void unit(void);
     void statement(void);
+    void dimBody(void);
     void block(void);
     void doBody(void);
     void functionDefinition(void);
@@ -50,10 +51,14 @@ private:
 //          | <statement>
 // <statement> ::= "print" <expression> [ "," <expression> ]... [ ";" <expression> [ "," <expression> ]... ]... [ ";" ]
 //               | "input" <identifier> [ "," <identifier> ]...
-//               | [ "let" ] <identifier> "=" <expression>
+//               | [ "let" ] <identifier> [ "[" <expression> "]" ] "=" <expression>
 //               | [ "call" ] <identifier> "(" <param-list> ")"
 //               | "if" <expression> "then" <block> [ "elseif" <expression> "then" <block> ]... [ "else" <block> ] "end" "if"
 //               | "do" <do-body>
+//               | "for" <identifier> "=" <expression> "to" <expression> [ "step" <expression> ] <block> "next" [ <identifier> ]
+//               | "dim" <dim-body> [ "," <dim-body> ]...
+//               | "end"
+// <dim-body> ::= <identifier> [ "[" <expression> [ "," <expression> ] "]" ]
 // <block> ::= <statement> [ ( ":" | <eol> ) <statement> ]...
 // <do-body> ::= ( "while" | "until" ) <expression> <block> "loop"
 //             | <block> "loop" ( "while" | "until" ) <expression>
@@ -63,7 +68,7 @@ private:
 // <accepted-param> ::= <identifier> [ "as" <type> ] | <null>
 // <param-list> ::= <expression> [ "," <expression> ]...
 // <primary-expression> ::= <identifier> "(" <param-list> ")"
-//                        | <identifier> "[" <literal> "]"
+//                        | <identifier> "[" <expression> [ "," <expression> ] "]"
 //                        | <identifier>  
 //                        | "(" <expression> ")"
 //                        | <literal>
@@ -79,5 +84,6 @@ private:
 // <or-expression> ::= <and-expression> [ "or" <and-expression> ]...
 // <expression> ::= <or-expression>
 // <type> ::= "integer" | "real" | "string"
+
 
 #endif
