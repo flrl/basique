@@ -20,6 +20,7 @@ public:
     Variant(int i) { this->setIntValue(i); }    
     Variant(double d) { this->setDoubleValue(d); }    
     Variant(const char *s) { this->setStringValue(s); }
+    Variant(VariantType t) { this->setDefaultValueForType(t); }
     
     ~Variant(void) { clearStringValue(); }
     
@@ -33,6 +34,8 @@ public:
     void setIntValue(int);
     void setDoubleValue(double);
     void setStringValue(const char *);
+    
+    void setDefaultValueForType(VariantType);
     
     bool isDefined(void) const { return this->type == is_undef; }
     
