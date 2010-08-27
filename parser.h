@@ -21,6 +21,10 @@ private:
     Token token;
     Tokeniser tokeniser;
     
+    Variant accepted_token_value;
+    int accepted_token_line;
+    int accepted_token_column;
+    
     int accept(Token t);
     int expect(Token t);
     void error(int, ...);

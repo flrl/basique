@@ -14,6 +14,9 @@
 
 int Parser::accept(Token t) {
     if (this->token == t) {
+        this->accepted_token_value = tokeniser.getValue();
+        this->accepted_token_line = tokeniser.getLine();
+        this->accepted_token_column = tokeniser.getColumn();
         this->token = tokeniser.getToken();
         return 1;
     }
@@ -59,8 +62,8 @@ void Parser::unit(void) {
 }
 
 // <statement> ::= "print" <expression> [ "," <expression> ]... [ ";" <expression> [ "," <expression> ]... ]... [ ";" ]
-//               | "input" <identifier> [ "," <identifier> ]...
-//               | [ "let" ] <identifier> [ "[" <expression> "]" ] "=" <expression>
+//               | "input" <identifier> [ "[" <expression> [ "," <expression> ] "]" ] [ "," <identifier> [ "["  <expression> [ "," <expression> ] "]" ] ]...
+//               | [ "let" ] <identifier> [ "[" <expression> [ "," <expression> ] "]" ] "=" <expression>
 //               | [ "call" ] <identifier> "(" <param-list> ")"
 //               | "if" <expression> "then" <block> [ "elseif" <expression> "then" <block> ]... [ "else" <block> ] "end" "if"
 //               | "do" <do-body>
@@ -79,6 +82,13 @@ void Parser::statement(void) {
     else if (accept(TkINPUT)) {
         do {
             expect(TkIDENTIFIER);
+            if (accept(TkLBRACKET)) {
+                expression();
+                if (accept(TkCOMMA)) {
+                    expression();
+                }
+                expect(TkRBRACKET);
+            }
         } while (accept(TkCOMMA));
     }
     else if (accept(TkLET)) {
@@ -86,6 +96,9 @@ void Parser::statement(void) {
         expect(TkEQUALS);
         if (accept(TkLBRACKET)) {
             expression();
+            if (accept(TkCOMMA)) {
+                expression();
+            }
             expect(TkRBRACKET);
         }
         expression();

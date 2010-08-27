@@ -15,9 +15,15 @@
 
 namespace Basic {
     class ASTNode;
+    class Identifier;
     class Expression;
     class Block;
     class Statement;
+    class PrintStatement;
+    class SemicolonExpression;
+    class CommaExpression;
+    class ForStatement;
+    class DoStatement;
 }
 
 using namespace Basic;
@@ -33,11 +39,18 @@ protected:
     int column;
 };
 
+class Basic::Identifier : public ASTNode {
+public:
+    Identifier();
+protected:
+};
+
 class Basic::Expression : public ASTNode {
 public:
     Expression();
-    Variant getResult();
+    Variant getResult() { return result; }
 protected:
+    Variant result;
     
 };
 
@@ -47,18 +60,60 @@ public:
     ~Block();
     void appendStatement(const Statement &);
 protected:
-    std::list<Statement> statements;
+    std::list<ASTNode> statements;
 };
 
-class Basic::Statement : public ASTNode {
+class Basic::PrintStatement : public ASTNode {
 public:
-    Statement(StatementType);
-    ~Statement();
+    PrintStatement();
 protected:
-    
+    std::list<SemicolonExpression> semicolonExpressions;
 };
 
+class Basic::SemicolonExpression : public ASTNode {
+public:
+    SemicolonExpression();
+protected:
+    std::list<CommaExpression> commaExpressions;
+};
 
+class Basic::CommaExpression : public ASTNode {
+public:
+    CommaExpression();
+protected:
+    std::list<Expression> expressions;
+};
+
+class Basic::ForStatement : public ASTNode {
+public:
+    ForStatement();
+protected:
+    Identifier *identifier;
+    Variant initialValue;
+    Variant finalValue;
+    Variant stepValue;
+    Block *body;
+};
+
+enum DoConditionType {
+    DcWHILE,
+    DcUNTIL,
+};
+
+enum DoConditionWhen {
+    DcPRECONDITION,
+    DcPOSTCONDITION 
+};
+
+class Basic::DoStatement : public ASTNode {
+public:
+    DoStatement();
+protected:
+    DoConditionType conditionType;
+    DoConditionWhen conditionWhen;
+    Expression *condition;
+    Block *body;
+};
 
 
 #endif
