@@ -61,11 +61,13 @@ private:
 //               | "do" <do-body>
 //               | "for" <identifier> "=" <expression> "to" <expression> [ "step" <expression> ] <block> "next" [ <identifier> ]
 //               | "dim" <dim-body> [ "," <dim-body> ]...
-//               | "end"
+//               | "exit" [ <expression> ]
+//               | <null>
 // <dim-body> ::= <identifier> [ "[" <expression> [ "," <expression> ] "]" ]
 // <block> ::= <statement> [ ( ":" | <eol> ) <statement> ]...
 // <do-body> ::= ( "while" | "until" ) <expression> <block> "loop"
 //             | <block> "loop" ( "while" | "until" ) <expression>
+//             | <block> "done"
 // <function-definition> ::= <identifier> "(" [ <accepted-param-list> ] ")" [ "as" <type> ] <block> "end" "function"
 // <sub-definition> ::= <identifier> "(" [ <accepted-param-list> ] ")" <block> "end" "sub"
 // <accepted-param-list> ::= <accepted-param> [ "," <accepted-param> ]...

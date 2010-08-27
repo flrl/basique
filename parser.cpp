@@ -69,7 +69,8 @@ void Parser::unit(void) {
 //               | "do" <do-body>
 //               | "for" <identifier> "=" <expression> "to" <expression> [ "step" <expression> ] <block> "next" [ <identifier> ]
 //               | "dim" <dim-body> [ "," <dim-body> ]...
-//               | "end"
+//               | "exit" [ <expression> ]
+//               | <null>
 void Parser::statement(void) {
     if (accept(TkPRINT)) {
         do {
@@ -163,12 +164,8 @@ void Parser::statement(void) {
             dimBody();
         } while (accept(TkCOMMA));
     }
-    else if (accept(TkEND)) {
-        ;  // FIXME exit!
-    }
-    else {
-        error(9, TkPRINT, TkINPUT, TkLET, TkCALL, TkIDENTIFIER, TkIF, TkDO, TkFOR, TkEND);
-        token = tokeniser.getToken();
+    else if (accept(TkEXIT)) {
+        expression();
     }
 }
 
@@ -193,20 +190,36 @@ void Parser::block(void) {
         
 // <do-body> ::= ( "while" | "until" ) <expression> <block> "loop"
 //             | <block> "loop" ( "while" | "until" ) <expression>
+//             | <block> "done"
 void Parser::doBody(void) {
-    if (accept(TkWHILE) || accept(TkUNTIL)) {
+    if (accept(TkWHILE)) {
+        expression();
+        block();
+        expect(TkLOOP);        
+    }
+    else if (accept(TkUNTIL)) {
         expression();
         block();
         expect(TkLOOP);
     }
     else {
         block();
-        expect(TkLOOP);
-        if (accept(TkWHILE) || accept(TkUNTIL)) {
-            expression();
+        if (accept(TkLOOP)) {
+            if (accept(TkWHILE)) {
+                expression();            
+            }
+            else if (accept(TkUNTIL)) {
+                expression();
+            }
+            else {
+                error(2, TkWHILE, TkUNTIL);
+            }
+        }
+        else if (accept(TkDONE)) {
+            ;
         }
         else {
-            error(2, TkWHILE, TkUNTIL);
+            error(2, TkLOOP, TkDONE);
         }
     }
 }
@@ -285,15 +298,21 @@ void Parser::primaryExpression(void) {
         expression();
         expect(TkRPAREN);
     }
-    else {
-        expect(TkLITERAL);
+    else if (accept(TkLITERAL)) {
+        ;
+    }
+    else
+        error(3, TkIDENTIFIER, TkLPAREN, TkLITERAL);
     }
 }
 
 // <unary-expression> ::= <unary-operator> <primary-expression> | <primary-expression>
 // <unary-operator> ::= "not" | "-"
 void Parser::unaryExpression(void) {
-    if (accept(TkNOT) || accept(TkMINUS)) {
+    if (accept(TkNOT)) {
+        primaryExpression();        
+    }
+    else if (accept(TkMINUS)) {
         primaryExpression();
     }
     else {
@@ -346,7 +365,16 @@ void Parser::expression(void) {
 
 // <type> ::= "integer" | "real" | "string"
 void Parser::type(void) {
-    if (!(accept(TkINTEGER) || accept(TkREAL) || accept(TkSTRING))) {
+    if (accept(TkINTEGER)) {
+        ;
+    }
+    else if (accept(TkREAL)) {
+        ;
+    }
+    else if (accept(TkSTRING)) {
+        ;
+    }
+    else {
         error(3, TkINTEGER, TkREAL, TkSTRING);
     }    
 }

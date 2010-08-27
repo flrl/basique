@@ -36,9 +36,9 @@ enum Token {
     TkLET,
     TkMOD,
     TkIF, TkTHEN, TkELSEIF, TkELSE, TkEND,
-    TkDO, TkLOOP, TkWHILE, TkUNTIL, TkWEND,
+    TkDO, TkLOOP, TkWHILE, TkUNTIL, TkDONE,
     TkFOR, TkTO, TkSTEP, TkNEXT,
-    TkFUNCTION, TkAS, TkRETURN, TkSUB, TkCALL,
+    TkFUNCTION, TkAS, TkRETURN, TkSUB, TkCALL, TkEXIT,
     TkDIM, TkINTEGER, TkREAL, TkSTRING, TkVARIANT,
     
     /* that's all, folks */
