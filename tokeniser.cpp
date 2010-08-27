@@ -40,7 +40,7 @@ void Tokeniser::setupKeywords(void) {
         keywords["loop"] = TkLOOP;
         keywords["while"] = TkWHILE;
         keywords["until"] = TkUNTIL;
-        keywords["wend"] = TkWEND;
+        keywords["done"] = TkDONE;
         keywords["for"] = TkFOR;
         keywords["to"] = TkTO;
         keywords["step"] = TkSTEP;
@@ -50,6 +50,7 @@ void Tokeniser::setupKeywords(void) {
         keywords["return"] = TkRETURN;
         keywords["sub"] = TkSUB;
         keywords["call"] = TkCALL;
+        keywords["exit"] = TkEXIT;
         keywords["dim"] = TkDIM;
         keywords["integer"] = TkINTEGER;
         keywords["real"] = TkREAL;
@@ -70,9 +71,9 @@ const char* Tokeniser::tokenDescriptions[] = {
     "let",
     "mod",
     "if", "then", "elseif", "else", "end",
-    "do", "loop", "while", "until", "wend",
+    "do", "loop", "while", "until", "done",
     "for", "to", "step", "next",
-    "function", "as", "return", "sub", "call",
+    "function", "as", "return", "sub", "call", "exit",
     "dim", "integer", "real", "string", "variant",
 };
 
