@@ -61,7 +61,7 @@ void Parser::unit(void) {
     }
 }
 
-// <statement> ::= "print" <expression> [ "," <expression> ]... [ ";" <expression> [ "," <expression> ]... ]... [ ";" ]
+// <statement> ::= "print" <print-expression>
 //               | "input" <identifier> [ "[" <expression> [ "," <expression> ] "]" ] [ "," <identifier> [ "["  <expression> [ "," <expression> ] "]" ] ]...
 //               | [ "let" ] <identifier> [ "[" <expression> [ "," <expression> ] "]" ] "=" <expression>
 //               | [ "call" ] <identifier> "(" <param-list> ")"
@@ -272,6 +272,21 @@ void Parser::paramList(void) {
     } while (accept(TkCOMMA));
 }
 
+// <print-expression> ::= <expression> [ "," <print-expression> ]...
+//                      | <null>
+void Parser::printExpression(void) {
+    // peek ahead for something that looks like the start of an expression before trying to parse one
+    if (this->token == TkIDENTIFIER or this->token == TkLPAREN or this->token == TkLITERAL) {
+        expression();
+        if (accept(TkCOMMA)) {
+            printExpression();
+        }
+    }
+    else {
+        ;
+    }
+}
+
 // <primary-expression> ::= <identifier> "(" <param-list> ")"
 //                        | <identifier> "[" <expression> [ "," <expression> ] "]"
 //                        | <identifier>  
@@ -301,7 +316,7 @@ void Parser::primaryExpression(void) {
     else if (accept(TkLITERAL)) {
         ;
     }
-    else
+    else {
         error(3, TkIDENTIFIER, TkLPAREN, TkLITERAL);
     }
 }

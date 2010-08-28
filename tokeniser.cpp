@@ -195,16 +195,17 @@ Token Tokeniser::readNumeric(char first) {
     return TkLITERAL;
 }
 
-// Tries to parse an alphanumeric string.  The first digit is provided in 'first'.
+// Tries to parse an alphanumeric string.  The first character is provided in 'first'.
 // If the string is not a recognised keyword, sets 'value' to the string found and returns 
 // TkIDENTIFIER; otherwise returns an appropriate Token value for the keyword matched.
+// This function treats the underscore character as an alphanumeric character.
 Token Tokeniser::readAlphanumeric(char first) {
     Token token;
     int ch = first, i = 0, len = MAX_IDENTIFIER_LENGTH;
     char *buffer = new char[len];
     
     buffer[i++] = ch;
-    while (isalnum(peekChar())) {
+    while ((ch = peekChar()) and (ch == '_' or isalnum(ch))) {
         if (len - i <= 2) {
             char *tmp = buffer;
             len *= 2;
@@ -223,7 +224,7 @@ Token Tokeniser::readAlphanumeric(char first) {
     }
     else {
         // if not, assume it's an identifier
-        // FIXME possibly look up a symbol table to identify valid identifiers?
+        // FIXME possibly look up a symbol table to identify valid identifiers? -- but when defining one, it won't be there yet
         token = TkIDENTIFIER;
         value.setStringValue(buffer);
     }
@@ -237,7 +238,7 @@ Token Tokeniser::readAlphanumeric(char first) {
 // On success, stores the string parsed in 'value' and returns TkSTRING.  On failure
 // returns TkINVALID;
 Token Tokeniser::readQuoted(char first) {
-    int ch = first, i = 0, len = 32;    
+    int ch = first, i = 0, len = 32;
     char *buffer = new char[len];
     bool found_closing_double_quote = false;
     
@@ -259,6 +260,34 @@ Token Tokeniser::readQuoted(char first) {
                     found_closing_double_quote = true;
                 }
                 break;
+            case '\\':
+                switch (peekChar()) {
+                    case '\\':  getChar(); buffer[i++] = '\\'; break;
+                    case '\'':  getChar(); buffer[i++] = '\''; break;
+                    case '"':   getChar(); buffer[i++] = '"';  break;
+                    case 'a':   getChar(); buffer[i++] = '\a'; break;
+                    case 'b':   getChar(); buffer[i++] = '\b'; break;
+                    case 'f':   getChar(); buffer[i++] = '\f'; break;
+                    case 'n':   getChar(); buffer[i++] = '\n'; break;
+                    case 'r':   getChar(); buffer[i++] = '\r'; break;
+                    case 't':   getChar(); buffer[i++] = '\t'; break;
+                    case 'v':   getChar(); buffer[i++] = '\v'; break;
+                        
+                    case 'x':
+                        buffer[i++] = readHexByte();
+                        break;
+                        
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                        buffer[i++] = readOctalByte();
+                        break;
+                    
+                    default:  // unrecognised escape sequence, keep the backslash and carry on as usual
+                        buffer[i++] = ch;
+                }
+                
             case EOF:  // FIXME handle this differently from \n?
             case '\n':
                 buffer[i] = '\0';
@@ -266,6 +295,7 @@ Token Tokeniser::readQuoted(char first) {
                         token_line, token_column, buffer);
                 delete[] buffer;
                 return TkINVALID;
+            
             default:
                 buffer[i++] = ch;
         }
@@ -274,6 +304,44 @@ Token Tokeniser::readQuoted(char first) {
     value.setStringValue(buffer);
     delete[] buffer;
     return TkLITERAL;
+}
+
+int Tokeniser::readHexByte(void) {
+    int val;
+    char digits[3], *endptr;
+    int i = 0, line = cursor_line, column = cursor_column;
+    
+    getChar(); // consume the leading 'x'
+    memset(digits, 0, sizeof(digits));
+    while (i < 2 and isxdigit(peekChar())) {
+        digits[i] = (char) getChar();
+    }
+    
+    val = strtol(digits, &endptr, 16);
+    if (endptr != NULL) {
+        fprintf(stderr, "warning: invalid characters in hex byte at line %i, column %i: `\\x%s'\n", line, column, digits);
+    }
+    return (char) val;
+}
+
+int Tokeniser::readOctalByte(void) {
+    int val;
+    char digits[4], *endptr;
+    int i = 0, line = cursor_line, column = cursor_column;
+    
+    memset(digits, 0, sizeof(digits));
+    while (i < 3 and isdigit(peekChar())) {
+        digits[i] = (char) getChar();
+    }
+    
+    val = strtol(digits, &endptr, 8);
+    if (endptr != NULL) {
+        fprintf(stderr, "warning: invalid characters in octal byte at line %i, column %i: `\\%s'\n", line, column, digits);
+    }
+    if (val > 0xFF) {
+        fprintf(stderr, "warning: octal byte value out of range at line %i, column %i: `\\%s'\n", line, column, digits);
+    }
+    return (char) val;
 }
 
 void Tokeniser::skipWhitespace(void) {
@@ -288,6 +356,7 @@ void Tokeniser::skipWhitespace(void) {
                 break;
                 
             case '\'':
+            case '#':
                 // consume comments until (but not including) end of line
                 getChar();
                 while ((ch = peekChar()) != EOF && ch != '\n') {
@@ -301,9 +370,12 @@ void Tokeniser::skipWhitespace(void) {
                 ch = fgetc(source);     // read the next character
                 ungetc(ch, source);     // put them both back
                 ungetc(saved, source);
-                if (ch == '\n') {       // if continuation char is followed by eol...
-                    ch = getChar();     // consume the underscore properly
-                    ch = getChar();     // consume the eol properly
+                if (isspace(ch)) {      // if continuation char is followed by whitespace...
+                    ch = getChar();     // consume the continuation properly
+                    ch = getChar();     // consume the space properly
+                }
+                else {                  // but if it's not followed by whitespace, it's not whitespace either
+                    return;
                 }
                 break;
                 

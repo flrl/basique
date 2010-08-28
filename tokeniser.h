@@ -78,6 +78,8 @@ private:
     Token readNumeric(char);
     Token readAlphanumeric(char);
     Token readQuoted(char);
+    int readHexByte(void);
+    int readOctalByte(void);
     
     int getChar(void) {
         int ch = fgetc(source);
