@@ -10,6 +10,7 @@
 #ifndef _PARSER_H
 #define _PARSER_H
 
+#include "ast.h"
 #include "tokeniser.h"
 #include "variant.h"
 
@@ -30,47 +31,48 @@ private:
     void error(int, ...);
     
     void unit(void);
-    void statement(void);
+    Basic::Statement* statement(void);
     void dimBody(void);
-    void block(void);
-    void doBody(void);
+    Basic::Block* block(void);
+    void doStatementBody(void);
     void functionDefinition(void);
     void subDefinition(void);
     void acceptedParamList(void);
     void acceptedParam(void);
-    void paramList(void);
-    void printExpression(void);
-    void primaryExpression(void);
-    void unaryExpression(void);
-    void multiplicativeExpression(void);
-    void additiveExpression(void);
-    void comparitiveExpression(void);
-    void andExpression(void);
-    void orExpression(void);
-    void expression(void);
+    Basic::ParamList* paramList(void);
+    Basic::PrintStatement* printStatementBody(void);
+    Basic::Expression* primaryExpression(void);
+    Basic::Expression* unaryExpression(void);
+    Basic::Expression* multiplicativeExpression(void);
+    Basic::Expression* additiveExpression(void);
+    Basic::Expression* comparitiveExpression(void);
+    Basic::Expression* andExpression(void);
+    Basic::Expression* orExpression(void);
+    Basic::Expression* expression(void);
     void type(void);
 };
 
 // <unit> ::= "function" <function-definition>
 //          | "sub" <sub-definition>
 //          | <statement>
-// <statement> ::= "print" <print-expression>
+// <statement> ::= "print" <print-statement-body>
 //               | "input" <identifier> [ "," <identifier> ]...
 //               | [ "let" ] <identifier> [ "[" <expression> "]" ] "=" <expression>
 //               | [ "call" ] <identifier> "(" <param-list> ")"
 //               | "if" <expression> "then" <block> [ "elseif" <expression> "then" <block> ]... [ "else" <block> ] "end" "if"
-//               | "do" <do-body>
+//               | "do" <do-statement-body>
 //               | "for" <identifier> "=" <expression> "to" <expression> [ "step" <expression> ] <block> "next" [ <identifier> ]
 //               | "dim" <dim-body> [ "," <dim-body> ]...
 //               | "exit" [ <expression> ]
 //               | <null>
-// <print-expression> ::= <expression> [ "," <print-expression> ]...
-//                      | <null>
+// <print-statement-body> ::= <print-expression-list>
+// <print-expression-list> ::= <expression> [ "," <print-expression-list> ]...
+//                           | <null>
 // <dim-body> ::= <identifier> [ "[" <expression> [ "," <expression> ] "]" ]
 // <block> ::= <statement> [ ( ":" | <eol> ) <statement> ]...
-// <do-body> ::= ( "while" | "until" ) <expression> <block> "loop"
-//             | <block> "loop" ( "while" | "until" ) <expression>
-//             | <block> "done"
+// <do-statement-body> ::= ( "while" | "until" ) <expression> <block> "loop"
+//                       | <block> "loop" ( "while" | "until" ) <expression>
+//                       | <block> "done"
 // <function-definition> ::= <identifier> "(" [ <accepted-param-list> ] ")" [ "as" <type> ] <block> "end" "function"
 // <sub-definition> ::= <identifier> "(" [ <accepted-param-list> ] ")" <block> "end" "sub"
 // <accepted-param-list> ::= <accepted-param> [ "," <accepted-param> ]...
@@ -87,7 +89,7 @@ private:
 // <multiplicative-operator> ::= "*" | "/" | "mod"
 // <additive-expression> ::= <multiplicative-expression> [ <additive-operator> <multiplicative-expression> ]...
 // <additive-operator> ::= "+" | "-"
-// <comparitive-expression> ::= <additive-expression> [ <comparitive-operator> <additive-expression> ]...
+// <comparitive-expression> ::= <additive-expression> [ <comparitive-operator> <additive-expression> ]
 // <comparitive-operator> ::= "=" | "<>" | "<" | ">" | "<=" | ">="
 // <and-expression> ::= <comparitive-expression> [ "and" <comparitive-expression> ]...
 // <or-expression> ::= <and-expression> [ "or" <and-expression> ]...
