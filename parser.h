@@ -39,6 +39,7 @@ private:
     void acceptedParamList(void);
     void acceptedParam(void);
     void paramList(void);
+    void printExpression(void);
     void primaryExpression(void);
     void unaryExpression(void);
     void multiplicativeExpression(void);
@@ -53,7 +54,7 @@ private:
 // <unit> ::= "function" <function-definition>
 //          | "sub" <sub-definition>
 //          | <statement>
-// <statement> ::= "print" <expression> [ "," <expression> ]... [ ";" <expression> [ "," <expression> ]... ]... [ ";" ]
+// <statement> ::= "print" <print-expression>
 //               | "input" <identifier> [ "," <identifier> ]...
 //               | [ "let" ] <identifier> [ "[" <expression> "]" ] "=" <expression>
 //               | [ "call" ] <identifier> "(" <param-list> ")"
@@ -63,6 +64,8 @@ private:
 //               | "dim" <dim-body> [ "," <dim-body> ]...
 //               | "exit" [ <expression> ]
 //               | <null>
+// <print-expression> ::= <expression> [ "," <print-expression> ]...
+//                      | <null>
 // <dim-body> ::= <identifier> [ "[" <expression> [ "," <expression> ] "]" ]
 // <block> ::= <statement> [ ( ":" | <eol> ) <statement> ]...
 // <do-body> ::= ( "while" | "until" ) <expression> <block> "loop"
