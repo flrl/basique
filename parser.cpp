@@ -88,7 +88,7 @@ Basic::Statement* Parser::statement(void) {
         return letStatementBody();
     }
     else if (accept(TkCALL)) {
-        return callStatementBody();  // FIXME ?
+//        return callStatementBody();  // FIXME ?
     }
     else if (accept(TkIDENTIFIER)) {
 //        if (accept(TkEQUALS)) {
@@ -249,6 +249,11 @@ void Parser::acceptedParam(void) {
             type();
         }
     }
+}
+
+// <subscript> ::= "(" <expression> [ "," <expression> ]... ")"
+Basic::Subscript* Parser::subscript(void) {
+    
 }
 
 // <param-list> ::= <expression> [ "," <expression> ]...
