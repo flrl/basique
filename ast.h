@@ -33,6 +33,7 @@ namespace Basic {
     
     class Statement;
     class PrintStatement;
+    class InputStatement;
 
     class Block;
     
@@ -58,6 +59,16 @@ class Basic::ParamList : public ASTNode {
 public:
     ParamList() { }
     ~ParamList();
+    virtual void execute();
+    void appendExpression(Expression *e) { expressions.push_back(e); }
+private:
+    std::list<Expression *> expressions;
+};
+
+class Basic::Subscript : public ASTNode {
+public:
+    Subscript(Expression *e) { expressions.push_back(e); }
+    ~Subscript();
     virtual void execute();
     void appendExpression(Expression *e) { expressions.push_back(e); }
 private:
@@ -193,6 +204,33 @@ protected:
     bool append_eol;
 };
 
+class Basic::InputStatement : public Statement {
+public:
+    InputStatement() { }
+    ~InputStatement();
+    virtual void execute();
+    void appendIdentifier(const char *s) {
+        char *identifier = new char[1 + strlen(s)];
+        strcpy(identifier, s);
+        identifiers.push_back(identifier);
+    }
+protected:
+    std::list<char *> identifiers;
+};
+
+class Basic::LetStatement : public Statement {
+public:
+    LetStatement(const char *i, Subscript *s, Expression *e) : subscript(s), expression(e) { 
+        identifier = new char[1 + strlen(i)];
+        strcpy(identifer, i);
+    }
+    ~LetStatement() { delete[] identifier; if (subscript) delete subscript; delete expression; }
+    virtual void execute();
+protected:
+    char *identifier;
+    Subscript *subscript;
+    Expression *expression;
+}
 
 class Basic::Block : public ASTNode {
 public:

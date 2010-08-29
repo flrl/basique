@@ -23,7 +23,7 @@ void Basic::VariableExpression::execute (void) {
 }
 
 void Basic::LiteralExpression::execute (void) {
-    ;
+    ; // result value is set at initialisation
 }
 
 void Basic::UnaryExpression::execute (void) {
@@ -80,7 +80,6 @@ void Basic::AdditiveExpression::execute (void) {
 }
 
 void Basic::ComparitiveExpression::execute (void) {
-//    if (accept(TkEQUALS) || accept(TkNOTEQUALS) || accept(TkLT) || accept(TkGT) || accept(TkLTEQUALS) || accept(TkGTEQUALS)) {
     bool intermediate = false;
     switch (this->cmp) {
         case TkEQUALS:      intermediate = (first == second); break;
@@ -127,6 +126,19 @@ void Basic::PrintStatement::execute (void) {
     if (append_eol)  putchar('\n');
 }
 
+void Basic::InputStatement::execute (void) {
+    
+}
+
 void Basic::ParamList::execute (void) {
     ;  // does nothing
+}
+
+
+
+
+Basic::InputStatement::~InputStatement() {
+    for (std::list<char *>::iterator i = identifiers.begin(); i != identifiers.end(); i++) {
+        delete *i;    
+    }
 }

@@ -26,9 +26,13 @@ int Parser::accept(Token t) {
 }
 
 int Parser::expect(Token t) {
-    if (accept(t))  return 1;
-    error(1, t);
-    return 0;
+    if (accept(t)) {
+        return 1;  
+    } 
+    else {
+        error(1, t);
+        return 0;        
+    }
 }
 
 void Parser::error(int argc, ...) {
@@ -62,66 +66,47 @@ void Parser::unit(void) {
 }
 
 // <statement> ::= "print" <print-statement-body>
-//               | "input" <identifier> [ "[" <expression> [ "," <expression> ] "]" ] [ "," <identifier> [ "["  <expression> [ "," <expression> ] "]" ] ]...
-//               | [ "let" ] <identifier> [ "[" <expression> [ "," <expression> ] "]" ] "=" <expression>
-//               | [ "call" ] <identifier> "(" <param-list> ")"
+//               | "input" <input-statement-body>
+//               | "let" <let-statement-body>
+//               | "call" <call>
 //               | "if" <expression> "then" <block> [ "elseif" <expression> "then" <block> ]... [ "else" <block> ] "end" "if"
 //               | "do" <do-statement-body>
 //               | "for" <identifier> "=" <expression> "to" <expression> [ "step" <expression> ] <block> "next" [ <identifier> ]
 //               | "dim" <dim-body> [ "," <dim-body> ]...
 //               | "exit" [ <expression> ]
+//               | <let-statement-body>
+//               | <call>
 //               | <null>
 Basic::Statement* Parser::statement(void) {
     if (accept(TkPRINT)) {
         return printStatementBody();
     }
     else if (accept(TkINPUT)) {
-        do {
-            expect(TkIDENTIFIER);
-            if (accept(TkLBRACKET)) {
-                expression();
-                if (accept(TkCOMMA)) {
-                    expression();
-                }
-                expect(TkRBRACKET);
-            }
-        } while (accept(TkCOMMA));
+        return inputStatementBody();
     }
     else if (accept(TkLET)) {
-        expect(TkIDENTIFIER);
-        expect(TkEQUALS);
-        if (accept(TkLBRACKET)) {
-            expression();
-            if (accept(TkCOMMA)) {
-                expression();
-            }
-            expect(TkRBRACKET);
-        }
-        expression();
+        return letStatementBody();
     }
     else if (accept(TkCALL)) {
-        expect(TkIDENTIFIER);
-        expect(TkLPAREN);
-        paramList();
-        expect(TkRPAREN);
+        return callStatementBody();  // FIXME ?
     }
     else if (accept(TkIDENTIFIER)) {
-        if (accept(TkEQUALS)) {
-            expression();
-        }
-        else if (accept(TkLPAREN)) {
-            paramList();
-            expect(TkRPAREN);
-        }
-        else if (accept(TkLBRACKET)) {
-            expression();
-            expect(TkRBRACKET);
-            expect(TkEQUALS);
-            expression();
-        }
-        else {
-            error(3, TkEQUALS, TkLPAREN, TkLBRACKET);
-        }
+//        if (accept(TkEQUALS)) {
+//            expression();
+//        }
+//        else if (accept(TkLPAREN)) {
+//            paramList();
+//            expect(TkRPAREN);
+//        }
+//        else if (accept(TkLBRACKET)) {
+//            expression();
+//            expect(TkRBRACKET);
+//            expect(TkEQUALS);
+//            expression();
+//        }
+//        else {
+//            error(3, TkEQUALS, TkLPAREN, TkLBRACKET);
+//        }
     }
     else if (accept(TkIF)) {
         expression();
@@ -295,6 +280,60 @@ Basic::PrintStatement* Parser::printStatementBody(void) {
     
     if (expressions == 0 or comma == 1)  s->setAppendEol(true);
     return s;
+}
+
+// FIXME <input-statement-body> ::= <identifier> [ "[" <expression> [ "," <expression> ] "]" ] [ "," <identifier> [ "["  <expression> [ "," <expression> ] "]" ] ]...
+// <input-statement-body> ::= <identifier> [ "," <identifier> ]...
+Basic::InputStatement* Parser::inputStatementBody(void) {
+    if (expect(TkIDENTIFIER)) {
+        Basic::InputStatement *s = new Basic::InputStatement();
+        s->appendIdentifier(this->accepted_token_value.getStringValue());
+        
+        while (accept(TkCOMMA)) {
+            if (expect(TkIDENTIFIER)) {
+                s->appendIdentifier(this->accepted_token_value.getStringValue());
+            }
+            else {
+                delete s;
+                return NULL;
+            }
+        }
+        
+        return s;
+    }
+    else {
+        return NULL;
+    }
+}
+
+// <let-statement-body> ::= <identifier> [ <subscript> ] "=" <expression>
+Basic::LetStatement* Parser::letStatementBody(void) {
+    if (expect(TkIDENTIFIER)) {
+        const char *identifier = this->accepted_token_value.getStringValue();
+        Subscript *s = NULL;
+        Expression *e = NULL;
+        if (this->token == TkLPAREN) {
+            s = subscript();
+        }
+        if (expect(TkEQUALS)) {
+            e = expression();
+            if (e) {
+                return new LetStatement(identifier, s, e);
+            }
+            else {
+                delete e;
+                if (s)  delete s;
+                return NULL;
+            }
+        }
+        else {
+            if (s)  delete s;
+            return NULL;
+        }
+    }
+    else {
+        return NULL;
+    }    
 }
 
 // <primary-expression> ::= <identifier> "(" <param-list> ")"
