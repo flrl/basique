@@ -184,3 +184,71 @@ void Variant::setDefaultValueForType(VariantType type){
     }
 }
 
+Variant operator+(const Variant &left, const Variant &right) {
+    Variant result;
+    
+    if (right.isUndef()) {
+        fprintf(stderr, "warning: undefined value in addition at line ..., column ...\n");        
+    }
+    
+    if (left.isString()) {
+        const char *lhs = left.getStringValue();
+        const char *rhs = right.getStringValue();
+        char *buffer = new char[strlen(lhs) + strlen(rhs) + 1];
+        strcpy(buffer, lhs);
+        strcat(buffer, rhs);
+        result.setStringValue(buffer);
+        delete[] buffer;
+    }
+    else if (left.isDouble() or (right.isDouble() and (left.isUndef() or left.isBool() or left.isInt()))) {
+        result.setDoubleValue(left.getDoubleValue() + right.getDoubleValue());
+    }
+    else if (left.isInt() or (right.isInt() and left.isBool())) {
+        result.setIntValue(left.getIntValue() + right.getIntValue());
+    }
+    else if (left.isBool()) {
+        result.setIntValue(left.getBoolValue() + right.getBoolValue()); // FIXME
+    }
+    else if (left.isUndef()) {
+        fprintf(stderr, "warning: undefined value in addition at line ..., column ...\n");   
+        result = left;
+    }
+    else {
+        fprintf(stderr, "debug: unhandled condition in Variant operator+\n");
+        result = left;
+    }
+    
+    return result;
+}
+
+Variant operator-(const Variant &left, const Variant &right) {
+    Variant result;
+    
+    if (right.isUndef()) {
+        fprintf(stderr, "warning: undefined value in subtraction at line ..., column ...\n");        
+    }
+    
+    if (left.isString()) {
+        fprintf(stderr, "warning: attempt to subtract from a string at line ..., column ...\n");
+        result = left;
+    }
+    else if (left.isDouble() or (right.isDouble() and (left.isUndef() or left.isBool() or left.isInt()))) {
+        result.setDoubleValue(left.getDoubleValue() - right.getDoubleValue());
+    }
+    else if (left.isInt() or (right.isInt() and left.isBool())) {
+        result.setIntValue(left.getIntValue() - right.getIntValue());
+    }
+    else if (left.isBool()) {
+        result.setIntValue(left.getBoolValue() - right.getBoolValue()); // FIXME
+    }
+    else if (left.isUndef()) {
+        fprintf(stderr, "warning: undefined value in subtraction at line ..., column ...\n");
+        result = left;
+    }
+    else {
+        fprintf(stderr, "debug: unhandled condition in Variant operator-\n");
+        result = left;
+    }    
+    
+    return result;
+}

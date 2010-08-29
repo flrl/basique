@@ -19,6 +19,7 @@ class Variant {
 public:
     Variant(void);
     Variant(const Variant&);
+    Variant(bool b) { this->setBoolValue(b); }
     Variant(int i) { this->setIntValue(i); }    
     Variant(double d) { this->setDoubleValue(d); }    
     Variant(const char *s) { this->setStringValue(s); }
@@ -39,7 +40,12 @@ public:
     
     void setDefaultValueForType(VariantType);
     
-    bool isDefined(void) const { return this->type == is_undef; }
+    bool isDefined(void) const  { return this->type != is_undef; }
+    bool isUndef(void) const    { return this->type == is_undef; }
+    bool isBool(void) const     { return this->type == is_bool; }
+    bool isInt(void) const      { return this->type == is_int; }
+    bool isDouble(void) const   { return this->type == is_double; }
+    bool isString(void) const   { return this->type == is_string; }
     
 private:
     bool bool_value;
@@ -54,6 +60,8 @@ private:
     }
 };
 
+Variant operator+(const Variant &, const Variant &);
+Variant operator-(const Variant &, const Variant &);
 
 
 // FIXME operator overloads
