@@ -130,10 +130,17 @@ void Basic::InputStatement::execute (void) {
     
 }
 
+void Basic::LetStatement::execute (void) {
+    
+}
+
 void Basic::ParamList::execute (void) {
     ;  // does nothing
 }
 
+void Basic::Subscript::execute (void) {
+    
+}
 
 
 
@@ -141,4 +148,8 @@ Basic::InputStatement::~InputStatement() {
     for (std::list<char *>::iterator i = identifiers.begin(); i != identifiers.end(); i++) {
         delete *i;    
     }
+}
+
+Basic::Subscript::~Subscript() {
+    // FIXME
 }

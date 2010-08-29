@@ -18,6 +18,7 @@ namespace Basic {
     class ASTNode;
 
     class ParamList;
+    class Subscript;
     
     class Expression;
     class FunctionCallExpression;
@@ -34,6 +35,7 @@ namespace Basic {
     class Statement;
     class PrintStatement;
     class InputStatement;
+    class LetStatement;
 
     class Block;
     
@@ -222,7 +224,7 @@ class Basic::LetStatement : public Statement {
 public:
     LetStatement(const char *i, Subscript *s, Expression *e) : subscript(s), expression(e) { 
         identifier = new char[1 + strlen(i)];
-        strcpy(identifer, i);
+        strcpy(identifier, i);
     }
     ~LetStatement() { delete[] identifier; if (subscript) delete subscript; delete expression; }
     virtual void execute();
@@ -230,7 +232,7 @@ protected:
     char *identifier;
     Subscript *subscript;
     Expression *expression;
-}
+};
 
 class Basic::Block : public ASTNode {
 public:

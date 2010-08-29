@@ -31,6 +31,7 @@ private:
     void error(int, ...);
     
     void unit(void);
+    Basic::Subscript* subscript(void);
     Basic::Statement* statement(void);
     void dimBody(void);
     Basic::Block* block(void);
@@ -42,6 +43,7 @@ private:
     Basic::ParamList* paramList(void);
     Basic::PrintStatement* printStatementBody(void);
     Basic::InputStatement* inputStatementBody(void);
+    Basic::LetStatement* letStatementBody(void);
     Basic::Expression* primaryExpression(void);
     Basic::Expression* unaryExpression(void);
     Basic::Expression* multiplicativeExpression(void);
