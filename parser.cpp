@@ -372,11 +372,6 @@ Basic::Expression* Parser::multiplicativeExpression(void) {
     else {
         return first;
     }
-    
-    
-//    do {
-//        unaryExpression();
-//    } while (accept(TkMULTIPLY) || accept(TkDIVIDE) || accept(TkMOD));
 }
 
 // <additive-expression> ::= <multiplicative-expression> [ <additive-operator> <multiplicative-expression> ]...
