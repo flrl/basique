@@ -94,7 +94,7 @@ Basic::Statement* Parser::statement(void) {
         return ifStatementBody();
     }
     else if (accept(TkDO)) {
-        doStatementBody();
+        return doStatementBody();
     }
     else if (accept(TkFOR)) {
         expect(TkIDENTIFIER);
@@ -162,42 +162,6 @@ Basic::Block* Parser::block(void) {
     return block;
 }
         
-// <do-statement-body> ::= ( "while" | "until" ) <expression> <block> "loop"
-//                       | <block> "loop" ( "while" | "until" ) <expression>
-//                       | <block> "done"
-void Parser::doStatementBody(void) {
-    if (accept(TkWHILE)) {
-        expression();
-        block();
-        expect(TkLOOP);        
-    }
-    else if (accept(TkUNTIL)) {
-        expression();
-        block();
-        expect(TkLOOP);
-    }
-    else {
-        block();
-        if (accept(TkLOOP)) {
-            if (accept(TkWHILE)) {
-                expression();            
-            }
-            else if (accept(TkUNTIL)) {
-                expression();
-            }
-            else {
-                error(2, TkWHILE, TkUNTIL);
-            }
-        }
-        else if (accept(TkDONE)) {
-            ;
-        }
-        else {
-            error(2, TkLOOP, TkDONE);
-        }
-    }
-}
-
 // <function-definition> ::= <identifier> "(" [ <accepted-param-list> ] ")" [ "as" <type> ] <block> "end" "function"
 void Parser::functionDefinition(void) {
     expect(TkIDENTIFIER);
@@ -374,6 +338,67 @@ Basic::IfStatement* Parser::ifStatementBody(void) {
     if (s)  delete s;
     return NULL;
 }
+
+// <do-statement-body> ::= ( "while" | "until" ) <expression> <block> "loop"
+//                       | <block> "loop" ( "while" | "until" ) <expression>
+//                       | <block> "loop"
+//                       | <block> "done"
+Basic::DoStatement* Parser::doStatementBody(void) {
+    DoConditionType t;
+    DoConditionWhen w;
+    Expression *c = NULL;
+    Block *b = NULL;
+    
+    if (accept(TkWHILE)) {
+        t = DcWHILE;
+        w = DcPRECONDITION;
+        if ((c = expression())) {
+            if ((b = block())) {
+                if (expect(TkLOOP)) {
+                    return new DoStatement(t, w, c, b);
+                }
+            }
+        }
+    }
+    else if (accept(TkUNTIL)) {
+        t = DcUNTIL;
+        w = DcPRECONDITION;
+        if ((c = expression())) {
+            if ((b = block())) {
+                if (expect(TkLOOP)) {
+                    return new DoStatement(t, w, c, b);
+                }
+            }
+        }
+    }
+    else if ((b = block())) {
+        if (accept(TkDONE)) {
+            t = DcONCE;
+            w = DcPOSTCONDITION;
+            return new DoStatement(t, w, NULL, b);
+        }
+        else if (accept(TkLOOP)) {
+            w = DcPOSTCONDITION;
+            if (accept(TkWHILE) and ((c = expression()))) {
+                return new DoStatement(DcWHILE, w, c, b);
+            }
+            else if (accept(TkUNTIL) and ((c = expression()))) {
+                return new DoStatement(DcUNTIL, w, c, b);
+            }
+            else {
+                return new DoStatement(DcFOREVER, w, c, b);
+            }
+        }
+        else {
+            error(2, TkLOOP, TkDONE);
+        }
+    }
+
+    if (c)  delete c;
+    if (b)  delete b;
+    return NULL;
+}
+
 
 
 // <primary-expression> ::= <identifier> "(" <param-list> ")"

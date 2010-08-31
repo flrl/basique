@@ -35,7 +35,6 @@ private:
     Basic::Statement* statement(void);
     void dimBody(void);
     Basic::Block* block(void);
-    void doStatementBody(void);
     void functionDefinition(void);
     void subDefinition(void);
     void acceptedParamList(void);
@@ -46,6 +45,7 @@ private:
     Basic::LetStatement* letStatementBody(void);
     Basic::CallStatement* callStatementBody(void);
     Basic::IfStatement* ifStatementBody(void);
+    Basic::DoStatement* doStatementBody(void);
     
     Basic::Expression* primaryExpression(void);
     Basic::Expression* unaryExpression(void);
@@ -84,6 +84,7 @@ private:
 // <block> ::= <statement> [ ( ":" | <eol> ) <statement> ]...
 // <do-statement-body> ::= ( "while" | "until" ) <expression> <block> "loop"
 //                       | <block> "loop" ( "while" | "until" ) <expression>
+//                       | <block> "loop"
 //                       | <block> "done"
 // <function-definition> ::= <identifier> "(" [ <accepted-param-list> ] ")" [ "as" <type> ] <block> "end" "function"
 // <sub-definition> ::= <identifier> "(" [ <accepted-param-list> ] ")" <block> "end" "sub"
