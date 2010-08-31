@@ -134,11 +134,19 @@ void Basic::LetStatement::execute (void) {
     
 }
 
+void Basic::CallStatement::execute (void) {
+    
+}
+
+void Basic::IfStatement::execute (void) {
+    
+}
+
 void Basic::ParamList::execute (void) {
     ;  // does nothing
 }
 
-void Basic::Subscript::execute (void) {
+void Basic::ArraySubscript::execute (void) {
     
 }
 
@@ -150,6 +158,18 @@ Basic::InputStatement::~InputStatement() {
     }
 }
 
-Basic::Subscript::~Subscript() {
+Basic::IfStatement::~IfStatement() {
+    // FIXME
+}
+
+Basic::ArraySubscript::~ArraySubscript() {
+    // FIXME
+}
+
+Basic::ParamList::~ParamList() {
+    // FIXME
+}
+
+Basic::Block::~Block() {
     // FIXME
 }

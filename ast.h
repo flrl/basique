@@ -18,7 +18,7 @@ namespace Basic {
     class ASTNode;
 
     class ParamList;
-    class Subscript;
+    class ArraySubscript;
     
     class Expression;
     class FunctionCallExpression;
@@ -36,6 +36,8 @@ namespace Basic {
     class PrintStatement;
     class InputStatement;
     class LetStatement;
+    class CallStatement;
+    class IfStatement;
 
     class Block;
     
@@ -57,6 +59,16 @@ protected:
     int column;
 };
 
+class Basic::Block : public ASTNode {
+public:
+    Block() { }
+    ~Block();
+    virtual void execute();
+    void appendStatement(Statement *s) { statements.push_back(s); }
+protected:
+    std::list<Statement *> statements;
+};
+
 class Basic::ParamList : public ASTNode {
 public:
     ParamList() { }
@@ -67,10 +79,10 @@ private:
     std::list<Expression *> expressions;
 };
 
-class Basic::Subscript : public ASTNode {
+class Basic::ArraySubscript : public ASTNode {
 public:
-    Subscript(Expression *e) { expressions.push_back(e); }
-    ~Subscript();
+    ArraySubscript(Expression *e) { expressions.push_back(e); }
+    ~ArraySubscript();
     virtual void execute();
     void appendExpression(Expression *e) { expressions.push_back(e); }
 private:
@@ -222,7 +234,7 @@ protected:
 
 class Basic::LetStatement : public Statement {
 public:
-    LetStatement(const char *i, Subscript *s, Expression *e) : subscript(s), expression(e) { 
+    LetStatement(const char *i, ArraySubscript *s, Expression *e) : subscript(s), expression(e) { 
         identifier = new char[1 + strlen(i)];
         strcpy(identifier, i);
     }
@@ -230,19 +242,36 @@ public:
     virtual void execute();
 protected:
     char *identifier;
-    Subscript *subscript;
+    ArraySubscript *subscript;
     Expression *expression;
 };
 
-class Basic::Block : public ASTNode {
+class Basic::CallStatement : public Statement {
 public:
-    Block() { }
-    ~Block();
+    CallStatement(const char *i, ParamList *params) : params(params) {
+        identifier = new char[1 + strlen(i)];
+        strcpy(identifier, i);
+    }
+    ~CallStatement() { delete[] identifier; if (params) delete params; }
     virtual void execute();
-    void appendStatement(Statement *s) { statements.push_back(s); }
 protected:
-    std::list<Statement *> statements;
+    char *identifier;
+    ParamList *params;
 };
+
+class Basic::IfStatement : public Statement {
+public:
+    IfStatement() { }
+    ~IfStatement();
+    virtual void execute();
+    void appendCondition(Expression *condition, Block *block) { conditions.push_back(condition); blocks.push_back(block); }
+    void setElseBlock(Block *block) { if (else_block) delete else_block; else_block = block; }
+protected:
+    std::list<Expression *> conditions;
+    std::list<Block *> blocks;
+    Block *else_block;
+};
+
 
 
 
