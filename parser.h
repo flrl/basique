@@ -31,7 +31,7 @@ private:
     void error(int, ...);
     
     void unit(void);
-    Basic::Subscript* subscript(void);
+    Basic::ArraySubscript* arraySubscript(void);
     Basic::Statement* statement(void);
     void dimBody(void);
     Basic::Block* block(void);
@@ -44,6 +44,9 @@ private:
     Basic::PrintStatement* printStatementBody(void);
     Basic::InputStatement* inputStatementBody(void);
     Basic::LetStatement* letStatementBody(void);
+    Basic::CallStatement* callStatementBody(void);
+    Basic::IfStatement* ifStatementBody(void);
+    
     Basic::Expression* primaryExpression(void);
     Basic::Expression* unaryExpression(void);
     Basic::Expression* multiplicativeExpression(void);
@@ -60,21 +63,23 @@ private:
 //          | <statement>
 // <statement> ::= "print" <print-statement-body>
 //               | "input" <input-statement-body>
-//               | [ "let" ] <identifier> [ <subscript> ] "=" <expression>
-//               | [ "call" ] <call>
-//               | "if" <expression> "then" <block> [ "elseif" <expression> "then" <block> ]... [ "else" <block> ] "end" "if"
+//               | "let" <let-statement-body>
+//               | "call" <call-statement-body>
+//               | "if" <if-statement-body>
 //               | "do" <do-statement-body>
 //               | "for" <identifier> "=" <expression> "to" <expression> [ "step" <expression> ] <block> "next" [ <identifier> ]
 //               | "dim" <dim-body> [ "," <dim-body> ]...
 //               | "exit" [ <expression> ]
 //               | <null>
-// <subscript> ::= "(" <expression> [ "," <expression> ]... ")"
-// <call> ::= <identifier> "(" <param-list> ")"
+// <array-subscript> ::= "(" <expression> [ "," <expression> ]... ")"
 // <print-statement-body> ::= <print-expression-list>
 // <print-expression-list> ::= <expression> [ "," <print-expression-list> ]...
 //                           | <null>
 // FIXME <input-statement-body> ::= <identifier> [ "[" <expression> [ "," <expression> ] "]" ] [ "," <identifier> [ "["  <expression> [ "," <expression> ] "]" ] ]...
 // <input-statement-body> ::= <identifier> [ "," <identifier> ]...
+// <let-statement-body> ::= <identifier> [ <array-subscript> ] "=" <expression>
+// <call-statement-body> ::= <identifier> "(" <param-list> ")"
+// <if-statement-body> ::= <expression> "then" <block> [ "elseif" <expression> "then" <block> ]... [ "else" <block> ] "end" "if"
 // <dim-body> ::= <identifier> [ "[" <expression> [ "," <expression> ] "]" ]
 // <block> ::= <statement> [ ( ":" | <eol> ) <statement> ]...
 // <do-statement-body> ::= ( "while" | "until" ) <expression> <block> "loop"

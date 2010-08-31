@@ -68,14 +68,14 @@ void Parser::unit(void) {
 // <statement> ::= "print" <print-statement-body>
 //               | "input" <input-statement-body>
 //               | "let" <let-statement-body>
-//               | "call" <call>
-//               | "if" <expression> "then" <block> [ "elseif" <expression> "then" <block> ]... [ "else" <block> ] "end" "if"
+//               | "call" <call-statement-body>
+//               | "if" <if-statement-body>
 //               | "do" <do-statement-body>
 //               | "for" <identifier> "=" <expression> "to" <expression> [ "step" <expression> ] <block> "next" [ <identifier> ]
 //               | "dim" <dim-body> [ "," <dim-body> ]...
 //               | "exit" [ <expression> ]
 //               | <let-statement-body>
-//               | <call>
+//               | <call-statement-body>
 //               | <null>
 Basic::Statement* Parser::statement(void) {
     if (accept(TkPRINT)) {
@@ -88,40 +88,10 @@ Basic::Statement* Parser::statement(void) {
         return letStatementBody();
     }
     else if (accept(TkCALL)) {
-//        return callStatementBody();  // FIXME ?
-    }
-    else if (accept(TkIDENTIFIER)) {
-//        if (accept(TkEQUALS)) {
-//            expression();
-//        }
-//        else if (accept(TkLPAREN)) {
-//            paramList();
-//            expect(TkRPAREN);
-//        }
-//        else if (accept(TkLBRACKET)) {
-//            expression();
-//            expect(TkRBRACKET);
-//            expect(TkEQUALS);
-//            expression();
-//        }
-//        else {
-//            error(3, TkEQUALS, TkLPAREN, TkLBRACKET);
-//        }
+        return callStatementBody();
     }
     else if (accept(TkIF)) {
-        expression();
-        expect(TkTHEN);
-        block();
-        while(accept(TkELSEIF)) {
-            expression();
-            expect(TkTHEN);
-            block();
-        }
-        if (accept(TkELSE)) {
-            block();
-        }
-        expect(TkEND);
-        expect(TkIF);
+        return ifStatementBody();
     }
     else if (accept(TkDO)) {
         doStatementBody();
@@ -146,6 +116,24 @@ Basic::Statement* Parser::statement(void) {
     }
     else if (accept(TkEXIT)) {
         expression();
+    }
+    else if (accept(TkIDENTIFIER)) {
+        //        if (accept(TkEQUALS)) {
+        //            expression();
+        //        }
+        //        else if (accept(TkLPAREN)) {
+        //            paramList();
+        //            expect(TkRPAREN);
+        //        }
+        //        else if (accept(TkLBRACKET)) {
+        //            expression();
+        //            expect(TkRBRACKET);
+        //            expect(TkEQUALS);
+        //            expression();
+        //        }
+        //        else {
+        //            error(3, TkEQUALS, TkLPAREN, TkLBRACKET);
+        //        }
     }
     else {
         return NULL;
@@ -252,8 +240,13 @@ void Parser::acceptedParam(void) {
 }
 
 // <subscript> ::= "(" <expression> [ "," <expression> ]... ")"
-Basic::Subscript* Parser::subscript(void) {
+Basic::ArraySubscript* Parser::arraySubscript(void) {
+//    ArraySubscript subscript = new ArraySubscript();
+    if (expect(TkLPAREN)) {
+        // FIXME...
+    }
     
+    return NULL;
 }
 
 // <param-list> ::= <expression> [ "," <expression> ]...
@@ -311,35 +304,77 @@ Basic::InputStatement* Parser::inputStatementBody(void) {
     }
 }
 
-// <let-statement-body> ::= <identifier> [ <subscript> ] "=" <expression>
+// <let-statement-body> ::= <identifier> [ <array-subscript> ] "=" <expression>
 Basic::LetStatement* Parser::letStatementBody(void) {
+    ArraySubscript *s = NULL;
+    Expression *e = NULL;
+
     if (expect(TkIDENTIFIER)) {
         const char *identifier = this->accepted_token_value.getStringValue();
-        Subscript *s = NULL;
-        Expression *e = NULL;
         if (this->token == TkLPAREN) {
-            s = subscript();
+            s = arraySubscript();
         }
         if (expect(TkEQUALS)) {
-            e = expression();
-            if (e) {
+            if ((e = expression())) {
                 return new LetStatement(identifier, s, e);
             }
-            else {
-                delete e;
-                if (s)  delete s;
-                return NULL;
-            }
-        }
-        else {
-            if (s)  delete s;
-            return NULL;
         }
     }
-    else {
-        return NULL;
-    }    
+    
+    if (s)  delete s;
+    if (e)  delete e;
+    return NULL;
 }
+
+// <call-statement-body> ::= <identifier> "(" <param-list> ")"
+Basic::CallStatement* Parser::callStatementBody(void) {
+    ParamList *p = NULL;
+
+    if (expect(TkIDENTIFIER)) {
+        const char *identifier = this->accepted_token_value.getStringValue();
+        if (expect(TkLPAREN)) {
+            if((p = paramList())) {
+                if (expect(TkRPAREN)) {
+                    return new CallStatement(identifier, paramList());                    
+                }
+            }
+        }
+        
+    }
+    
+    if (p)  delete p;
+    return NULL;
+}
+
+// <if-statement-body> ::= <expression> "then" <block> [ "elseif" <expression> "then" <block> ]... [ "else" <block> ] "end" "if"
+Basic::IfStatement* Parser::ifStatementBody(void) {
+    IfStatement *s = NULL;
+    Expression *e = NULL;
+    
+    if ((e = expression())) {
+        s = new IfStatement();
+        if (expect(TkTHEN)) {
+            s->appendCondition(e, block());
+        }
+        while (accept(TkELSEIF)) {
+            if ((e = expression())) {
+                if (expect(TkTHEN)) {
+                    s->appendCondition(e, block());
+                }
+            }
+        }
+        if (accept(TkELSE)) {
+            s->setElseBlock(block());
+        }
+        if (expect(TkEND) and expect(TkIF)) {
+            return s;
+        }
+    }
+    
+    if (s)  delete s;
+    return NULL;
+}
+
 
 // <primary-expression> ::= <identifier> "(" <param-list> ")"
 //                        | <identifier> "[" <expression> [ "," <expression> ] "]"
