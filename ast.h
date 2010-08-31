@@ -38,6 +38,7 @@ namespace Basic {
     class LetStatement;
     class CallStatement;
     class IfStatement;
+    class DoStatement;
 
     class Block;
     
@@ -272,6 +273,30 @@ protected:
     Block *else_block;
 };
 
+enum DoConditionType {
+    DcWHILE,
+    DcUNTIL,
+    DcFOREVER,
+    DcONCE,
+};
+
+enum DoConditionWhen {
+    DcPRECONDITION,
+    DcPOSTCONDITION 
+};
+
+class Basic::DoStatement : public Statement {
+public:
+    DoStatement(DoConditionType t, DoConditionWhen w, Expression *c, Block *b) 
+        : condition_type(t), condition_when(w), condition(c), body(b) { }
+    ~DoStatement() { if (condition)  delete condition; delete body; }
+    virtual void execute();
+protected:
+    DoConditionType condition_type;
+    DoConditionWhen condition_when;
+    Expression *condition;
+    Block *body;
+};
 
 
 
@@ -289,26 +314,6 @@ protected:
     Block *body;
 };
 
-enum DoConditionType {
-    DcWHILE,
-    DcUNTIL,
-};
-
-enum DoConditionWhen {
-    DcPRECONDITION,
-    DcPOSTCONDITION 
-};
-
-class Basic::DoStatement : public ASTNode {
-public:
-    DoStatement();
-    virtual void execute();
-protected:
-    DoConditionType conditionType;
-    DoConditionWhen conditionWhen;
-    Expression *condition;
-    Block *body;
-};
 
 
 #endif

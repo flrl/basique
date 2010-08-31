@@ -142,6 +142,10 @@ void Basic::IfStatement::execute (void) {
     
 }
 
+void Basic::DoStatement::execute (void) {
+    
+}
+
 void Basic::ParamList::execute (void) {
     ;  // does nothing
 }
