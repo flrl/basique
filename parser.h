@@ -90,12 +90,11 @@ private:
 // <sub-definition> ::= <identifier> "(" [ <accepted-param-list> ] ")" <block> "end" "sub"
 // <accepted-param-list> ::= <accepted-param> [ "," <accepted-param> ]...
 // <accepted-param> ::= <identifier> [ "as" <type> ] | <null>
-// <param-list> ::= <expression> [ "," <expression> ]...
+// <param-list> ::= <expression> [ "," <expression> ]... | <null>
 // <primary-expression> ::= <call>
 //                        | <identifier>  
 //                        | "(" <expression> ")"
 //                        | <literal>
-// <call> ::= <identifier> "(" <param-list> ")"
 // <unary-expression> ::= <unary-operator> <primary-expression> | <primary-expression>
 // <unary-operator> ::= "not" | "-"
 // <multiplicative-expression> ::= <unary-expression> [ <multiplicative-operator> <unary-expression> ]...

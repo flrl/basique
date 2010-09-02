@@ -213,12 +213,24 @@ Basic::ArraySubscript* Parser::arraySubscript(void) {
     return NULL;
 }
 
-// <param-list> ::= <expression> [ "," <expression> ]...
+// <param-list> ::= <expression> [ "," <expression> ]... 
+//                | <null>
 Basic::ParamList* Parser::paramList(void) {
     Basic::ParamList *p = new Basic::ParamList();
-    do {
-        p->appendExpression(expression());
-    } while (accept(TkCOMMA));
+    Expression *e = expression();
+    if (e) {
+        p->appendExpression(e);
+        while (accept(TkCOMMA)) {
+            if ((e = expression())) {
+                p->appendExpression(e);
+            }
+            else {
+                delete p;
+                return NULL;
+            }
+        }
+    }
+    
     return p;
 }
 
@@ -299,7 +311,7 @@ Basic::CallStatement* Parser::callStatementBody(void) {
         if (expect(TkLPAREN)) {
             if((p = paramList())) {
                 if (expect(TkRPAREN)) {
-                    return new CallStatement(identifier, paramList());                    
+                    return new CallStatement(identifier, p);     
                 }
             }
         }
@@ -314,24 +326,26 @@ Basic::CallStatement* Parser::callStatementBody(void) {
 Basic::IfStatement* Parser::ifStatementBody(void) {
     IfStatement *s = NULL;
     Expression *e = NULL;
+    Block *b = NULL;
     
     if ((e = expression())) {
         s = new IfStatement();
-        if (expect(TkTHEN)) {
-            s->appendCondition(e, block());
-        }
-        while (accept(TkELSEIF)) {
-            if ((e = expression())) {
-                if (expect(TkTHEN)) {
-                    s->appendCondition(e, block());
+        if (expect(TkTHEN) and (b = block())) {
+            s->appendCondition(e, b);
+            
+            while (accept(TkELSEIF)) {
+                if ((e = expression())) {
+                    if (expect(TkTHEN) and (b = block())) {
+                        s->appendCondition(e, b);
+                    }
                 }
             }
-        }
-        if (accept(TkELSE)) {
-            s->setElseBlock(block());
-        }
-        if (expect(TkEND) and expect(TkIF)) {
-            return s;
+            if (accept(TkELSE) and (b=block())) {
+                s->setElseBlock(b);
+            }
+            if (expect(TkEND) and expect(TkIF)) {
+                return s;
+            }
         }
     }
     
@@ -402,7 +416,7 @@ Basic::DoStatement* Parser::doStatementBody(void) {
 
 
 // <primary-expression> ::= <identifier> "(" <param-list> ")"
-//                        | <identifier> "[" <expression> [ "," <expression> ] "]"
+//                        | <identifier> "[" <expression> [ "," <expression> ] "]"  // FIXME
 //                        | <identifier>  
 //                        | "(" <expression> ")"
 //                        | <literal>
@@ -411,140 +425,231 @@ Basic::Expression* Parser::primaryExpression(void) {
         const char *identifier = this->accepted_token_value.getStringValue();
         
         if(accept(TkLPAREN)) {
-            Basic::ParamList *params = paramList();
-            expect(TkRPAREN);
-            return new Basic::FunctionCallExpression(identifier, params);
+            Basic::ParamList *params = NULL;
+            if ((params = paramList())) {
+                if (expect(TkRPAREN)) {
+                    return new Basic::FunctionCallExpression(identifier, params);                    
+                }
+                else {
+                    delete params;
+                    return NULL;
+                }
+            }
         }
         else if (accept(TkLBRACKET)) {
-            Basic::Expression *first = expression();
+            // FIXME this is all wrong anyway -- wrong parens, and should be an <array-subscript>
+            Basic::Expression *first = NULL;
             Basic::Expression *second = NULL;
-            if (accept(TkCOMMA)) {
-                second = expression();
+            if ((first = expression())) {
+                if (accept(TkCOMMA)) {
+                    if ((second = expression())) {
+                        return new Basic::ArrayIndexExpression(identifier, first, second);        
+                    }
+                    else {
+                        delete first;
+                        return NULL;
+                    }
+                }
+                if (expect(TkRBRACKET)) {
+                    return new Basic::ArrayIndexExpression(identifier, first, NULL);
+                }
+                else {
+                    delete first;
+                    return NULL;
+                }
             }
-            expect(TkRBRACKET);
-            return new Basic::ArrayIndexExpression(identifier, first, second);
         }
         else {
             return new Basic::VariableExpression(identifier);
         }
     }
     else if (accept(TkLPAREN)) {
-        Basic::Expression *e = expression();
-        expect(TkRPAREN);
-        return e;
+        Basic::Expression *e = NULL;
+        if ((e = expression())) {
+            if (expect(TkRPAREN)) {
+                return e;                
+            }
+            else {
+                delete e;
+                return NULL;
+            }
+        }
     }
     else if (accept(TkLITERAL)) {
         return new Basic::LiteralExpression(this->accepted_token_value);
     }
-    else {
-        error(3, TkIDENTIFIER, TkLPAREN, TkLITERAL);
-        return NULL;
-    }
+
+    error(3, TkIDENTIFIER, TkLPAREN, TkLITERAL);
+    return NULL;        
 }
 
 // <unary-expression> ::= <unary-operator> <primary-expression> | <primary-expression>
 // <unary-operator> ::= "not" | "-"
 Basic::Expression* Parser::unaryExpression(void) {
+    Expression *e = NULL;
     if (accept(TkNOT)) {
-        return new Basic::UnaryExpression(TkNOT, primaryExpression());
+        if ((e = primaryExpression())) {
+            return new Basic::UnaryExpression(TkNOT, e);            
+        }
     }
     else if (accept(TkMINUS)) {
-        return new Basic::UnaryExpression(TkMINUS, primaryExpression());
+        if ((e = primaryExpression())) {
+            return new Basic::UnaryExpression(TkMINUS, e);            
+        }
     }
     else {
         return primaryExpression();
     }
+    
+    if (e)  delete e;
+    return NULL;
 }
 
 // <multiplicative-expression> ::= <unary-expression> [ <multiplicative-operator> <unary-expression> ]...
 // <multiplicative-operator> ::= "*" | "/" | "mod"
 Basic::Expression* Parser::multiplicativeExpression(void) {
-    Basic::Expression *first = unaryExpression();
-
-    if (this->token == TkMULTIPLY or this->token == TkDIVIDE or this->token == TkMOD) {
-        Basic::MultiplicativeExpression *e = new Basic::MultiplicativeExpression();
-        e->appendTerm(first);
-        e->appendOperator(this->token);
-        while (accept(TkMULTIPLY) or accept(TkDIVIDE) or accept(TkMOD)) {
-            e->appendTerm(unaryExpression());
-            if (this->token == TkMULTIPLY or this->token == TkDIVIDE or this->token == TkMOD) {
-                e->appendOperator(this->token);
+    Expression *term = NULL;
+    
+    if ((term = unaryExpression())) {
+        if (this->token == TkMULTIPLY or this->token == TkDIVIDE or this->token == TkMOD) {
+            Basic::MultiplicativeExpression *e = new Basic::MultiplicativeExpression();
+            e->appendTerm(term);
+            e->appendOperator(this->token);
+            while (accept(TkMULTIPLY) or accept(TkDIVIDE) or accept(TkMOD)) {
+                if ((term = unaryExpression())) {
+                    e->appendTerm(term);
+                    if (this->token == TkMULTIPLY or this->token == TkDIVIDE or this->token == TkMOD) {
+                        e->appendOperator(this->token);
+                    }                    
+                }
+                else {
+                    delete e;
+                    return NULL;
+                }
             }
+            return e;
         }
-        return e;
+        else {
+            return term;
+        }        
     }
     else {
-        return first;
+        return NULL;
     }
 }
 
 // <additive-expression> ::= <multiplicative-expression> [ <additive-operator> <multiplicative-expression> ]...
 // <additive-operator> ::= "+" | "-"
 Basic::Expression* Parser::additiveExpression(void) {
-    Basic::Expression *first = multiplicativeExpression();
+    Basic::Expression *term = NULL;
     
-    if (this->token == TkPLUS or this->token == TkMINUS) {
-        Basic::AdditiveExpression *e = new Basic::AdditiveExpression();
-        e->appendTerm(first);
-        e->appendOperator(this->token);
-        while (accept(TkPLUS) or accept(TkMINUS)) {
-            e->appendTerm(multiplicativeExpression());
-            if (this->token == TkPLUS or this->token == TkMINUS) {
-                e->appendOperator(this->token);
+    if ((term = multiplicativeExpression())) {
+        if (this->token == TkPLUS or this->token == TkMINUS) {
+            Basic::AdditiveExpression *e = new Basic::AdditiveExpression();
+            e->appendTerm(term);
+            e->appendOperator(this->token);
+            while (accept(TkPLUS) or accept(TkMINUS)) {
+                if ((term = multiplicativeExpression())) {
+                    e->appendTerm(multiplicativeExpression());
+                    if (this->token == TkPLUS or this->token == TkMINUS) {
+                        e->appendOperator(this->token);
+                    }                    
+                }
+                else {
+                    delete e;
+                    return NULL;
+                }
             }
+            return e;
         }
-        return e;
+        else {
+            return term;
+        }
     }
     else {
-        return first;
+        return NULL;
     }
 }
 
 // <comparitive-expression> ::= <additive-expression> [ <comparitive-operator> <additive-expression> ]
 // <comparitive-operator> ::= "=" | "<>" | "<" | ">" | "<=" | ">="
 Basic::Expression* Parser::comparitiveExpression(void) {
-    Basic::Expression *first = additiveExpression();
-    Token t = this->token;
-    if (accept(TkEQUALS) || accept(TkNOTEQUALS) || accept(TkLT) || accept(TkGT) || accept(TkLTEQUALS) || accept(TkGTEQUALS)) {
-        Basic::Expression *second = additiveExpression();
-        return new Basic::ComparitiveExpression(first, t, second);
+    Expression *first = NULL;
+    Expression *second = NULL;
+    
+    if ((first = additiveExpression())) {
+        Token t = this->token;
+        if (accept(TkEQUALS) || accept(TkNOTEQUALS) || accept(TkLT) || accept(TkGT) || accept(TkLTEQUALS) || accept(TkGTEQUALS)) {
+            if ((second = additiveExpression())) {
+                return new Basic::ComparitiveExpression(first, t, second);                
+            }
+            else {
+                delete first;
+                return NULL;
+            }
+        }
+        else {
+            return first;
+        }        
     }
     else {
-        return first;
+        return NULL;
     }
 }
 
 // <and-expression> ::= <comparitive-expression> [ "and" <comparitive-expression> ]...
 Basic::Expression* Parser::andExpression(void) {
-    Basic::Expression *first = comparitiveExpression();
+    Basic::Expression *term = NULL;
     
-    if (this->token == TkAND) {
-        Basic::AndExpression *e = new Basic::AndExpression();
-        e->appendTerm(first);
-        while (accept(TkAND)) {
-            e->appendTerm(andExpression());
+    if ((term = comparitiveExpression())) {
+        if (this->token == TkAND) {
+            Basic::AndExpression *e = new Basic::AndExpression();
+            e->appendTerm(term);
+            while (accept(TkAND)) {
+                if ((term = comparitiveExpression())) {
+                    e->appendTerm(term);                    
+                }
+                else {
+                    delete e;
+                    return NULL;
+                }
+            }
+            return e;
         }
-        return e;
+        else {
+            return term;
+        }        
     }
     else {
-        return first;
+        return NULL;
     }
 }
 
 // <or-expression> ::= <and-expression> [ "or" <and-expression> ]...
 Basic::Expression* Parser::orExpression(void) {
-    Basic::Expression *first = andExpression();
+    Basic::Expression *term = NULL;
     
-    if (this->token == TkOR) {
-        Basic::OrExpression *e = new Basic::OrExpression();
-        e->appendTerm(first);
-        while (accept(TkOR)) {
-            e->appendTerm(andExpression());
+    if ((term = andExpression())) {
+        if (this->token == TkOR) {
+            Basic::OrExpression *e = new Basic::OrExpression();
+            e->appendTerm(term);
+            while (accept(TkOR)) {
+                if ((term = andExpression())) {
+                    e->appendTerm(term);
+                }
+                else {
+                    delete e;
+                    return NULL;
+                }
+            }
+            return e;
         }
-        return e;
+        else {
+            return term;
+        }        
     }
     else {
-        return first;
+        return NULL;
     }
 }
 
