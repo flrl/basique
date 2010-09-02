@@ -177,3 +177,19 @@ Basic::ParamList::~ParamList() {
 Basic::Block::~Block() {
     // FIXME
 }
+
+Basic::AdditiveExpression::~AdditiveExpression() {
+    
+}
+
+Basic::MultiplicativeExpression::~MultiplicativeExpression() {
+    
+}
+
+Basic::OrExpression::~OrExpression() {
+    
+}
+
+Basic::AndExpression::~AndExpression() {
+    
+}
