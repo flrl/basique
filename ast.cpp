@@ -146,11 +146,23 @@ void Basic::DoStatement::execute (void) {
     
 }
 
+void Basic::ForStatement::execute (void) {
+    
+}
+
+void Basic::DimStatement::execute (void) {
+    
+}
+
 void Basic::ParamList::execute (void) {
     ;  // does nothing
 }
 
 void Basic::ArraySubscript::execute (void) {
+    
+}
+
+void Basic::ArrayDimension::execute (void) {
     
 }
 
@@ -166,8 +178,24 @@ Basic::IfStatement::~IfStatement() {
     // FIXME
 }
 
+Basic::ForStatement::~ForStatement() {
+    delete[] identifier;
+    delete start;
+    delete end;
+    if (step)  delete step;
+    delete body;
+}
+
+Basic::DimStatement::~DimStatement() {
+    
+}
+
 Basic::ArraySubscript::~ArraySubscript() {
     // FIXME
+}
+
+Basic::ArrayDimension::~ArrayDimension() {
+    
 }
 
 Basic::ParamList::~ParamList() {

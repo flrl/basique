@@ -10,6 +10,7 @@
 #ifndef _AST_H
 
 #include <list>
+#include <utility>
 
 #include "tokeniser.h"
 #include "variant.h"
@@ -19,6 +20,7 @@ namespace Basic {
 
     class ParamList;
     class ArraySubscript;
+    class ArrayDimension;
     
     class Expression;
     class FunctionCallExpression;
@@ -39,12 +41,12 @@ namespace Basic {
     class CallStatement;
     class IfStatement;
     class DoStatement;
+    class ForStatement;
+    class DimStatement;
 
     class Block;
     
     class Identifier;
-    class ForStatement;
-    class DoStatement;
 }
 
 using namespace Basic;
@@ -90,6 +92,17 @@ private:
     std::list<Expression *> expressions;
 };
 
+typedef std::pair<Basic::Expression*, Basic::Expression*> ArrayDimensionSpecification;
+
+class Basic::ArrayDimension : public ASTNode {
+public:
+    ArrayDimension(Expression *d1, Expression *d2) { dimensions.push_back(std::make_pair(d1, d2)); }
+    ~ArrayDimension();
+    virtual void execute();
+    void appendDimension(Expression *d1, Expression *d2) { dimensions.push_back(std::make_pair(d1, d2)); }
+private:
+    std::list<ArrayDimensionSpecification> dimensions;
+};
 
 class Basic::Expression : public ASTNode {
 public:
@@ -214,7 +227,7 @@ public:
     void appendExpression(Expression *e) { expressions.push_back(e); }
     void setAppendEol(bool b) { append_eol = b; }
     
-protected:
+private:
     std::list<Expression *> expressions;
     bool append_eol;
 };
@@ -229,7 +242,7 @@ public:
         strcpy(identifier, s);
         identifiers.push_back(identifier);
     }
-protected:
+private:
     std::list<char *> identifiers;
 };
 
@@ -241,7 +254,7 @@ public:
     }
     ~LetStatement() { delete[] identifier; if (subscript) delete subscript; delete expression; }
     virtual void execute();
-protected:
+private:
     char *identifier;
     ArraySubscript *subscript;
     Expression *expression;
@@ -255,7 +268,7 @@ public:
     }
     ~CallStatement() { delete[] identifier; if (params) delete params; }
     virtual void execute();
-protected:
+private:
     char *identifier;
     ParamList *params;
 };
@@ -267,7 +280,7 @@ public:
     virtual void execute();
     void appendCondition(Expression *condition, Block *block) { conditions.push_back(condition); blocks.push_back(block); }
     void setElseBlock(Block *block) { if (else_block) delete else_block; else_block = block; }
-protected:
+private:
     std::list<Expression *> conditions;
     std::list<Block *> blocks;
     Block *else_block;
@@ -291,29 +304,48 @@ public:
         : condition_type(t), condition_when(w), condition(c), body(b) { }
     ~DoStatement() { if (condition)  delete condition; delete body; }
     virtual void execute();
-protected:
+private:
     DoConditionType condition_type;
     DoConditionWhen condition_when;
     Expression *condition;
     Block *body;
 };
 
-
-
-
-
-class Basic::ForStatement : public ASTNode {
+class Basic::ForStatement : public Statement {
 public:
-    ForStatement();
+    ForStatement(const char *id, Expression *s, Expression *e, Expression *t, Block *b) : start(s), end(e), step(t), body(b) { 
+        identifier = new char[1 + strlen(id)];
+        strcpy(identifier, id);
+    }
+    ~ForStatement();
     virtual void execute();
-protected:
-    Identifier *identifier;
-    Variant initialValue;
-    Variant finalValue;
-    Variant stepValue;
+private:
+    char *identifier;
+    Expression *start;
+    Expression *end;
+    Expression *step;
     Block *body;
 };
 
+typedef std::pair<char *, Basic::ArrayDimension*> Dimensionable;
+
+class Basic::DimStatement : public Statement {
+public:
+    DimStatement(const char *id, ArrayDimension *dim) { 
+        char *identifier = new char[1 + strlen(id)];
+        strcpy(identifier, id);
+        dimensionables.push_back(std::make_pair(identifier, dim));
+    }
+    ~DimStatement();
+    virtual void execute();
+    void appendDimensionable(const char *id, ArrayDimension *dim) {
+        char *identifier = new char[1 + strlen(id)];
+        strcpy(identifier, id);
+        dimensionables.push_back(std::make_pair(identifier, dim));
+    }
+private:
+    std::list<Dimensionable> dimensionables;
+};
 
 
 #endif

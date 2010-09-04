@@ -71,8 +71,8 @@ void Parser::unit(void) {
 //               | "call" <call-statement-body>
 //               | "if" <if-statement-body>
 //               | "do" <do-statement-body>
-//               | "for" <identifier> "=" <expression> "to" <expression> [ "step" <expression> ] <block> "next" [ <identifier> ]
-//               | "dim" <dim-body> [ "," <dim-body> ]...
+//               | "for" <for-statement-body>
+//               | "dim" <dim-statement-body>
 //               | "exit" [ <expression> ]
 //               | <let-statement-body>
 //               | <call-statement-body>
@@ -97,58 +97,34 @@ Basic::Statement* Parser::statement(void) {
         return doStatementBody();
     }
     else if (accept(TkFOR)) {
-        expect(TkIDENTIFIER);
-        expect(TkEQUALS);
-        expression();
-        expect(TkTO);
-        expression();
-        if (accept(TkSTEP)) {
-            expression();
-        }
-        block();
-        expect(TkNEXT);
-        accept(TkIDENTIFIER);
+        return forStatementBody();
     }
     else if (accept(TkDIM)) {
-        do {
-            dimBody();
-        } while (accept(TkCOMMA));
+        return dimStatementBody();
     }
     else if (accept(TkEXIT)) {
         expression();
     }
-    else if (accept(TkIDENTIFIER)) {
-        //        if (accept(TkEQUALS)) {
-        //            expression();
-        //        }
-        //        else if (accept(TkLPAREN)) {
-        //            paramList();
-        //            expect(TkRPAREN);
-        //        }
-        //        else if (accept(TkLBRACKET)) {
-        //            expression();
-        //            expect(TkRBRACKET);
-        //            expect(TkEQUALS);
-        //            expression();
-        //        }
-        //        else {
-        //            error(3, TkEQUALS, TkLPAREN, TkLBRACKET);
-        //        }
-    }
+//    else if (accept(TkIDENTIFIER)) {
+//        if (accept(TkEQUALS)) {
+//            expression();
+//        }
+//        else if (accept(TkLPAREN)) {
+//            paramList();
+//            expect(TkRPAREN);
+//        }
+//        else if (accept(TkLBRACKET)) {
+//            expression();
+//            expect(TkRBRACKET);
+//            expect(TkEQUALS);
+//            expression();
+//        }
+//        else {
+//            error(3, TkEQUALS, TkLPAREN, TkLBRACKET);
+//        }
+//    }
     else {
         return NULL;
-    }
-}
-
-// <dim-body> ::= <identifier> [ "[" <expression> [ "," <expression> ] "]" ]
-void Parser::dimBody(void) {
-    expect(TkIDENTIFIER);
-    if (accept(TkLBRACKET)) {
-        expression();
-        if (accept(TkCOMMA)) {
-            expression();
-        }
-        expect(TkRBRACKET);
     }
 }
 
@@ -203,11 +179,72 @@ void Parser::acceptedParam(void) {
     }
 }
 
-// <subscript> ::= "(" <expression> [ "," <expression> ]... ")"
+// <array-subscript> ::= "(" <expression> [ "," <expression> ]... ")"
 Basic::ArraySubscript* Parser::arraySubscript(void) {
-//    ArraySubscript subscript = new ArraySubscript();
+    Expression *e = NULL;
     if (expect(TkLPAREN)) {
-        // FIXME...
+        if ((e = expression())) {
+            ArraySubscript *sub = new ArraySubscript(e);
+            while (accept(TkCOMMA)) {
+                if ((e = expression())) {
+                    sub->appendExpression(e);
+                }
+                else {
+                    delete sub;
+                    return NULL;
+                }
+            }
+            if (expect(TkRPAREN)) {
+                return sub;                
+            }
+            else {
+                delete sub;
+                return NULL;
+            }
+        }
+        else {
+            return NULL;
+        }
+    }
+    else {
+        return NULL;
+    }
+}
+
+// <array-dimension> ::= "(" <expression> [ "to" <expression> ] [ "," <expression> [ "to" <expression> ] ]... ")"
+Basic::ArrayDimension* Parser::arrayDimension(void) {
+    Expression *a = NULL;
+    Expression *b = NULL;
+    if (expect(TkLPAREN)) {
+        if ((a = expression())) {
+            if (accept(TkTO)) {
+                if (not (b = expression())) {
+                    delete a;
+                    return NULL;
+                }
+            }
+            ArrayDimension *dim = new ArrayDimension(a, b);
+            
+            while (accept(TkCOMMA)) {
+                if ((a = expression())) {
+                    if (accept(TkTO)) {
+                        if ((b = expression())) {
+                            dim->appendDimension(a, b);
+                        }
+                        else {
+                            delete a;
+                            delete dim;
+                            return NULL;
+                        }
+                    }
+                    else {
+                        dim->appendDimension(a, NULL);
+                    }
+                }
+            }
+            
+            return dim;
+        }
     }
     
     return NULL;
@@ -287,8 +324,8 @@ Basic::LetStatement* Parser::letStatementBody(void) {
 
     if (expect(TkIDENTIFIER)) {
         const char *identifier = this->accepted_token_value.getStringValue();
-        if (this->token == TkLPAREN) {
-            s = arraySubscript();
+        if (this->token == TkLPAREN and not (s = arraySubscript())) {
+            return NULL;
         }
         if (expect(TkEQUALS)) {
             if ((e = expression())) {
@@ -413,7 +450,78 @@ Basic::DoStatement* Parser::doStatementBody(void) {
     return NULL;
 }
 
+// <for-statement-body> ::= <identifier> "=" <expression> "to" <expression> [ "step" <expression> ] <block> "next" [ <identifier> ]
+Basic::ForStatement* Parser::forStatementBody(void) {
+    Expression *start = NULL;
+    Expression *end = NULL;
+    Expression *step = NULL;
+    Block *body = NULL;
+    if (expect(TkIDENTIFIER)) {
+        const char *identifier = this->accepted_token_value.getStringValue();
+        if (expect(TkEQUALS)) {
+            if ((start = expression())) {
+                if (expect(TkTO)) {
+                    if ((end = expression())) {
+                        if (accept(TkSTEP)) {
+                            if (not (step = expression())) {
+                                delete end;
+                                delete start;
+                                return NULL;
+                            }
+                        }
+                        if ((body = block())) {
+                            if (expect(TkNEXT)) {
+                                accept(TkIDENTIFIER);  // FIXME just ignoring it for now
+                                return new ForStatement(identifier, start, end, step, body);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
+    if (body)  delete body;
+    if (step)  delete step;
+    if (end)   delete end;
+    if (start) delete start;
+    return NULL;
+}
+
+// <dim-statement-body> ::= <identifier> [ <array-dimension> ] [ "," <identifier> [ <array-dimension> ] ]...
+Basic::DimStatement* Parser::dimStatementBody(void) {
+    ArrayDimension *dim = NULL;
+    if (expect(TkIDENTIFIER)) {
+        const char *identifier = this->accepted_token_value.getStringValue();
+        dim = arrayDimension();
+        DimStatement *s = new DimStatement(identifier, dim);
+        while (accept(TkCOMMA)) {
+            if (expect(TkIDENTIFIER)) {
+                const char *identifier = this->accepted_token_value.getStringValue();
+                if (this->token == TkLPAREN) {
+                    if ((dim = arrayDimension())) {
+                        s->appendDimensionable(identifier, dim);
+                    }
+                    else {
+                        delete s;
+                        return NULL;
+                    }
+                }
+                else {
+                    s->appendDimensionable(identifier, NULL);                    
+                }
+            }
+            else {
+                delete s;
+                return NULL;
+            }
+        }
+        return s;
+    }
+    else {
+        return NULL;        
+    }
+}
 
 // <primary-expression> ::= <identifier> "(" <param-list> ")"
 //                        | <identifier> "[" <expression> [ "," <expression> ] "]"  // FIXME
