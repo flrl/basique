@@ -32,6 +32,7 @@ private:
     
     void unit(void);
     Basic::ArraySubscript* arraySubscript(void);
+    Basic::ArrayDimension* arrayDimension(void);
     Basic::Statement* statement(void);
     void dimBody(void);
     Basic::Block* block(void);
@@ -46,6 +47,8 @@ private:
     Basic::CallStatement* callStatementBody(void);
     Basic::IfStatement* ifStatementBody(void);
     Basic::DoStatement* doStatementBody(void);
+    Basic::ForStatement* forStatementBody(void);
+    Basic::DimStatement* dimStatementBody(void);
     
     Basic::Expression* primaryExpression(void);
     Basic::Expression* unaryExpression(void);
@@ -67,11 +70,12 @@ private:
 //               | "call" <call-statement-body>
 //               | "if" <if-statement-body>
 //               | "do" <do-statement-body>
-//               | "for" <identifier> "=" <expression> "to" <expression> [ "step" <expression> ] <block> "next" [ <identifier> ]
-//               | "dim" <dim-body> [ "," <dim-body> ]...
+//               | "for" <for-statement-body>
+//               | "dim" <dim-statement-body>
 //               | "exit" [ <expression> ]
 //               | <null>
 // <array-subscript> ::= "(" <expression> [ "," <expression> ]... ")"
+// <array-dimension> ::= "(" <expression> [ "to" <expression> ] [ "," <expression> [ "to" <expression> ] ]... ")"
 // <print-statement-body> ::= <print-expression-list>
 // <print-expression-list> ::= <expression> [ "," <print-expression-list> ]...
 //                           | <null>
@@ -80,12 +84,13 @@ private:
 // <let-statement-body> ::= <identifier> [ <array-subscript> ] "=" <expression>
 // <call-statement-body> ::= <identifier> "(" <param-list> ")"
 // <if-statement-body> ::= <expression> "then" <block> [ "elseif" <expression> "then" <block> ]... [ "else" <block> ] "end" "if"
-// <dim-body> ::= <identifier> [ "[" <expression> [ "," <expression> ] "]" ]
-// <block> ::= <statement> [ ( ":" | <eol> ) <statement> ]...
 // <do-statement-body> ::= ( "while" | "until" ) <expression> <block> "loop"
 //                       | <block> "loop" ( "while" | "until" ) <expression>
 //                       | <block> "loop"
 //                       | <block> "done"
+// <for-statement-body> ::= <identifier> "=" <expression> "to" <expression> [ "step" <expression> ] <block> "next" [ <identifier> ]
+// <dim-statement-body> ::= <identifier> [ <array-dimension> ] [ "," <identifier> [ <array-dimension> ] ]...
+// <block> ::= <statement> [ ( ":" | <eol> ) <statement> ]...
 // <function-definition> ::= <identifier> "(" [ <accepted-param-list> ] ")" [ "as" <type> ] <block> "end" "function"
 // <sub-definition> ::= <identifier> "(" [ <accepted-param-list> ] ")" <block> "end" "sub"
 // <accepted-param-list> ::= <accepted-param> [ "," <accepted-param> ]...
