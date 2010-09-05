@@ -8,6 +8,7 @@
  */
 
 #ifndef _AST_H
+#define _AST_H
 
 #include <list>
 #include <utility>

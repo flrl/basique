@@ -14,12 +14,6 @@
 
 #include "tokeniser.h"
 
-struct StrComparator  {
-    bool operator() (const char *lhs, const char *rhs) const {
-        return strcmp(lhs, rhs) < 0;
-    }
-};
-
 TokenMap Tokeniser::keywords = TokenMap();
 
 void Tokeniser::setupKeywords(void) {
