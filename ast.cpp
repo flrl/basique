@@ -186,7 +186,6 @@ Basic::ForStatement::~ForStatement() {
 
 Basic::DimStatement::~DimStatement() {
     for (std::list<Dimensionable>::iterator d = dimensionables.begin(); d != dimensionables.end(); d++) {
-        delete[] d->first;
         if (d->second)  delete d->second;
     }
 }

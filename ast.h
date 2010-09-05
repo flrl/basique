@@ -13,6 +13,7 @@
 #include <list>
 #include <utility>
 
+#include "immutablestring.h"
 #include "tokeniser.h"
 #include "variant.h"
 
@@ -113,11 +114,11 @@ protected:
 
 class Basic::IdentifierExpression : public Expression {
 public:
-    IdentifierExpression(const char *id, ParamList *p=NULL) : params(p) { strncpy(this->identifier, id, MAX_IDENTIFIER_LENGTH); }
+    IdentifierExpression(const char *id, ParamList *p=NULL) : identifier(id), params(p) { }
     ~IdentifierExpression() { if (params) delete params; }
     virtual void execute();
 private:
-    char identifier[MAX_IDENTIFIER_LENGTH + 1];
+    ImmutableString identifier;
     ParamList *params;
 };
 
@@ -210,37 +211,33 @@ private:
 
 class Basic::InputStatement : public Statement {
 public:
-    InputStatement(const char *id, ArraySubscript *s, Expression *e) : subscript(s), prompt(e) { 
-        strncpy(identifier, id, MAX_IDENTIFIER_LENGTH); 
-    }
+    InputStatement(const char *id, ArraySubscript *s, Expression *e) : identifier(id), subscript(s), prompt(e) { }
     ~InputStatement() { if (subscript) delete subscript; if (prompt) delete prompt; }
     virtual void execute();
 private:
-    char identifier[MAX_IDENTIFIER_LENGTH + 1];
+    ImmutableString identifier;
     ArraySubscript *subscript;
     Expression *prompt;
 };
 
 class Basic::LetStatement : public Statement {
 public:
-    LetStatement(const char *id, ArraySubscript *s, Expression *e) : subscript(s), expression(e) { 
-        strncpy(identifier, id, MAX_IDENTIFIER_LENGTH);
-    }
+    LetStatement(const char *id, ArraySubscript *s, Expression *e) : identifier(id), subscript(s), expression(e) { }
     ~LetStatement() { if (subscript) delete subscript; delete expression; }
     virtual void execute();
 private:
-    char identifier[MAX_IDENTIFIER_LENGTH + 1];
+    ImmutableString identifier;
     ArraySubscript *subscript;
     Expression *expression;
 };
 
 class Basic::CallStatement : public Statement {
 public:
-    CallStatement(const char *id, ParamList *params) : params(params) { strncpy(identifier, id, MAX_IDENTIFIER_LENGTH); }
+    CallStatement(const char *id, ParamList *params) : identifier(id), params(params) { }
     ~CallStatement() { if (params) delete params; }
     virtual void execute();
 private:
-    char identifier[MAX_IDENTIFIER_LENGTH + 1];
+    ImmutableString identifier;
     ParamList *params;
 };
 
@@ -284,34 +281,29 @@ private:
 
 class Basic::ForStatement : public Statement {
 public:
-    ForStatement(const char *id, Expression *s, Expression *e, Expression *t, Block *b) : start(s), end(e), step(t), body(b) { 
-        strncpy(identifier, id, MAX_IDENTIFIER_LENGTH);
-    }
+    ForStatement(const char *id, Expression *s, Expression *e, Expression *t, Block *b) 
+        : identifier(id), start(s), end(e), step(t), body(b) { }
     ~ForStatement();
     virtual void execute();
 private:
-    char identifier[MAX_IDENTIFIER_LENGTH + 1];
+    ImmutableString identifier;
     Expression *start;
     Expression *end;
     Expression *step;
     Block *body;
 };
 
-typedef std::pair<char *, Basic::ArrayDimension*> Dimensionable;
+typedef std::pair<ImmutableString, Basic::ArrayDimension*> Dimensionable;
 
 class Basic::DimStatement : public Statement {
 public:
-    DimStatement(const char *id, ArrayDimension *dim) { 
-        char *identifier = new char[1 + strlen(id)];
-        strcpy(identifier, id);
-        dimensionables.push_back(std::make_pair(identifier, dim));
+    DimStatement(const char *identifier, ArrayDimension *dim) { 
+        dimensionables.push_back(std::make_pair(ImmutableString(identifier), dim));
     }
     ~DimStatement();
     virtual void execute();
-    void appendDimensionable(const char *id, ArrayDimension *dim) {
-        char *identifier = new char[1 + strlen(id)];
-        strcpy(identifier, id);
-        dimensionables.push_back(std::make_pair(identifier, dim));
+    void appendDimensionable(const char *identifier, ArrayDimension *dim) {
+        dimensionables.push_back(std::make_pair(ImmutableString(identifier), dim));
     }
 private:
     std::list<Dimensionable> dimensionables;
