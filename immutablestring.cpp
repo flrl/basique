@@ -12,43 +12,41 @@
 #include "immutablestring.h"
 
 ImmutableString::ImmutableString(const char *s) {
-    value = new char[1 + strlen(s)];
-    strcpy(value, s);
+    _length = strlen(s);
+    _cstring = new char[1 + _length];
+    strcpy(_cstring, s);
 }
 
 ImmutableString::ImmutableString(const ImmutableString &s) {
-    value = new char[1 + strlen(s.value)];
-    strcpy(value, s.value);
+    _length = s.length();
+    _cstring = new char[1 + _length];
+    strcpy(_cstring, s.cstring());
 }
 
 ImmutableString::~ImmutableString() {
-    delete[] value;
-}
-
-const char *ImmutableString::cstring(void) const {
-    return value;
+    delete[] _cstring;
 }
 
 bool ImmutableString::operator==(const ImmutableString &other) const {
-    return strcmp(value, other.value) == 0;
+    return strcmp(_cstring, other.cstring()) == 0;
 }
 
-bool ImmutableString::operator==(const char *other) const {
-    return strcmp(value, other) == 0;
+bool ImmutableString::operator==(const char *s) const {
+    return strcmp(_cstring, s) == 0;
 }
 
 bool ImmutableString::operator<(const ImmutableString &other) const {
-    return strcmp(value, other.value) < 0;
+    return strcmp(_cstring, other.cstring()) < 0;
 }
 
-bool ImmutableString::operator<(const char *other) const {
-    return strcmp(value, other) < 0;
+bool ImmutableString::operator<(const char *s) const {
+    return strcmp(_cstring, s) < 0;
 }
 
 bool ImmutableString::operator>(const ImmutableString &other) const {
-    return strcmp(value, other.value) > 0;
+    return strcmp(_cstring, other.cstring()) > 0;
 }
 
-bool ImmutableString::operator>(const char *other) const {
-    return strcmp(value, other) > 0;
+bool ImmutableString::operator>(const char *s) const {
+    return strcmp(_cstring, s) > 0;
 }
