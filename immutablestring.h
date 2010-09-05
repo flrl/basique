@@ -16,7 +16,8 @@ public:
     ImmutableString(const ImmutableString &);
     ~ImmutableString();
     
-    const char *cstring(void) const;
+    const char *cstring(void) const { return _cstring; }
+    size_t length(void) const { return _length; }
     
     bool operator==(const ImmutableString &) const;
     bool operator==(const char *) const;
@@ -28,7 +29,8 @@ public:
 private:
     ImmutableString();
     void operator=(const ImmutableString &);
-    char *value;
+    char *_cstring;
+    size_t _length;
 };
 
 #endif
