@@ -73,14 +73,12 @@ private:
 //               | "for" <for-statement-body>
 //               | "dim" <dim-statement-body>
 //               | "exit" [ <expression> ]
-//               | <null>
 // <array-subscript> ::= "(" <expression> [ "," <expression> ]... ")"
 // <array-dimension> ::= "(" <expression> [ "to" <expression> ] [ "," <expression> [ "to" <expression> ] ]... ")"
 // <print-statement-body> ::= <print-expression-list>
 // <print-expression-list> ::= <expression> [ "," <print-expression-list> ]...
 //                           | <null>
-// FIXME <input-statement-body> ::= <identifier> [ "[" <expression> [ "," <expression> ] "]" ] [ "," <identifier> [ "["  <expression> [ "," <expression> ] "]" ] ]...
-// <input-statement-body> ::= <identifier> [ "," <identifier> ]...
+// <input-statement-body> ::= <identifier> [ <array-subscript> ] [ "," <expression> ]
 // <let-statement-body> ::= <identifier> [ <array-subscript> ] "=" <expression>
 // <call-statement-body> ::= <identifier> "(" <param-list> ")"
 // <if-statement-body> ::= <expression> "then" <block> [ "elseif" <expression> "then" <block> ]... [ "else" <block> ] "end" "if"
@@ -90,16 +88,17 @@ private:
 //                       | <block> "done"
 // <for-statement-body> ::= <identifier> "=" <expression> "to" <expression> [ "step" <expression> ] <block> "next" [ <identifier> ]
 // <dim-statement-body> ::= <identifier> [ <array-dimension> ] [ "," <identifier> [ <array-dimension> ] ]...
-// <block> ::= <statement> [ ( ":" | <eol> ) <statement> ]...
+// <block> ::= <block-statement-list>
+// <block-statement-list> ::= <statement> [ ( ":" | <eol> ) <block-statement-list> ]...
+//                          | <null>
 // <function-definition> ::= <identifier> "(" [ <accepted-param-list> ] ")" [ "as" <type> ] <block> "end" "function"
 // <sub-definition> ::= <identifier> "(" [ <accepted-param-list> ] ")" <block> "end" "sub"
 // <accepted-param-list> ::= <accepted-param> [ "," <accepted-param> ]...
 // <accepted-param> ::= <identifier> [ "as" <type> ] | <null>
 // <param-list> ::= <expression> [ "," <expression> ]... | <null>
-// <primary-expression> ::= <call>
-//                        | <identifier>  
+// <primary-expression> ::= <literal>
+//                        | <identifier> [ "(" <param-list> ")" ]
 //                        | "(" <expression> ")"
-//                        | <literal>
 // <unary-expression> ::= <unary-operator> <primary-expression> | <primary-expression>
 // <unary-operator> ::= "not" | "-"
 // <multiplicative-expression> ::= <unary-expression> [ <multiplicative-operator> <unary-expression> ]...

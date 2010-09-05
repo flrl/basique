@@ -10,20 +10,12 @@
 #include "ast.h"
 #include "symboltable.h"
 
-void Basic::FunctionCallExpression::execute (void) {
-    
-}
-
-void Basic::ArrayIndexExpression::execute (void) {
-    
-}
-
-void Basic::VariableExpression::execute (void) {
-    
-}
-
 void Basic::LiteralExpression::execute (void) {
     ; // result value is set at initialisation
+}
+
+void Basic::IdentifierExpression::execute (void) {
+    
 }
 
 void Basic::UnaryExpression::execute (void) {
@@ -55,12 +47,12 @@ void Basic::MultiplicativeExpression::execute (void) {
 }
 
 void Basic::AdditiveExpression::execute (void) {
-    std::list<Expression*>::iterator term = terms.begin();
+    std::list<Expression*>::const_iterator term = terms.begin();
     (*term)->execute();
     Variant intermediate = (*term)->getResult();
     term++;
     
-    std::list<Token>::iterator op = operators.begin();
+    std::list<Token>::const_iterator op = operators.begin();
     
     do {
         (*term)->execute();
@@ -96,7 +88,7 @@ void Basic::ComparitiveExpression::execute (void) {
 
 void Basic::AndExpression::execute (void) {
     bool intermediate = true;
-    for (std::list<Expression*>::iterator e = terms.begin(); e != terms.end(); e++) {
+    for (std::list<Expression*>::const_iterator e = terms.begin(); e != terms.end(); e++) {
         (*e)->execute();
         intermediate = (intermediate and (*e)->getResult().getBoolValue());
     }
@@ -105,7 +97,7 @@ void Basic::AndExpression::execute (void) {
 
 void Basic::OrExpression::execute (void) {
     bool intermediate = false;
-    for (std::list<Expression*>::iterator e = terms.begin(); e != terms.end(); e++) {
+    for (std::list<Expression*>::const_iterator e = terms.begin(); e != terms.end(); e++) {
         (*e)->execute();
         intermediate = (intermediate and (*e)->getResult().getBoolValue());
     }
@@ -113,13 +105,13 @@ void Basic::OrExpression::execute (void) {
 }
 
 void Basic::Block::execute (void) {
-    for (std::list<Statement*>::iterator s = statements.begin(); s != statements.end(); s++) {
+    for (std::list<Statement*>::const_iterator s = statements.begin(); s != statements.end(); s++) {
         (*s)->execute();
     }
 }
 
 void Basic::PrintStatement::execute (void) {
-    for (std::list<Expression*>::iterator e = expressions.begin(); e != expressions.end(); e++) {
+    for (std::list<Expression*>::const_iterator e = expressions.begin(); e != expressions.end(); e++) {
         (*e)->execute();
         fputs((*e)->getResult().getStringValue(), stdout);
     }
@@ -168,18 +160,11 @@ void Basic::ArrayDimension::execute (void) {
 
 
 
-Basic::InputStatement::~InputStatement() {
-    for (std::list<char *>::iterator i = identifiers.begin(); i != identifiers.end(); i++) {
-        delete *i;    
-    }
-}
-
 Basic::IfStatement::~IfStatement() {
     // FIXME
 }
 
 Basic::ForStatement::~ForStatement() {
-    delete[] identifier;
     delete start;
     delete end;
     if (step)  delete step;

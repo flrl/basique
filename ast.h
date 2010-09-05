@@ -23,10 +23,8 @@ namespace Basic {
     class ArrayDimension;
     
     class Expression;
-    class FunctionCallExpression;
-    class ArrayIndexExpression;
-    class VariableExpression;
     class LiteralExpression;
+    class IdentifierExpression;
     class UnaryExpression;
     class MultiplicativeExpression;
     class AdditiveExpression;
@@ -112,37 +110,14 @@ protected:
     Variant value;
 };
 
-class Basic::FunctionCallExpression : public Expression {
+class Basic::IdentifierExpression : public Expression {
 public:
-    FunctionCallExpression(const char *id, ParamList *p) : params(p) {
-        strncpy(this->identifier, id, MAX_IDENTIFIER_LENGTH);        
-    }
-    ~FunctionCallExpression() { delete params; }
+    IdentifierExpression(const char *id, ParamList *p=NULL) : params(p) { strncpy(this->identifier, id, MAX_IDENTIFIER_LENGTH); }
+    ~IdentifierExpression() { if (params) delete params; }
     virtual void execute();
 private:
     char identifier[MAX_IDENTIFIER_LENGTH + 1];
     ParamList *params;
-};
-
-class Basic::ArrayIndexExpression : public Expression {
-public:
-    ArrayIndexExpression(const char *id, Expression *first, Expression *second) : first(first), second(second) {
-        strncpy(this->identifier, id, MAX_IDENTIFIER_LENGTH);
-    }
-    ~ArrayIndexExpression() { delete first; delete second; }
-    virtual void execute();
-private:
-    Expression *first;
-    Expression *second;
-    char identifier[MAX_IDENTIFIER_LENGTH + 1];
-};
-
-class Basic::VariableExpression : public Expression {
-public:
-    VariableExpression(const char *id) { strncpy(this->identifier, id, MAX_IDENTIFIER_LENGTH); }
-    virtual void execute();
-private:
-    char identifier[MAX_IDENTIFIER_LENGTH + 1];
 };
 
 class Basic::LiteralExpression : public Expression {
@@ -234,42 +209,37 @@ private:
 
 class Basic::InputStatement : public Statement {
 public:
-    InputStatement() { }
-    ~InputStatement();
-    virtual void execute();
-    void appendIdentifier(const char *s) {
-        char *identifier = new char[1 + strlen(s)];
-        strcpy(identifier, s);
-        identifiers.push_back(identifier);
+    InputStatement(const char *id, ArraySubscript *s, Expression *e) : subscript(s), prompt(e) { 
+        strncpy(identifier, id, MAX_IDENTIFIER_LENGTH); 
     }
+    ~InputStatement() { if (subscript) delete subscript; if (prompt) delete prompt; }
+    virtual void execute();
 private:
-    std::list<char *> identifiers;
+    char identifier[MAX_IDENTIFIER_LENGTH + 1];
+    ArraySubscript *subscript;
+    Expression *prompt;
 };
 
 class Basic::LetStatement : public Statement {
 public:
-    LetStatement(const char *i, ArraySubscript *s, Expression *e) : subscript(s), expression(e) { 
-        identifier = new char[1 + strlen(i)];
-        strcpy(identifier, i);
+    LetStatement(const char *id, ArraySubscript *s, Expression *e) : subscript(s), expression(e) { 
+        strncpy(identifier, id, MAX_IDENTIFIER_LENGTH);
     }
-    ~LetStatement() { delete[] identifier; if (subscript) delete subscript; delete expression; }
+    ~LetStatement() { if (subscript) delete subscript; delete expression; }
     virtual void execute();
 private:
-    char *identifier;
+    char identifier[MAX_IDENTIFIER_LENGTH + 1];
     ArraySubscript *subscript;
     Expression *expression;
 };
 
 class Basic::CallStatement : public Statement {
 public:
-    CallStatement(const char *i, ParamList *params) : params(params) {
-        identifier = new char[1 + strlen(i)];
-        strcpy(identifier, i);
-    }
-    ~CallStatement() { delete[] identifier; if (params) delete params; }
+    CallStatement(const char *id, ParamList *params) : params(params) { strncpy(identifier, id, MAX_IDENTIFIER_LENGTH); }
+    ~CallStatement() { if (params) delete params; }
     virtual void execute();
 private:
-    char *identifier;
+    char identifier[MAX_IDENTIFIER_LENGTH + 1];
     ParamList *params;
 };
 
@@ -314,13 +284,12 @@ private:
 class Basic::ForStatement : public Statement {
 public:
     ForStatement(const char *id, Expression *s, Expression *e, Expression *t, Block *b) : start(s), end(e), step(t), body(b) { 
-        identifier = new char[1 + strlen(id)];
-        strcpy(identifier, id);
+        strncpy(identifier, id, MAX_IDENTIFIER_LENGTH);
     }
     ~ForStatement();
     virtual void execute();
 private:
-    char *identifier;
+    char identifier[MAX_IDENTIFIER_LENGTH + 1];
     Expression *start;
     Expression *end;
     Expression *step;
