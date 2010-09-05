@@ -159,9 +159,22 @@ void Basic::ArrayDimension::execute (void) {
 }
 
 
+Basic::PrintStatement::~PrintStatement() {
+    for (std::list<Expression *>::iterator e = expressions.begin(); e != expressions.end(); e++) {
+        delete (*e);
+    }
+}
 
 Basic::IfStatement::~IfStatement() {
-    // FIXME
+    for (std::list<Expression *>::iterator e = conditions.begin(); e != conditions.end(); e++) {
+        delete (*e);
+    }
+    
+    for (std::list<Block *>::iterator b = blocks.begin(); b != blocks.end(); b++) {
+        delete (*b);
+    }
+    
+    if (else_block)  delete else_block;
 }
 
 Basic::ForStatement::~ForStatement() {
@@ -172,37 +185,57 @@ Basic::ForStatement::~ForStatement() {
 }
 
 Basic::DimStatement::~DimStatement() {
-    
+    for (std::list<Dimensionable>::iterator d = dimensionables.begin(); d != dimensionables.end(); d++) {
+        delete[] d->first;
+        if (d->second)  delete d->second;
+    }
 }
 
 Basic::ArraySubscript::~ArraySubscript() {
-    // FIXME
+    for (std::list<Expression *>::iterator e = expressions.begin(); e != expressions.end(); e++) {
+        delete (*e);
+    }
 }
 
 Basic::ArrayDimension::~ArrayDimension() {
-    
+    for (std::list<ArrayDimensionSpecification>::iterator d = dimensions.begin(); d != dimensions.end(); d++) {
+        delete d->first;
+        if (d->second)  delete d->second;
+    }
 }
 
 Basic::ParamList::~ParamList() {
-    // FIXME
+    for (std::list<Expression *>::iterator e = expressions.begin(); e != expressions.end(); e++) {
+        delete (*e);
+    }
 }
 
 Basic::Block::~Block() {
-    // FIXME
-}
-
-Basic::AdditiveExpression::~AdditiveExpression() {
-    
+    for (std::list<Statement *>::iterator s = statements.begin(); s != statements.end(); s++) {
+        delete (*s);
+    }
 }
 
 Basic::MultiplicativeExpression::~MultiplicativeExpression() {
-    
+    for (std::list<Expression *>::iterator e = terms.begin(); e != terms.end(); e++) {
+        delete (*e);
+    }
 }
 
-Basic::OrExpression::~OrExpression() {
-    
+Basic::AdditiveExpression::~AdditiveExpression() {
+    for (std::list<Expression *>::iterator e = terms.begin(); e != terms.end(); e++) {
+        delete (*e);
+    }    
 }
 
 Basic::AndExpression::~AndExpression() {
-    
+    for (std::list<Expression *>::iterator e = terms.begin(); e != terms.end(); e++) {
+        delete (*e);
+    }
+}
+
+Basic::OrExpression::~OrExpression() {
+    for (std::list<Expression *>::iterator e = terms.begin(); e != terms.end(); e++) {
+        delete (*e);
+    }    
 }
