@@ -12,7 +12,7 @@
 #include <cstdio>
 #include <map>
 
-#include "immutablestring.h"
+#include "string.h"
 #include "variant.h"
 
 #define MAX_IDENTIFIER_LENGTH (31)
@@ -47,7 +47,7 @@ enum Token {
 };
 
 //typedef std::map<const char*,Token,StrComparator> TokenMap;
-typedef std::map<ImmutableString, Token> TokenMap;
+typedef std::map<const String, Token> TokenMap;
 
 class Tokeniser {
 public:
