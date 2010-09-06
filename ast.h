@@ -13,7 +13,7 @@
 #include <list>
 #include <utility>
 
-#include "immutablestring.h"
+#include "string.h"
 #include "tokeniser.h"
 #include "variant.h"
 
@@ -118,7 +118,7 @@ public:
     ~IdentifierExpression() { if (params) delete params; }
     virtual void execute();
 private:
-    ImmutableString identifier;
+    const String identifier;
     ParamList *params;
 };
 
@@ -215,7 +215,7 @@ public:
     ~InputStatement() { if (subscript) delete subscript; if (prompt) delete prompt; }
     virtual void execute();
 private:
-    ImmutableString identifier;
+    const String identifier;
     ArraySubscript *subscript;
     Expression *prompt;
 };
@@ -226,7 +226,7 @@ public:
     ~LetStatement() { if (subscript) delete subscript; delete expression; }
     virtual void execute();
 private:
-    ImmutableString identifier;
+    const String identifier;
     ArraySubscript *subscript;
     Expression *expression;
 };
@@ -237,7 +237,7 @@ public:
     ~CallStatement() { if (params) delete params; }
     virtual void execute();
 private:
-    ImmutableString identifier;
+    const String identifier;
     ParamList *params;
 };
 
@@ -286,24 +286,24 @@ public:
     ~ForStatement();
     virtual void execute();
 private:
-    ImmutableString identifier;
+    const String identifier;
     Expression *start;
     Expression *end;
     Expression *step;
     Block *body;
 };
 
-typedef std::pair<ImmutableString, Basic::ArrayDimension*> Dimensionable;
+typedef std::pair<const String, Basic::ArrayDimension*> Dimensionable;
 
 class Basic::DimStatement : public Statement {
 public:
     DimStatement(const char *identifier, ArrayDimension *dim) { 
-        dimensionables.push_back(std::make_pair(ImmutableString(identifier), dim));
+        dimensionables.push_back(std::make_pair(String(identifier), dim));
     }
     ~DimStatement();
     virtual void execute();
     void appendDimensionable(const char *identifier, ArrayDimension *dim) {
-        dimensionables.push_back(std::make_pair(ImmutableString(identifier), dim));
+        dimensionables.push_back(std::make_pair(String(identifier), dim));
     }
 private:
     std::list<Dimensionable> dimensionables;

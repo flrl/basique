@@ -17,7 +17,7 @@
 #include <stdint.h>
 
 #include "ast.h"
-#include "immutablestring.h"
+#include "string.h"
 #include "variant.h"
 
 namespace SymbolTableEntryType {
@@ -33,7 +33,7 @@ namespace SymbolTableEntryType {
 }
 
 typedef std::pair<SymbolTableEntryType::Enum, intptr_t> SymbolTableEntry;
-typedef std::map<ImmutableString, SymbolTableEntry> SymbolTableEntryMap;
+typedef std::map<const String, SymbolTableEntry> SymbolTableEntryMap;
 
 class SymbolTable {
 public:
