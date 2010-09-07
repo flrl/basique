@@ -75,7 +75,7 @@ private:
 // <array-subscript> ::= "(" <expression> [ "," <expression> ]... ")"
 // <array-dimension> ::= "(" <expression> [ "to" <expression> ] [ "," <expression> [ "to" <expression> ] ]... ")"
 // <print-statement-body> ::= <print-expression-list>
-// <print-expression-list> ::= <expression> [ "," <print-expression-list> ]...
+// <print-expression-list> ::= <expression> [ "," <expression> ]... [ "," ]
 //                           | <null>
 // <input-statement-body> ::= <identifier> [ <array-subscript> ] [ "," <expression> ]
 // <let-statement-body> ::= <identifier> [ <array-subscript> ] "=" <expression>
