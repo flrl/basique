@@ -60,9 +60,9 @@ private:
     void type(void);
 };
 
-// <unit> ::= "function" <function-definition-body>
-//          | "sub" <sub-definition-body>
-//          | <statement>
+// <unit> ::= "function" <function-definition-body> <eol>
+//          | "sub" <sub-definition-body> <eol>
+//          | <statement> <eol>
 // <statement> ::= "print" <print-statement-body>
 //               | "input" <input-statement-body>
 //               | "let" <let-statement-body>
@@ -90,9 +90,9 @@ private:
 // <block> ::= <block-statement-list>
 // <block-statement-list> ::= <statement> [ ( ":" | <eol> ) <block-statement-list> ]...
 //                          | <null>
-// <function-definition-body> ::= <identifier> "(" [ <accepted-param-list> ] ")" <block> "end" "function"
-// <sub-definition-body> ::= <identifier> "(" [ <accepted-param-list> ] ")" <block> "end" "sub"
-// <accepted-param-list> ::= <identifier> [ "," <accepted-param-list> ]...
+// <function-definition-body> ::= <identifier> "(" <accepted-param-list> ")" <block> "end" "function"
+// <sub-definition-body> ::= <identifier> "(" <accepted-param-list> ")" <block> "end" "sub"
+// <accepted-param-list> ::= <identifier> [ "," <identifier> ]...
 //                         | <null> 
 // <param-list> ::= <expression> [ "," <expression> ]... | <null>
 // <primary-expression> ::= <literal>

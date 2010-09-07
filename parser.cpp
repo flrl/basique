@@ -65,7 +65,7 @@ Basic::ASTNode* Parser::unit(void) {
     }
 }
 
-// <function-definition-body> ::= <identifier> "(" [ <accepted-param-list> ] ")" <block> "end" "function"
+// <function-definition-body> ::= <identifier> "(" <accepted-param-list> ")" <block> "end" "function"
 Basic::FunctionDefinition* Parser::functionDefinitionBody(void) {
     AcceptedParamList *a = NULL;
     Block *b = NULL;
@@ -93,7 +93,7 @@ Basic::FunctionDefinition* Parser::functionDefinitionBody(void) {
     return NULL;
 }
 
-// <sub-definition-body> ::= <identifier> "(" [ <accepted-param-list> ] ")" <block> "end" "sub"
+// <sub-definition-body> ::= <identifier> "(" <accepted-param-list> ")" <block> "end" "sub"
 Basic::SubDefinition* Parser::subDefinitionBody(void) {
     AcceptedParamList *a = NULL;
     Block *b = NULL;
@@ -188,7 +188,7 @@ Basic::Statement* Parser::statement(void) {
 // <block-statement-list> ::= <statement> [ ( ":" | <eol> ) <block-statement-list> ]...
 //                          | <null>
 Basic::Block* Parser::block(void) {
-    Basic::Block *block = new Basic::Block();
+    Block *block = new Basic::Block();
     Statement *s = NULL;
     do {
         switch (this->token) {
@@ -218,10 +218,23 @@ Basic::Block* Parser::block(void) {
     return block;    
 }
         
-// <accepted-param-list> ::= <identifier> [ "," <accepted-param-list> ]...
+// <accepted-param-list> ::= <identifier> [ "," <identifier> ]...
 //                         | <null> 
 Basic::AcceptedParamList* Parser::acceptedParamList(void) {
-    //FIXME
+    AcceptedParamList *a = new Basic::AcceptedParamList();
+    if (accept(TkIDENTIFIER)) {
+        a->appendIdentifier(accepted_token_value.getStringValue());
+        while(accept(TkCOMMA)) {
+            if (expect(TkIDENTIFIER)) {
+                a->appendIdentifier(accepted_token_value.getStringValue());
+            }
+            else {
+                delete a;
+                return NULL;
+            }
+        }
+    }
+    return a;
 }
 
 // <array-subscript> ::= "(" <expression> [ "," <expression> ]... ")"

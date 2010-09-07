@@ -105,6 +105,7 @@ public:
     AcceptedParamList() { }
     ~AcceptedParamList();
     virtual void execute();
+    void appendIdentifier(const String &s) { identifiers.push_back(s); }
 private:
     std::list<String> identifiers;
 };
