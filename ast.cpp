@@ -146,6 +146,10 @@ void Basic::DimStatement::execute (void) {
     
 }
 
+void Basic::AcceptedParamList::execute (void) {
+    
+}
+
 void Basic::ParamList::execute (void) {
     ;  // does nothing
 }
@@ -155,6 +159,14 @@ void Basic::ArraySubscript::execute (void) {
 }
 
 void Basic::ArrayDimension::execute (void) {
+    
+}
+
+void Basic::FunctionDefinition::execute (void) {
+    
+}
+
+void Basic::SubDefinition::execute (void) {
     
 }
 
@@ -201,6 +213,10 @@ Basic::ArrayDimension::~ArrayDimension() {
         delete d->first;
         if (d->second)  delete d->second;
     }
+}
+
+Basic::AcceptedParamList::~AcceptedParamList() {
+    
 }
 
 Basic::ParamList::~ParamList() {

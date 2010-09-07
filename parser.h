@@ -30,16 +30,15 @@ private:
     int expect(Token t);
     void error(int, ...);
     
-    void unit(void);
+    Basic::ASTNode* unit(void);
     Basic::ArraySubscript* arraySubscript(void);
     Basic::ArrayDimension* arrayDimension(void);
     Basic::Statement* statement(void);
     void dimBody(void);
     Basic::Block* block(void);
-    void functionDefinition(void);
-    void subDefinition(void);
-    void acceptedParamList(void);
-    void acceptedParam(void);
+    Basic::FunctionDefinition* functionDefinitionBody(void);
+    Basic::SubDefinition* subDefinitionBody(void);
+    Basic::AcceptedParamList* acceptedParamList(void);
     Basic::ParamList* paramList(void);
     Basic::PrintStatement* printStatementBody(void);
     Basic::InputStatement* inputStatementBody(void);
@@ -61,8 +60,8 @@ private:
     void type(void);
 };
 
-// <unit> ::= "function" <function-definition>
-//          | "sub" <sub-definition>
+// <unit> ::= "function" <function-definition-body>
+//          | "sub" <sub-definition-body>
 //          | <statement>
 // <statement> ::= "print" <print-statement-body>
 //               | "input" <input-statement-body>
@@ -91,10 +90,10 @@ private:
 // <block> ::= <block-statement-list>
 // <block-statement-list> ::= <statement> [ ( ":" | <eol> ) <block-statement-list> ]...
 //                          | <null>
-// <function-definition> ::= <identifier> "(" [ <accepted-param-list> ] ")" [ "as" <type> ] <block> "end" "function"
-// <sub-definition> ::= <identifier> "(" [ <accepted-param-list> ] ")" <block> "end" "sub"
-// <accepted-param-list> ::= <accepted-param> [ "," <accepted-param> ]...
-// <accepted-param> ::= <identifier> [ "as" <type> ] | <null>
+// <function-definition-body> ::= <identifier> "(" [ <accepted-param-list> ] ")" <block> "end" "function"
+// <sub-definition-body> ::= <identifier> "(" [ <accepted-param-list> ] ")" <block> "end" "sub"
+// <accepted-param-list> ::= <identifier> [ "," <accepted-param-list> ]...
+//                         | <null> 
 // <param-list> ::= <expression> [ "," <expression> ]... | <null>
 // <primary-expression> ::= <literal>
 //                        | <identifier> [ "(" <param-list> ")" ]

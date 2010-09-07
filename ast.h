@@ -20,9 +20,13 @@
 namespace Basic {
     class ASTNode;
 
+    class AcceptedParamList;
     class ParamList;
     class ArraySubscript;
     class ArrayDimension;
+    
+    class FunctionDefinition;
+    class SubDefinition;
     
     class Expression;
     class LiteralExpression;
@@ -62,14 +66,47 @@ protected:
     int column;
 };
 
+class Basic::FunctionDefinition : public ASTNode {
+public:
+    FunctionDefinition(const String &identifier, AcceptedParamList *a, Block *b) : identifier(identifier), accepted_params(a), body(b) { }
+    ~FunctionDefinition();
+    virtual void execute();
+    void call();
+private:
+    const String identifier;
+    AcceptedParamList *accepted_params;
+    Block *body;
+};
+
+class Basic::SubDefinition : public ASTNode {
+public:
+    SubDefinition(const String &identifier, AcceptedParamList *a, Block *b) : identifier(identifier), accepted_params(a), body(b) { }
+    ~SubDefinition();
+    virtual void execute();
+    void call();
+private:
+    const String identifier;
+    AcceptedParamList *accepted_params;
+    Block *body;
+};
+
 class Basic::Block : public ASTNode {
 public:
     Block() { }
     ~Block();
     virtual void execute();
     void appendStatement(Statement *s) { statements.push_back(s); }
-protected:
+private:
     std::list<Statement *> statements;
+};
+
+class Basic::AcceptedParamList : public ASTNode {
+public:
+    AcceptedParamList() { }
+    ~AcceptedParamList();
+    virtual void execute();
+private:
+    std::list<String> identifiers;
 };
 
 class Basic::ParamList : public ASTNode {
