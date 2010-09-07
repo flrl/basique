@@ -330,34 +330,38 @@ Basic::ParamList* Parser::paramList(void) {
 }
 
 // <print-statement-body> ::= <print-expression-list>
-// <print-expression-list> ::= <expression> [ "," <print-expression-list> ]...
+// <print-expression-list> ::= <expression> [ "," <expression> ]... [ "," ]
 //                           | <null>
 Basic::PrintStatement* Parser::printStatementBody(void) {
     Basic::PrintStatement *s = new Basic::PrintStatement();
-    Expression *e = NULL;
-    int comma = 0;
-    int expressions = 0;
-    do {
-        switch (this->token) {
-            case TkLITERAL:
-            case TkIDENTIFIER:
-            case TkLPAREN:
-                if ((e = expression())) {
-                    s->appendExpression(e);
-                    comma = 0;
-                    expressions++;
+
+    if (this->token == TkLITERAL or this->token == TkIDENTIFIER or this->token == TkLPAREN) {
+        Expression *e = NULL;
+        if ((e = expression())) {
+            s->appendExpression(e);
+            while (accept(TkCOMMA)) {
+                if (this->token == TkLITERAL or this->token == TkIDENTIFIER or this->token == TkLPAREN) {
+                    if ((e = expression())) {
+                        s->appendExpression(e);
+                    }
+                    else {
+                        delete s;
+                        return NULL;
+                    }
                 }
                 else {
-                    delete s;
-                    return NULL;
+                    // trailing comma
+                    s->setAppendEol(false);
+                    break;
                 }
-                break;
-            default:
-                ;
+            }
         }
-    } while ((comma = accept(TkCOMMA)));
-    
-    if (expressions == 0 or comma == 1)  s->setAppendEol(true);
+        else {
+            delete s;
+            return NULL;
+        }
+    }
+
     return s;
 }
 

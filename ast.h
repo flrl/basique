@@ -236,7 +236,7 @@ class Basic::Statement : public ASTNode { };
 
 class Basic::PrintStatement : public Statement {
 public:
-    PrintStatement() { }
+    PrintStatement() : append_eol(true) { }
     ~PrintStatement();
     virtual void execute();
     void appendExpression(Expression *e) { expressions.push_back(e); }
