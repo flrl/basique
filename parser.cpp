@@ -50,18 +50,33 @@ void Parser::error(int argc, ...) {
 }
 
 
-// <unit> ::= "function" <function-definition-body>
-//          | "sub" <sub-definition-body>
-//          | <statement>
+// <unit> ::= "function" <function-definition-body> <eol>
+//          | "sub" <sub-definition-body> <eol>
+//          | <statement> <eol>
 Basic::ASTNode* Parser::unit(void) {
+    ASTNode *unit = NULL;
+
     if (accept(TkFUNCTION)) {
-        return functionDefinitionBody();
+        unit = functionDefinitionBody();
     }
     else if (accept(TkSUB)) {
-        return subDefinitionBody();
+        unit = subDefinitionBody();
     }
     else {
-        return statement();
+        unit = statement();
+    }
+
+    if (unit) {
+        if (expect(TkEOL)) {
+            return unit;
+        }
+        else {
+            delete unit;
+            return NULL;
+        }
+    }
+    else {
+        return NULL;
     }
 }
 

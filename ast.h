@@ -57,6 +57,7 @@ using namespace Basic;
 
 class Basic::ASTNode {
 public:
+    virtual ~ASTNode() { }
     virtual void execute(void) =0;
     int getLine(void) { return line; }
     int getColumn(void) { return column; }
@@ -66,28 +67,14 @@ protected:
     int column;
 };
 
-class Basic::FunctionDefinition : public ASTNode {
+class Basic::AcceptedParamList : public ASTNode {
 public:
-    FunctionDefinition(const String &identifier, AcceptedParamList *a, Block *b) : identifier(identifier), accepted_params(a), body(b) { }
-    ~FunctionDefinition();
+    AcceptedParamList() { }
+    ~AcceptedParamList();
     virtual void execute();
-    void call();
+    void appendIdentifier(const String &s) { identifiers.push_back(s); }
 private:
-    const String identifier;
-    AcceptedParamList *accepted_params;
-    Block *body;
-};
-
-class Basic::SubDefinition : public ASTNode {
-public:
-    SubDefinition(const String &identifier, AcceptedParamList *a, Block *b) : identifier(identifier), accepted_params(a), body(b) { }
-    ~SubDefinition();
-    virtual void execute();
-    void call();
-private:
-    const String identifier;
-    AcceptedParamList *accepted_params;
-    Block *body;
+    std::list<String> identifiers;
 };
 
 class Basic::Block : public ASTNode {
@@ -100,14 +87,28 @@ private:
     std::list<Statement *> statements;
 };
 
-class Basic::AcceptedParamList : public ASTNode {
+class Basic::FunctionDefinition : public ASTNode {
 public:
-    AcceptedParamList() { }
-    ~AcceptedParamList();
+    FunctionDefinition(const String &identifier, AcceptedParamList *a, Block *b) : identifier(identifier), accepted_params(a), body(b) { }
+    ~FunctionDefinition() { delete accepted_params; delete body; }
     virtual void execute();
-    void appendIdentifier(const String &s) { identifiers.push_back(s); }
+    void call();
 private:
-    std::list<String> identifiers;
+    const String identifier;
+    AcceptedParamList *accepted_params;
+    Block *body;
+};
+
+class Basic::SubDefinition : public ASTNode {
+public:
+    SubDefinition(const String &identifier, AcceptedParamList *a, Block *b) : identifier(identifier), accepted_params(a), body(b) { }
+    ~SubDefinition() { delete accepted_params; delete body; }
+    virtual void execute();
+    void call();
+private:
+    const String identifier;
+    AcceptedParamList *accepted_params;
+    Block *body;
 };
 
 class Basic::ParamList : public ASTNode {
@@ -145,6 +146,7 @@ private:
 class Basic::Expression : public ASTNode {
 public:
     Expression() { }
+    virtual ~Expression() { }
     Variant getResult() { return value; }
 protected:
     Variant value;
@@ -232,7 +234,10 @@ private:
 };
 
 
-class Basic::Statement : public ASTNode { };
+class Basic::Statement : public ASTNode { 
+public:
+    virtual ~Statement() { }
+};
 
 class Basic::PrintStatement : public Statement {
 public:
