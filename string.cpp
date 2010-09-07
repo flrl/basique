@@ -11,15 +11,25 @@
 
 #include "string.h"
 
-String::String(const char *s) {
-    _length = strlen(s);
-    _cstring = new char[1 + _length];
-    strcpy(_cstring, s);
+String::String(const char *s=NULL) {
+    if (s) {
+        _length = strlen(s);
+        _size = 1 + _length;
+        _cstring = new char[_size];
+        strcpy(_cstring, s);   
+    }
+    else {
+        _length = 0;
+        _size = 1;
+        _cstring = new char[_size];
+        _cstring[0] = '\0';
+    }
 }
 
 String::String(const String &s) {
     _length = s.length();
-    _cstring = new char[1 + _length];
+    _size = 1 + _length;
+    _cstring = new char[_size];
     strcpy(_cstring, s.cstring());
 }
 
@@ -40,8 +50,14 @@ bool String::operator>(const String &other) const {
 }
 
 void String::operator=(const String &other) {
-    if (_cstring)  delete[] _cstring;
-    _length = other.length();
-    _cstring = new char[1 + _length];
-    strcpy(_cstring, other.cstring());
+    if (other.length() >= _size) {
+        delete[] _cstring;
+        _length = other.length();
+        _size = 1 + _length;
+        _cstring = new char[_size];
+        strcpy(_cstring, other.cstring());        
+    }
+    else {
+        strcpy(_cstring, other.cstring());
+    }
 }

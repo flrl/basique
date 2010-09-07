@@ -26,9 +26,9 @@ public:
     void operator=(const String &);
     
 private:
-    String();
     char *_cstring;
     size_t _length;
+    size_t _size;
 };
 
 #endif
