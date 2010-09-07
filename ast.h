@@ -154,7 +154,7 @@ protected:
 
 class Basic::IdentifierExpression : public Expression {
 public:
-    IdentifierExpression(const char *id, ParamList *p=NULL) : identifier(id), params(p) { }
+    IdentifierExpression(const String &id, ParamList *p=NULL) : identifier(id), params(p) { }
     ~IdentifierExpression() { if (params) delete params; }
     virtual void execute();
 private:
@@ -254,7 +254,7 @@ private:
 
 class Basic::InputStatement : public Statement {
 public:
-    InputStatement(const char *id, ArraySubscript *s, Expression *e) : identifier(id), subscript(s), prompt(e) { }
+    InputStatement(const String &id, ArraySubscript *s, Expression *e) : identifier(id), subscript(s), prompt(e) { }
     ~InputStatement() { if (subscript) delete subscript; if (prompt) delete prompt; }
     virtual void execute();
 private:
@@ -265,7 +265,7 @@ private:
 
 class Basic::LetStatement : public Statement {
 public:
-    LetStatement(const char *id, ArraySubscript *s, Expression *e) : identifier(id), subscript(s), expression(e) { }
+    LetStatement(const String &id, ArraySubscript *s, Expression *e) : identifier(id), subscript(s), expression(e) { }
     ~LetStatement() { if (subscript) delete subscript; delete expression; }
     virtual void execute();
 private:
@@ -276,7 +276,7 @@ private:
 
 class Basic::CallStatement : public Statement {
 public:
-    CallStatement(const char *id, ParamList *params) : identifier(id), params(params) { }
+    CallStatement(const String &id, ParamList *params) : identifier(id), params(params) { }
     ~CallStatement() { if (params) delete params; }
     virtual void execute();
 private:
@@ -324,7 +324,7 @@ private:
 
 class Basic::ForStatement : public Statement {
 public:
-    ForStatement(const char *id, Expression *s, Expression *e, Expression *t, Block *b) 
+    ForStatement(const String &id, Expression *s, Expression *e, Expression *t, Block *b) 
         : identifier(id), start(s), end(e), step(t), body(b) { }
     ~ForStatement();
     virtual void execute();
@@ -340,13 +340,13 @@ typedef std::pair<const String, Basic::ArrayDimension*> Dimensionable;
 
 class Basic::DimStatement : public Statement {
 public:
-    DimStatement(const char *identifier, ArrayDimension *dim) { 
-        dimensionables.push_back(std::make_pair(String(identifier), dim));
+    DimStatement(const String &identifier, ArrayDimension *dim) { 
+        dimensionables.push_back(std::make_pair(identifier, dim));
     }
     ~DimStatement();
     virtual void execute();
-    void appendDimensionable(const char *identifier, ArrayDimension *dim) {
-        dimensionables.push_back(std::make_pair(String(identifier), dim));
+    void appendDimensionable(const String &identifier, ArrayDimension *dim) {
+        dimensionables.push_back(std::make_pair(identifier, dim));
     }
 private:
     std::list<Dimensionable> dimensionables;
