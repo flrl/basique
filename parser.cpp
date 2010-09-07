@@ -50,19 +50,75 @@ void Parser::error(int argc, ...) {
 }
 
 
-// <unit> ::= "function" <function-definition>
-//          | "sub" <sub-definition>
+// <unit> ::= "function" <function-definition-body>
+//          | "sub" <sub-definition-body>
 //          | <statement>
-void Parser::unit(void) {
+Basic::ASTNode* Parser::unit(void) {
     if (accept(TkFUNCTION)) {
-        functionDefinition();
+        return functionDefinitionBody();
     }
     else if (accept(TkSUB)) {
-        subDefinition();
+        return subDefinitionBody();
     }
     else {
-        statement();
+        return statement();
     }
+}
+
+// <function-definition-body> ::= <identifier> "(" [ <accepted-param-list> ] ")" <block> "end" "function"
+Basic::FunctionDefinition* Parser::functionDefinitionBody(void) {
+    AcceptedParamList *a = NULL;
+    Block *b = NULL;
+    if (expect(TkIDENTIFIER)) {
+        String identifier(accepted_token_value.getStringValue());
+        if (expect(TkLPAREN)) {
+            if (this->token != TkRPAREN) {
+                if (not (a = acceptedParamList())) {
+                    return NULL;
+                }
+            }
+
+            if (expect(TkRPAREN)) {
+                if ((b = block())) {
+                    if (expect(TkEND) and expect(TkFUNCTION)) {
+                        return new FunctionDefinition(identifier, a, b);
+                    }
+                }
+            }
+        }
+    }
+                        
+    if (a)  delete a;
+    if (b)  delete b;
+    return NULL;
+}
+
+// <sub-definition-body> ::= <identifier> "(" [ <accepted-param-list> ] ")" <block> "end" "sub"
+Basic::SubDefinition* Parser::subDefinitionBody(void) {
+    AcceptedParamList *a = NULL;
+    Block *b = NULL;
+    if (expect(TkIDENTIFIER)) {
+        String identifier(accepted_token_value.getStringValue());
+        if (expect(TkLPAREN)) {
+            if (this->token != TkRPAREN) {
+                if (not (a = acceptedParamList())) {
+                    return NULL;
+                }
+            }
+            
+            if (expect(TkRPAREN)) {
+                if ((b = block())) {
+                    if (expect(TkEND) and expect(TkSUB)) {
+                        return new SubDefinition(identifier, a, b);
+                    }
+                }
+            }
+        }
+    }
+    
+    if (a)  delete a;
+    if (b)  delete b;
+    return NULL;
 }
 
 // <statement> ::= "print" <print-statement-body>
@@ -162,45 +218,10 @@ Basic::Block* Parser::block(void) {
     return block;    
 }
         
-// <function-definition> ::= <identifier> "(" [ <accepted-param-list> ] ")" [ "as" <type> ] <block> "end" "function"
-void Parser::functionDefinition(void) {
-    expect(TkIDENTIFIER);
-    expect(TkLPAREN);
-    acceptedParamList();
-    expect(TkRPAREN);
-    if (accept(TkAS)) {
-        type();
-    }
-    block();
-    expect(TkEND);
-    expect(TkFUNCTION);
-}
-
-// <sub-definition> ::= <identifier> "(" [ <accepted-param-list> ] ")" <block> "end" "sub"
-void Parser::subDefinition(void) {
-    expect(TkIDENTIFIER);
-    expect(TkLPAREN);
-    acceptedParamList();
-    expect(TkRPAREN);
-    block();
-    expect(TkEND);
-    expect(TkSUB);
-}
-
-// <accepted-param-list> ::= <accepted-param> [ "," <accepted-param> ]...
-void Parser::acceptedParamList(void) {
-    do {
-        acceptedParam();
-    } while (accept(TkCOMMA));
-}
-
-// <accepted-param> ::= <identifier> [ "as" <type> ] | <null>
-void Parser::acceptedParam(void) {
-    if (accept(TkIDENTIFIER)) {
-        if (accept(TkAS)) {
-            type();
-        }
-    }
+// <accepted-param-list> ::= <identifier> [ "," <accepted-param-list> ]...
+//                         | <null> 
+Basic::AcceptedParamList* Parser::acceptedParamList(void) {
+    //FIXME
 }
 
 // <array-subscript> ::= "(" <expression> [ "," <expression> ]... ")"
