@@ -383,7 +383,7 @@ Basic::PrintStatement* Parser::printStatementBody(void) {
 // <input-statement-body> ::= <identifier> [ <array-subscript> ] [ "," <expression> ]
 Basic::InputStatement* Parser::inputStatementBody(void) {
     if (expect(TkIDENTIFIER)) {
-        const char *identifier = this->accepted_token_value.getStringValue();
+        String identifier(this->accepted_token_value.getStringValue());
         ArraySubscript *subscript = NULL;
         Expression *prompt = NULL;
         if (this->token == TkLPAREN) {
@@ -410,7 +410,7 @@ Basic::LetStatement* Parser::letStatementBody(void) {
     Expression *e = NULL;
 
     if (expect(TkIDENTIFIER)) {
-        const char *identifier = this->accepted_token_value.getStringValue();
+        String identifier(this->accepted_token_value.getStringValue());
         if (this->token == TkLPAREN and not (s = arraySubscript())) {
             return NULL;
         }
@@ -431,7 +431,7 @@ Basic::CallStatement* Parser::callStatementBody(void) {
     ParamList *p = NULL;
 
     if (expect(TkIDENTIFIER)) {
-        const char *identifier = this->accepted_token_value.getStringValue();
+        String identifier(this->accepted_token_value.getStringValue());
         if (expect(TkLPAREN)) {
             if((p = paramList())) {
                 if (expect(TkRPAREN)) {
@@ -544,7 +544,7 @@ Basic::ForStatement* Parser::forStatementBody(void) {
     Expression *step = NULL;
     Block *body = NULL;
     if (expect(TkIDENTIFIER)) {
-        const char *identifier = this->accepted_token_value.getStringValue();
+        String identifier(this->accepted_token_value.getStringValue());
         if (expect(TkEQUALS)) {
             if ((start = expression())) {
                 if (expect(TkTO)) {
@@ -579,12 +579,12 @@ Basic::ForStatement* Parser::forStatementBody(void) {
 Basic::DimStatement* Parser::dimStatementBody(void) {
     ArrayDimension *dim = NULL;
     if (expect(TkIDENTIFIER)) {
-        const char *identifier = this->accepted_token_value.getStringValue();
+        String identifier(this->accepted_token_value.getStringValue());
         dim = arrayDimension();
         DimStatement *s = new DimStatement(identifier, dim);
         while (accept(TkCOMMA)) {
             if (expect(TkIDENTIFIER)) {
-                const char *identifier = this->accepted_token_value.getStringValue();
+                String identifier(this->accepted_token_value.getStringValue());
                 if (this->token == TkLPAREN) {
                     if ((dim = arrayDimension())) {
                         s->appendDimensionable(identifier, dim);
@@ -618,7 +618,7 @@ Basic::Expression* Parser::primaryExpression(void) {
         return new LiteralExpression(this->accepted_token_value);
     }
     else if (accept(TkIDENTIFIER)) {
-        const char *identifier = this->accepted_token_value.getStringValue();
+        String identifier(this->accepted_token_value.getStringValue());
         if (accept(TkLPAREN)) {
             ParamList *p = NULL;
             if ((p = paramList())) {

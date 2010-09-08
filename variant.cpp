@@ -13,11 +13,10 @@
 
 #include "variant.h"
 
-Variant::Variant(void) {
+Variant::Variant(void) : string_value("") {
     this->bool_value = 0;
     this->int_value = 0;
     this->double_value = 0.0;
-    this->clearStringValue();
     this->type = is_undef;
 }
 
@@ -51,7 +50,7 @@ bool Variant::getBoolValue(void) const {
         case is_double:
             return double_value != 0.0;
         case is_string:
-            return string_value != NULL && string_value[0] != '\0' && strcmp(string_value, "0") != 0;
+            return string_value.length() > 0 && strcmp(string_value.cstring(), "0") != 0;
         case is_undef:
         default:
             return false;
@@ -67,7 +66,7 @@ int Variant::getIntValue(void) const {
         case is_double:
             return static_cast<int>(double_value);
         case is_string:
-            return string_value != NULL ? strtol(string_value, NULL, 10) : 0;
+            return strtol(string_value.cstring(), NULL, 10);
         case is_undef:
         default:
             return 0;
@@ -83,7 +82,7 @@ double Variant::getDoubleValue(void) const {
         case is_double:
             return this->double_value;
         case is_string:
-            return strtod(this->string_value, NULL);
+            return strtod(this->string_value.cstring(), NULL);
         case is_undef:
         default:
             return 0.0; /* FIXME */
@@ -93,13 +92,9 @@ double Variant::getDoubleValue(void) const {
 
 /* uses dynamically allocated memory, but manages it itself. 
  memory allocated at last call is freed next time. */
-const char * Variant::getStringValue(void) const {
-    static char *buffer = NULL;
+String Variant::getStringValue(void) const {
+    char *buffer = NULL;
     
-    if (buffer) {
-        delete[] buffer;
-        buffer = NULL;
-    }
     switch (this->type) {
         case is_bool:
             buffer = new char[6];
@@ -114,22 +109,23 @@ const char * Variant::getStringValue(void) const {
             sprintf(buffer, "%f", this->double_value);
             break;
         case is_string:
-            buffer = new char[1 + strlen(this->string_value)];
-            strcpy(buffer, this->string_value);
-            break;
+            return this->string_value;
         case is_undef:
             buffer = new char[1];
             buffer[0] = '\0';
             break;
     }
-    return buffer;
+    
+    String result(buffer);
+    delete[] buffer;
+    return result;
 }
 
 void Variant::setBoolValue(bool b) {
     this->bool_value = b;
     this->int_value = 0;
     this->double_value = 0.0;
-    clearStringValue();
+    this->string_value = "";
     this->type = is_bool;
 }
 
@@ -137,7 +133,7 @@ void Variant::setIntValue(int i) {
     this->bool_value = false;
     this->int_value = i;
     this->double_value = 0.0;
-    clearStringValue();
+    this->string_value = "";
     this->type = is_int;    
 }
 
@@ -145,23 +141,16 @@ void Variant::setDoubleValue(double d) {
     this->bool_value = false;
     this->int_value = 0;
     this->double_value = d;
-    clearStringValue();
+    this->string_value = "";
     this->type = is_double;
 }
 
-void Variant::setStringValue(const char *s) {
+void Variant::setStringValue(const String &s) {
     this->bool_value = false;
     this->int_value = 0;
     this->double_value = 0.0;
-    clearStringValue();
-    if (s != NULL) {
-        this->string_value = new char[1 + strlen(s)];
-        strcpy(this->string_value, s);
-        this->type = is_string;   
-    }
-    else {
-        this->type = is_undef;
-    }
+    this->string_value = s;
+    this->type = is_string;   
 }
 
 void Variant::setDefaultValueForType(VariantType type){
@@ -192,13 +181,7 @@ Variant operator+(const Variant &left, const Variant &right) {
     }
     
     if (left.isString()) {
-        const char *lhs = left.getStringValue();
-        const char *rhs = right.getStringValue();
-        char *buffer = new char[strlen(lhs) + strlen(rhs) + 1];
-        strcpy(buffer, lhs);
-        strcat(buffer, rhs);
-        result.setStringValue(buffer);
-        delete[] buffer;
+        result.setStringValue(left.getStringValue() + right.getStringValue());
     }
     else if (left.isDouble() or (right.isDouble() and (left.isUndef() or left.isBool() or left.isInt()))) {
         result.setDoubleValue(left.getDoubleValue() + right.getDoubleValue());

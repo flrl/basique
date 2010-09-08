@@ -1,5 +1,5 @@
 /*
- *  immutablestring.h
+ *  string.h
  *  Untitled
  *
  *  Created by Ellie on 5/09/10.
@@ -14,6 +14,7 @@ class String {
 public:
     String(const char *);
     String(const String &);
+    String();
     ~String();
     
     const char *cstring(void) const { return _cstring; }
@@ -24,11 +25,14 @@ public:
     bool operator>(const String &) const;
 
     void operator=(const String &);
+    void operator+=(const String &);
     
 private:
     char *_cstring;
     size_t _length;
     size_t _size;
 };
+
+String operator+(const String &, const String &);
 
 #endif
