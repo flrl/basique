@@ -11,6 +11,8 @@
 
 #include <cstdlib>
 
+#include "string.h"
+
 enum VariantType {
     is_undef, is_bool, is_int, is_double, is_string,
 };
@@ -22,21 +24,21 @@ public:
     Variant(bool b) { this->setBoolValue(b); }
     Variant(int i) { this->setIntValue(i); }    
     Variant(double d) { this->setDoubleValue(d); }    
-    Variant(const char *s) { this->setStringValue(s); }
+    Variant(const String &s) { this->setStringValue(s); }
     Variant(VariantType t) { this->setDefaultValueForType(t); }
     
-    ~Variant(void) { clearStringValue(); }
+    ~Variant(void) { }
     
     bool getBoolValue(void) const;
     int getIntValue(void) const;
     double getDoubleValue(void) const;
-    const char* getStringValue(void) const;
+    String getStringValue(void) const;
     VariantType getType(void) const { return this->type; }
 
     void setBoolValue(bool);
     void setIntValue(int);
     void setDoubleValue(double);
-    void setStringValue(const char *);
+    void setStringValue(const String &);
     
     void setDefaultValueForType(VariantType);
     
@@ -51,13 +53,8 @@ private:
     bool bool_value;
     int int_value;
     double double_value;
-    char* string_value; //?
+    String string_value;
     VariantType type;
-    
-    void clearStringValue(void) { 
-        if (string_value != NULL) delete[] string_value; 
-        string_value = NULL; 
-    }
 };
 
 Variant operator+(const Variant &, const Variant &);

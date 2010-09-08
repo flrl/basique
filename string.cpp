@@ -1,5 +1,5 @@
 /*
- *  immutablestring.cpp
+ *  string.cpp
  *  Untitled
  *
  *  Created by Daniel on 5/09/10.
@@ -33,6 +33,13 @@ String::String(const String &s) {
     strcpy(_cstring, s.cstring());
 }
 
+String::String() {
+    _length = 0;
+    _size = 1;
+    _cstring = new char[_size];
+    _cstring[0] = '\0';
+}
+
 String::~String() {
     delete[] _cstring;
 }
@@ -60,4 +67,25 @@ void String::operator=(const String &other) {
     else {
         strcpy(_cstring, other.cstring());
     }
+}
+
+void String::operator+=(const String &other) {
+    _length += other.length();
+    if (_size <= _length) {
+        _size = 1 + _length;
+        char *tmp = new char[_size];
+        strcpy(tmp, _cstring);
+        strcat(tmp, other.cstring());
+        delete[] _cstring;
+        _cstring = tmp;
+    }
+    else {
+        strcat(_cstring, other.cstring());
+    }
+}
+
+String operator+(const String &left, const String &right) {
+    String result(left);
+    result += right;
+    return result;
 }
