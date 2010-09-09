@@ -50,7 +50,7 @@ bool Variant::getBoolValue(void) const {
         case is_double:
             return double_value != 0.0;
         case is_string:
-            return string_value.length() > 0 && strcmp(string_value.cstring(), "0") != 0;
+            return string_value.length() > 0 && strcmp(string_value, "0") != 0;
         case is_undef:
         default:
             return false;
@@ -66,7 +66,7 @@ int Variant::getIntValue(void) const {
         case is_double:
             return static_cast<int>(double_value);
         case is_string:
-            return strtol(string_value.cstring(), NULL, 10);
+            return strtol(string_value, NULL, 10);
         case is_undef:
         default:
             return 0;
@@ -82,7 +82,7 @@ double Variant::getDoubleValue(void) const {
         case is_double:
             return this->double_value;
         case is_string:
-            return strtod(this->string_value.cstring(), NULL);
+            return strtod(this->string_value, NULL);
         case is_undef:
         default:
             return 0.0; /* FIXME */

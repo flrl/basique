@@ -11,7 +11,7 @@
 
 #include "string.h"
 
-String::String(const char *s=NULL) {
+String::String(const char *s) {
     if (s) {
         _length = strlen(s);
         _size = 1 + _length;
@@ -30,7 +30,7 @@ String::String(const String &s) {
     _length = s.length();
     _size = 1 + _length;
     _cstring = new char[_size];
-    strcpy(_cstring, s.cstring());
+    strcpy(_cstring, s);
 }
 
 String::String() {
@@ -45,15 +45,15 @@ String::~String() {
 }
 
 bool String::operator==(const String &other) const {
-    return strcmp(_cstring, other.cstring()) == 0;
+    return strcmp(_cstring, other) == 0;
 }
 
 bool String::operator<(const String &other) const {
-    return strcmp(_cstring, other.cstring()) < 0;
+    return strcmp(_cstring, other) < 0;
 }
 
 bool String::operator>(const String &other) const {
-    return strcmp(_cstring, other.cstring()) > 0;
+    return strcmp(_cstring, other) > 0;
 }
 
 void String::operator=(const String &other) {
@@ -62,10 +62,10 @@ void String::operator=(const String &other) {
         _length = other.length();
         _size = 1 + _length;
         _cstring = new char[_size];
-        strcpy(_cstring, other.cstring());        
+        strcpy(_cstring, other);        
     }
     else {
-        strcpy(_cstring, other.cstring());
+        strcpy(_cstring, other);
     }
 }
 
@@ -75,12 +75,12 @@ void String::operator+=(const String &other) {
         _size = 1 + _length;
         char *tmp = new char[_size];
         strcpy(tmp, _cstring);
-        strcat(tmp, other.cstring());
+        strcat(tmp, other);
         delete[] _cstring;
         _cstring = tmp;
     }
     else {
-        strcat(_cstring, other.cstring());
+        strcat(_cstring, other);
     }
 }
 
