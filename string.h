@@ -17,13 +17,14 @@ public:
     String();
     ~String();
     
-    const char *cstring(void) const { return _cstring; }
+    operator const char * () const { return _cstring; }
     size_t length(void) const { return _length; }
     
     bool operator==(const String &) const;
     bool operator<(const String &) const;
     bool operator>(const String &) const;
 
+    
     void operator=(const String &);
     void operator+=(const String &);
     

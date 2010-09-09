@@ -113,7 +113,7 @@ void Basic::Block::execute (void) {
 void Basic::PrintStatement::execute (void) {
     for (std::list<Expression*>::const_iterator e = expressions.begin(); e != expressions.end(); e++) {
         (*e)->execute();
-        fputs((*e)->getResult().getStringValue().cstring(), stdout);
+        fputs((*e)->getResult().getStringValue(), stdout);
     }
     if (append_eol)  putchar('\n');
 }

@@ -16,6 +16,7 @@
 
 #include <stdint.h>
 
+#include "array.h"
 #include "ast.h"
 #include "string.h"
 #include "variant.h"
@@ -32,7 +33,7 @@ namespace SymbolTableEntryType {
     };
 }
 
-typedef std::pair<SymbolTableEntryType::Enum, intptr_t> SymbolTableEntry;
+typedef std::pair<SymbolTableEntryType::Enum, void *> SymbolTableEntry;
 typedef std::map<const String, SymbolTableEntry> SymbolTableEntryMap;
 
 class SymbolTable {
@@ -43,9 +44,15 @@ public:
     void push_frame();
     void pop_frame();
     
-    void create_symbol(const char *, SymbolTableEntryType::Enum, intptr_t);
-    SymbolTableEntry lookup_symbol(const char *);
+    SymbolTableEntry lookup_symbol(const char *) const;
     bool defined(const char *) const;
+
+    void create_symbol(const char *, SymbolTableEntryType::Enum, void *);
+
+    void define_function(const String &, Basic::FunctionDefinition *);
+    void define_subroutine(const String &, Basic::SubDefinition *);
+    void define_variant(const String &, Variant *);
+    void define_array(const String &, Array *);
     
 private:
     std::vector<SymbolTableEntryMap> frames;

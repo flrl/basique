@@ -17,6 +17,12 @@ namespace Basic {
     class Array; 
 }
 
+// FIXME
+// constructor should take a list of dimension specifications
+// getter should take a list of dimension indexes
+// need a "validate params" function that takes a list of dimension indexes and checks that they're sane
+// which caller can use before calling getter
+
 class Basic::Array {
 public:
     Array(size_t size_x, size_t size_y, VariantType type) { initialiseContents(size_x, size_y, type); }
