@@ -50,7 +50,7 @@ bool Basic::Array::isValidIndex(const Index &index) const {
 //                          j * sizeof(k0..kn)      +
 //                          k * sizeof(T)
 
-const Variant& Basic::Array::itemAt(const Index &index) const {
+const Basic::Variant& Basic::Array::itemAt(const Index &index) const {
     if (index.size() != _dimensions.size())  throw IndexOutOfBounds();
     size_t actual_index = 0;
     size_t size_of_last_dimension = 1;

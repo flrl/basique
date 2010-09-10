@@ -48,7 +48,7 @@ public:
 
     void define_function(const String &, Basic::FunctionDefinition *);
     void define_subroutine(const String &, Basic::SubDefinition *);
-    void define_variant(const String &, Variant *);
+    void define_variant(const String &, Basic::Variant *);
     void define_array(const String &, Basic::Array *);
     
 private:

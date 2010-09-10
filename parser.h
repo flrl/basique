@@ -22,7 +22,7 @@ private:
     Token token;
     Tokeniser tokeniser;
     
-    Variant accepted_token_value;
+    Basic::Variant accepted_token_value;
     int accepted_token_line;
     int accepted_token_column;
     
@@ -34,7 +34,6 @@ private:
     Basic::ArraySubscript* arraySubscript(void);
     Basic::ArrayDimension* arrayDimension(void);
     Basic::Statement* statement(void);
-    void dimBody(void);
     Basic::Block* block(void);
     Basic::FunctionDefinition* functionDefinitionBody(void);
     Basic::SubDefinition* subDefinitionBody(void);
