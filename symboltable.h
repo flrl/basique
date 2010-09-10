@@ -21,41 +21,38 @@
 #include "string.h"
 #include "variant.h"
 
-namespace SymbolTableEntryType {
-    enum Enum {
+class SymbolTable {
+public:
+    enum EntryType {
         UNDEFINED,
         BUILTIN_FUNCTION,
         FUNCTION,
         SUBROUTINE,
         VARIANT,
         VARIANT_ARRAY,
-        // etc
+        // etc        
     };
-}
-
-typedef std::pair<SymbolTableEntryType::Enum, void *> SymbolTableEntry;
-typedef std::map<const String, SymbolTableEntry> SymbolTableEntryMap;
-
-class SymbolTable {
-public:
+    typedef std::pair<EntryType, void *> Entry;
+    typedef std::map<const String, Entry> Frame;
+    
     SymbolTable();
     ~SymbolTable();
     
     void push_frame();
     void pop_frame();
     
-    SymbolTableEntry lookup_symbol(const char *) const;
-    bool defined(const char *) const;
+    const Entry *find(const String &) const;
+    Entry *find(const String &identifier) { return const_cast<Entry*>(find(identifier)); }
 
-    void create_symbol(const char *, SymbolTableEntryType::Enum, void *);
+    bool defined(const String&) const;
 
     void define_function(const String &, Basic::FunctionDefinition *);
     void define_subroutine(const String &, Basic::SubDefinition *);
     void define_variant(const String &, Variant *);
-    void define_array(const String &, Array *);
+    void define_array(const String &, Basic::Array *);
     
 private:
-    std::vector<SymbolTableEntryMap> frames;
+    std::vector<Frame> frames;
     
 };
 

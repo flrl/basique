@@ -9,23 +9,46 @@
 
 #include "symboltable.h"
 
-SymbolTableEntry SymbolTable::lookup_symbol(const char *identifier) const {
-    for (std::vector<SymbolTableEntryMap>::const_reverse_iterator frame = frames.rbegin(); frame != frames.rend(); frame++) {
-        SymbolTableEntryMap::const_iterator result = frame->find(String(identifier));
-        if (result != frame->end())  return result->second;  // iterator of map derefs to pair<key_t, value_t>
+const SymbolTable::Entry *SymbolTable::find(const String &identifier) const {
+    for (std::vector<Frame>::const_reverse_iterator frame = frames.rbegin(); frame != frames.rend(); frame++) {
+        Frame::const_iterator result = frame->find(identifier);
+        if (result != frame->end())  return &result->second;  // iterator of map derefs to pair<key_t, value_t>
     }
 
-    return std::make_pair(SymbolTableEntryType::UNDEFINED, (void*) NULL);
+    return NULL;
 }
 
-void SymbolTable::create_symbol(const char *identifier, SymbolTableEntryType::Enum ste_type, void *ste_value) {
-    std::vector<SymbolTableEntryMap>::reverse_iterator frame = frames.rbegin();
-    frame->insert(std::make_pair(String(identifier), std::make_pair(ste_type, ste_value)));
-}
+//SymbolTable::Entry *SymbolTable::find(const String &identifier) {
+//    for (std::vector<Frame>::reverse_iterator frame = frames.rbegin(); frame != frames.rend(); frame++) {
+//        Frame::iterator result = frame->find(identifier);
+//        if (result != frame->end())  return &result->second;  // iterator of map derefs to pair<key_t, value_t>
+//    }
+//    return NULL;
+//}
 
-bool SymbolTable::defined(const char *identifier) const {
-    for (std::vector<SymbolTableEntryMap>::const_reverse_iterator frame = frames.rbegin(); frame != frames.rend(); frame++) {
-        if (frame->count(String(identifier)) > 0)  return true;
+bool SymbolTable::defined(const String &identifier) const {
+    for (std::vector<Frame>::const_reverse_iterator frame = frames.rbegin(); frame != frames.rend(); frame++) {
+        if (frame->count(identifier) > 0)  return true;
     }
     return false;
+}
+
+void SymbolTable::define_function(const String &identifier, Basic::FunctionDefinition *binding) {
+    std::vector<Frame>::reverse_iterator frame = frames.rbegin();
+    frame->insert(std::make_pair(identifier, std::make_pair(SymbolTable::FUNCTION, binding)));
+}
+
+void SymbolTable::define_subroutine(const String &identifier, Basic::SubDefinition *binding) {
+    std::vector<Frame>::reverse_iterator frame = frames.rbegin();
+    frame->insert(std::make_pair(identifier, std::make_pair(SymbolTable::SUBROUTINE, binding)));
+}
+
+void SymbolTable::define_variant(const String &identifier, Variant *binding) {
+    std::vector<Frame>::reverse_iterator frame = frames.rbegin();
+    frame->insert(std::make_pair(identifier, std::make_pair(SymbolTable::VARIANT, binding)));
+}
+
+void SymbolTable::define_array(const String &identifier, Basic::Array *binding) {
+    std::vector<Frame>::reverse_iterator frame = frames.rbegin();
+    frame->insert(std::make_pair(identifier, std::make_pair(SymbolTable::VARIANT_ARRAY, binding)));
 }
