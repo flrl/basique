@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef _IMMUTABLESTRING_H
-#define _IMMUTABLESTRING_H
+#ifndef _STRING_H
+#define _STRING_H
 
 class String {
 public:
@@ -17,14 +17,13 @@ public:
     String();
     ~String();
     
-    operator const char * () const { return _cstring; }
+    operator const char*(void) const { return _cstring; }
     size_t length(void) const { return _length; }
     
     bool operator==(const String &) const;
     bool operator<(const String &) const;
     bool operator>(const String &) const;
 
-    
     String &operator=(const String &);
     String &operator+=(const String &);
     
