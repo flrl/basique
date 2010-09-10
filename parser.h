@@ -19,15 +19,15 @@ public:
     Parser(void);
     
 private:
-    Token token;
-    Tokeniser tokeniser;
+    Basic::Token token;
+    Basic::Tokeniser tokeniser;
     
     Basic::Variant accepted_token_value;
     int accepted_token_line;
     int accepted_token_column;
     
-    int accept(Token t);
-    int expect(Token t);
+    int accept(Basic::Token t);
+    int expect(Basic::Token t);
     void error(int, ...);
     
     Basic::ASTNode* unit(void);
