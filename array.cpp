@@ -7,16 +7,22 @@
  *
  */
 
+#include <cassert>
+
 #include "array.h"
 
 Basic::Array::Array(const std::vector<DimensionSpecification> &dimspecs) {
     size_t total_size = 1;
     _dimensions.reserve(dimspecs.size());
+    if (dimspecs.size() == 0)  throw BadDimensionSpecification();
     for (std::vector<DimensionSpecification>::const_iterator ds = dimspecs.begin(); ds != dimspecs.end(); ds++) {
-        if (ds->first >= ds->second)  throw BadDimensionSpecification();
-        total_size *= (1 + ds->second - ds->first);
+        if (ds->first > ds->second)  throw BadDimensionSpecification();
+        size_t size = (1 + ds->second - ds->first);
+        _sizes.push_back(size);
+        total_size *= size;
         _dimensions.push_back(std::make_pair(ds->first, ds->second));
     }
+    assert(total_size > 0);
     _data.resize(total_size);
 }
 
@@ -52,8 +58,9 @@ const Variant& Basic::Array::itemAt(const Index &index) const {
         if (_dimensions[d].first > index[d])  throw IndexOutOfBounds();
         if (_dimensions[d].second < index[d])  throw IndexOutOfBounds();
         actual_index += (_dimensions[d].first + index[d]) * size_of_last_dimension;
-        size_of_last_dimension *= 1 + _dimensions[d].second - _dimensions[d].first;
+        size_of_last_dimension *= _sizes[d];
     }
-    if (actual_index < 0 || actual_index >= _data.size())  throw IndexOutOfBounds();
+    assert(actual_index >= 0);
+    assert(actual_index < _data.size());
     return _data[actual_index];    
 }
