@@ -10,6 +10,8 @@
 #include "ast.h"
 #include "symboltable.h"
 
+using namespace Basic;
+
 void Basic::LiteralExpression::execute (void) {
     ; // result value is set at initialisation
 }
@@ -220,7 +222,7 @@ Basic::AcceptedParamList::~AcceptedParamList() {
 }
 
 Basic::ParamList::~ParamList() {
-    for (std::list<Basic::Expression *>::iterator e = expressions.begin(); e != expressions.end(); e++) {
+    for (std::vector<Expression *>::iterator e = expressions.begin(); e != expressions.end(); e++) {
         delete (*e);
     }
 }

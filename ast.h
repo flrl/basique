@@ -12,6 +12,7 @@
 
 #include <list>
 #include <utility>
+#include <vector>
 
 #include "string.h"
 #include "tokeniser.h"
@@ -115,8 +116,10 @@ public:
     ~ParamList();
     virtual void execute();
     void appendExpression(Expression *e) { expressions.push_back(e); }
+    size_t size() const { return expressions.size(); }
+    Expression *param (size_t index) { return expressions[index]; }
 private:
-    std::list<Expression *> expressions;
+    std::vector<Basic::Expression *> expressions;
 };
 
 class Basic::ArraySubscript : public ASTNode {
