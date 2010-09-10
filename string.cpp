@@ -56,7 +56,9 @@ bool String::operator>(const String &other) const {
     return strcmp(_cstring, other) > 0;
 }
 
-void String::operator=(const String &other) {
+String &String::operator=(const String &other) {
+    if (this == &other)  return *this;
+    
     if (other.length() >= _size) {
         delete[] _cstring;
         _length = other.length();
@@ -67,9 +69,11 @@ void String::operator=(const String &other) {
     else {
         strcpy(_cstring, other);
     }
+    
+    return *this;
 }
 
-void String::operator+=(const String &other) {
+String &String::operator+=(const String &other) {
     _length += other.length();
     if (_size <= _length) {
         _size = 1 + _length;
@@ -82,6 +86,8 @@ void String::operator+=(const String &other) {
     else {
         strcat(_cstring, other);
     }
+    
+    return *this;
 }
 
 String operator+(const String &left, const String &right) {

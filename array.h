@@ -9,48 +9,38 @@
 
 #ifndef _ARRAY_H
 
+#include <exception>
+#include <utility>
 #include <vector>
 
 #include "variant.h"
 
 namespace Basic { 
-    class Array; 
+    class Array;
 }
-
-// FIXME
-// constructor should take a list of dimension specifications
-// getter should take a list of dimension indexes
-// need a "validate params" function that takes a list of dimension indexes and checks that they're sane
-// which caller can use before calling getter
 
 class Basic::Array {
 public:
-    Array(size_t size_x, size_t size_y, VariantType type) { initialiseContents(size_x, size_y, type); }
-    Array(size_t size_x, VariantType type) { initialiseContents(size_x, 1, type); }
-    ~Array(void);
+    typedef std::pair<int, int> DimensionSpecification;
+    typedef std::vector<int> Index;
+    class BadDimensionSpecification : public std::exception { };
+    class IndexOutOfBounds : public std::exception { };
     
-    Variant &itemAt(unsigned, unsigned); 
-    Variant &itemAt(unsigned i) { return itemAt(i, 0); }
+    Array(const std::vector<DimensionSpecification> &);
+    ~Array();
     
-    Variant getItemAt(unsigned, unsigned) const;
-    Variant getItemAt(unsigned i) const { return getItemAt(i, 0); }
+    bool isValidIndex(const Index &) const;
+    const Variant &itemAt(const Index &) const;
     
-    void setItemAt(unsigned, unsigned, Variant);
-    void setItemAt(unsigned i, Variant v) { setItemAt(i, 0, v); }
-    
-private:
-    size_t size_x, size_y;
-    size_t allocated_size;
-    VariantType content_type;
-    std::vector<Variant> contents;
-    
-    void initialiseContents(size_t, size_t, VariantType);
-    
-    int getContentsIndexForPosition(unsigned x, unsigned y) const {
-        if (x >= size_x || y >= size_y)  return -1;
-        return y * size_x + x;
-    }
-};
+    const Variant &operator[](const Index &index) const { return itemAt(index); }
+    Variant &operator[](const Index &index) { return const_cast<Variant&>(itemAt(index)); }
 
+private:
+    Array();
+    Array &operator=(const Array &);
+    
+    std::vector<DimensionSpecification> _dimensions;
+    std::vector<Variant> _data;
+};
 
 #endif
