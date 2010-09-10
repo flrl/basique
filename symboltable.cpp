@@ -43,7 +43,7 @@ void SymbolTable::define_subroutine(const String &identifier, Basic::SubDefiniti
     frame->insert(std::make_pair(identifier, std::make_pair(SymbolTable::SUBROUTINE, binding)));
 }
 
-void SymbolTable::define_variant(const String &identifier, Variant *binding) {
+void SymbolTable::define_variant(const String &identifier, Basic::Variant *binding) {
     std::vector<Frame>::reverse_iterator frame = frames.rbegin();
     frame->insert(std::make_pair(identifier, std::make_pair(SymbolTable::VARIANT, binding)));
 }

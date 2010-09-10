@@ -13,14 +13,14 @@
 
 #include "variant.h"
 
-Variant::Variant(void) : string_value("") {
+Basic::Variant::Variant(void) : string_value("") {
     this->bool_value = 0;
     this->int_value = 0;
     this->double_value = 0.0;
-    this->type = is_undef;
+    this->type = Basic::Variant::is_undef;
 }
 
-Variant::Variant(const Variant &other) {
+Basic::Variant::Variant(const Variant &other) {
     switch(other.type) {
         case is_bool:
             this->setBoolValue(other.bool_value);
@@ -41,7 +41,7 @@ Variant::Variant(const Variant &other) {
     }
 }
 
-bool Variant::getBoolValue(void) const {
+bool Basic::Variant::getBoolValue(void) const {
     switch (this->type) {
         case is_bool:
             return bool_value;
@@ -57,7 +57,7 @@ bool Variant::getBoolValue(void) const {
     }
 }
 
-int Variant::getIntValue(void) const {
+int Basic::Variant::getIntValue(void) const {
     switch (this->type) {
         case is_bool:
             return bool_value ? 1 : 0;
@@ -73,7 +73,7 @@ int Variant::getIntValue(void) const {
     }
 }
 
-double Variant::getDoubleValue(void) const {
+double Basic::Variant::getDoubleValue(void) const {
     switch (this->type) {
         case is_bool:
             return this->bool_value ? 1.0 : 0.0 ;
@@ -92,7 +92,7 @@ double Variant::getDoubleValue(void) const {
 
 /* uses dynamically allocated memory, but manages it itself. 
  memory allocated at last call is freed next time. */
-String Variant::getStringValue(void) const {
+String Basic::Variant::getStringValue(void) const {
     char *buffer = NULL;
     
     switch (this->type) {
@@ -121,7 +121,7 @@ String Variant::getStringValue(void) const {
     return result;
 }
 
-void Variant::setBoolValue(bool b) {
+void Basic::Variant::setBoolValue(bool b) {
     this->bool_value = b;
     this->int_value = 0;
     this->double_value = 0.0;
@@ -129,7 +129,7 @@ void Variant::setBoolValue(bool b) {
     this->type = is_bool;
 }
 
-void Variant::setIntValue(int i) {
+void Basic::Variant::setIntValue(int i) {
     this->bool_value = false;
     this->int_value = i;
     this->double_value = 0.0;
@@ -137,7 +137,7 @@ void Variant::setIntValue(int i) {
     this->type = is_int;    
 }
 
-void Variant::setDoubleValue(double d) {
+void Basic::Variant::setDoubleValue(double d) {
     this->bool_value = false;
     this->int_value = 0;
     this->double_value = d;
@@ -145,7 +145,7 @@ void Variant::setDoubleValue(double d) {
     this->type = is_double;
 }
 
-void Variant::setStringValue(const String &s) {
+void Basic::Variant::setStringValue(const String &s) {
     this->bool_value = false;
     this->int_value = 0;
     this->double_value = 0.0;
@@ -153,7 +153,7 @@ void Variant::setStringValue(const String &s) {
     this->type = is_string;   
 }
 
-void Variant::setDefaultValueForType(VariantType type){
+void Basic::Variant::setDefaultValueForType(Basic::Variant::Type type){
     switch (type) {
         case is_bool:
             setBoolValue(false);
@@ -173,8 +173,8 @@ void Variant::setDefaultValueForType(VariantType type){
     }
 }
 
-Variant operator+(const Variant &left, const Variant &right) {
-    Variant result;
+Basic::Variant operator+(const Basic::Variant &left, const Basic::Variant &right) {
+    Basic::Variant result;
     
     if (right.isUndef()) {
         fprintf(stderr, "warning: undefined value in addition at line ..., column ...\n");        
@@ -204,8 +204,8 @@ Variant operator+(const Variant &left, const Variant &right) {
     return result;
 }
 
-Variant operator-(const Variant &left, const Variant &right) {
-    Variant result;
+Basic::Variant operator-(const Basic::Variant &left, const Basic::Variant &right) {
+    Basic::Variant result;
     
     if (right.isUndef()) {
         fprintf(stderr, "warning: undefined value in subtraction at line ..., column ...\n");        

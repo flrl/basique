@@ -13,19 +13,23 @@
 
 #include "string.h"
 
-enum VariantType {
-    is_undef, is_bool, is_int, is_double, is_string,
-};
+namespace Basic {
+    class Variant;
+}
 
-class Variant {
+class Basic::Variant {
 public:
+    enum Type {
+        is_undef, is_bool, is_int, is_double, is_string,
+    };
+    
     Variant(void);
     Variant(const Variant&);
     Variant(bool b) { this->setBoolValue(b); }
     Variant(int i) { this->setIntValue(i); }    
     Variant(double d) { this->setDoubleValue(d); }    
     Variant(const String &s) { this->setStringValue(s); }
-    Variant(VariantType t) { this->setDefaultValueForType(t); }
+    Variant(Type t) { this->setDefaultValueForType(t); }
     
     ~Variant(void) { }
     
@@ -33,14 +37,14 @@ public:
     int getIntValue(void) const;
     double getDoubleValue(void) const;
     String getStringValue(void) const;
-    VariantType getType(void) const { return this->type; }
+    Type getType(void) const { return this->type; }
 
     void setBoolValue(bool);
     void setIntValue(int);
     void setDoubleValue(double);
     void setStringValue(const String &);
     
-    void setDefaultValueForType(VariantType);
+    void setDefaultValueForType(Type);
     
     bool isDefined(void) const  { return this->type != is_undef; }
     bool isUndef(void) const    { return this->type == is_undef; }
@@ -54,11 +58,11 @@ private:
     int int_value;
     double double_value;
     String string_value;
-    VariantType type;
+    Type type;
 };
 
-Variant operator+(const Variant &, const Variant &);
-Variant operator-(const Variant &, const Variant &);
+Basic::Variant operator+(const Basic::Variant &, const Basic::Variant &);
+Basic::Variant operator-(const Basic::Variant &, const Basic::Variant &);
 
 
 // FIXME operator overloads

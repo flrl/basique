@@ -26,10 +26,10 @@ void Basic::UnaryExpression::execute (void) {
     }
     else if (this->op == TkMINUS) {
         switch(intermediate.getType()) {
-            case is_int:
+            case Basic::Variant::is_int:
                 this->value.setIntValue(0 - intermediate.getIntValue());
                 break;
-            case is_double:
+            case Basic::Variant::is_double:
                 this->value.setDoubleValue(0.0 - intermediate.getDoubleValue());
                 break;
             default:
@@ -47,7 +47,7 @@ void Basic::MultiplicativeExpression::execute (void) {
 }
 
 void Basic::AdditiveExpression::execute (void) {
-    std::list<Expression*>::const_iterator term = terms.begin();
+    std::list<Basic::Expression*>::const_iterator term = terms.begin();
     (*term)->execute();
     Variant intermediate = (*term)->getResult();
     term++;
@@ -88,7 +88,7 @@ void Basic::ComparitiveExpression::execute (void) {
 
 void Basic::AndExpression::execute (void) {
     bool intermediate = true;
-    for (std::list<Expression*>::const_iterator e = terms.begin(); e != terms.end(); e++) {
+    for (std::list<Basic::Expression*>::const_iterator e = terms.begin(); e != terms.end(); e++) {
         (*e)->execute();
         intermediate = (intermediate and (*e)->getResult().getBoolValue());
     }
@@ -97,7 +97,7 @@ void Basic::AndExpression::execute (void) {
 
 void Basic::OrExpression::execute (void) {
     bool intermediate = false;
-    for (std::list<Expression*>::const_iterator e = terms.begin(); e != terms.end(); e++) {
+    for (std::list<Basic::Expression*>::const_iterator e = terms.begin(); e != terms.end(); e++) {
         (*e)->execute();
         intermediate = (intermediate and (*e)->getResult().getBoolValue());
     }
@@ -105,13 +105,13 @@ void Basic::OrExpression::execute (void) {
 }
 
 void Basic::Block::execute (void) {
-    for (std::list<Statement*>::const_iterator s = statements.begin(); s != statements.end(); s++) {
+    for (std::list<Basic::Statement*>::const_iterator s = statements.begin(); s != statements.end(); s++) {
         (*s)->execute();
     }
 }
 
 void Basic::PrintStatement::execute (void) {
-    for (std::list<Expression*>::const_iterator e = expressions.begin(); e != expressions.end(); e++) {
+    for (std::list<Basic::Expression*>::const_iterator e = expressions.begin(); e != expressions.end(); e++) {
         (*e)->execute();
         fputs((*e)->getResult().getStringValue(), stdout);
     }
@@ -172,17 +172,17 @@ void Basic::SubDefinition::execute (void) {
 
 
 Basic::PrintStatement::~PrintStatement() {
-    for (std::list<Expression *>::iterator e = expressions.begin(); e != expressions.end(); e++) {
+    for (std::list<Basic::Expression *>::iterator e = expressions.begin(); e != expressions.end(); e++) {
         delete (*e);
     }
 }
 
 Basic::IfStatement::~IfStatement() {
-    for (std::list<Expression *>::iterator e = conditions.begin(); e != conditions.end(); e++) {
+    for (std::list<Basic::Expression *>::iterator e = conditions.begin(); e != conditions.end(); e++) {
         delete (*e);
     }
     
-    for (std::list<Block *>::iterator b = blocks.begin(); b != blocks.end(); b++) {
+    for (std::list<Basic::Block *>::iterator b = blocks.begin(); b != blocks.end(); b++) {
         delete (*b);
     }
     
@@ -203,7 +203,7 @@ Basic::DimStatement::~DimStatement() {
 }
 
 Basic::ArraySubscript::~ArraySubscript() {
-    for (std::list<Expression *>::iterator e = expressions.begin(); e != expressions.end(); e++) {
+    for (std::list<Basic::Expression *>::iterator e = expressions.begin(); e != expressions.end(); e++) {
         delete (*e);
     }
 }
@@ -220,37 +220,37 @@ Basic::AcceptedParamList::~AcceptedParamList() {
 }
 
 Basic::ParamList::~ParamList() {
-    for (std::list<Expression *>::iterator e = expressions.begin(); e != expressions.end(); e++) {
+    for (std::list<Basic::Expression *>::iterator e = expressions.begin(); e != expressions.end(); e++) {
         delete (*e);
     }
 }
 
 Basic::Block::~Block() {
-    for (std::list<Statement *>::iterator s = statements.begin(); s != statements.end(); s++) {
+    for (std::list<Basic::Statement *>::iterator s = statements.begin(); s != statements.end(); s++) {
         delete (*s);
     }
 }
 
 Basic::MultiplicativeExpression::~MultiplicativeExpression() {
-    for (std::list<Expression *>::iterator e = terms.begin(); e != terms.end(); e++) {
+    for (std::list<Basic::Expression *>::iterator e = terms.begin(); e != terms.end(); e++) {
         delete (*e);
     }
 }
 
 Basic::AdditiveExpression::~AdditiveExpression() {
-    for (std::list<Expression *>::iterator e = terms.begin(); e != terms.end(); e++) {
+    for (std::list<Basic::Expression *>::iterator e = terms.begin(); e != terms.end(); e++) {
         delete (*e);
     }    
 }
 
 Basic::AndExpression::~AndExpression() {
-    for (std::list<Expression *>::iterator e = terms.begin(); e != terms.end(); e++) {
+    for (std::list<Basic::Expression *>::iterator e = terms.begin(); e != terms.end(); e++) {
         delete (*e);
     }
 }
 
 Basic::OrExpression::~OrExpression() {
-    for (std::list<Expression *>::iterator e = terms.begin(); e != terms.end(); e++) {
+    for (std::list<Basic::Expression *>::iterator e = terms.begin(); e != terms.end(); e++) {
         delete (*e);
     }    
 }

@@ -75,7 +75,7 @@ Tokeniser::Tokeniser(const char * filename) {
     this->source = fopen(filename, "r");
     this->token_line = this->cursor_line = 0;
     this->token_column = this->cursor_column = 0;
-    this->value = Variant();
+    this->value = Basic::Variant();
     setupKeywords();
 }
 
@@ -83,7 +83,7 @@ Tokeniser::Tokeniser(int fd) {
     this->source = fdopen(fd, "r");
     this->token_line = this->cursor_line = 0;
     this->token_column = this->cursor_column = 0;
-    this->value = Variant();
+    this->value = Basic::Variant();
     setupKeywords();
 }
 

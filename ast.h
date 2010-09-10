@@ -53,8 +53,6 @@ namespace Basic {
     class Identifier;
 }
 
-using namespace Basic;
-
 class Basic::ASTNode {
 public:
     virtual ~ASTNode() { }
@@ -297,27 +295,18 @@ private:
     Block *else_block;
 };
 
-enum DoConditionType {
-    DcWHILE,
-    DcUNTIL,
-    DcFOREVER,
-    DcONCE,
-};
-
-enum DoConditionWhen {
-    DcPRECONDITION,
-    DcPOSTCONDITION 
-};
-
 class Basic::DoStatement : public Statement {
 public:
-    DoStatement(DoConditionType t, DoConditionWhen w, Expression *c, Block *b) 
+    enum Type { WHILE, UNTIL, FOREVER, ONCE };
+    enum When { PRECONDITION, POSTCONDITION };
+    
+    DoStatement(Type t, When w, Expression *c, Block *b) 
         : condition_type(t), condition_when(w), condition(c), body(b) { }
     ~DoStatement() { if (condition)  delete condition; delete body; }
     virtual void execute();
 private:
-    DoConditionType condition_type;
-    DoConditionWhen condition_when;
+    Type condition_type;
+    When condition_when;
     Expression *condition;
     Block *body;
 };

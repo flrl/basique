@@ -23,9 +23,6 @@ enum Token {
     TkEOF, TkEOL, TkCOLON, TkCOMMA, TkSEMICOLON,
     TkIDENTIFIER, TkLITERAL, 
     
-    // FIXME collapse TkINTEGER, TkREAL and TkString into a single (Variant) TkLITERAL, and then re-add "integer", "real", 
-    // and "string" keywords for use in type statements?  (eg   `dim foo as string')
-    
     /* symbols */
     TkPLUS, TkMINUS, TkMULTIPLY, TkDIVIDE, 
     TkLPAREN, TkRPAREN, TkLBRACKET, TkRBRACKET,
@@ -59,7 +56,7 @@ public:
     int getLine(void) const { return token_line; }
     int getColumn(void) const { return token_column; }
     
-    Variant getValue(void) const { return value; }
+    Basic::Variant getValue(void) const { return value; }
     
     static const char *tokenDescriptions[Tk_MAX];
 
@@ -72,7 +69,7 @@ private:
     int token_column;
     int cursor_line;
     int cursor_column;
-    Variant value;
+    Basic::Variant value;
     
     void skipWhitespace(void);
     void updateTokenPosition(void) { token_line = cursor_line; token_column = cursor_column; }
