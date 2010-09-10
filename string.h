@@ -25,13 +25,13 @@ public:
     bool operator>(const String &) const;
 
     
-    void operator=(const String &);
-    void operator+=(const String &);
+    String &operator=(const String &);
+    String &operator+=(const String &);
     
 private:
-    char *_cstring;
     size_t _length;
     size_t _size;
+    char *_cstring;
 };
 
 String operator+(const String &, const String &);
