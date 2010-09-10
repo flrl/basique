@@ -12,7 +12,7 @@
 
 #include "parser.h"
 
-int Parser::accept(Token t) {
+int Parser::accept(Basic::Token t) {
     if (this->token == t) {
         this->accepted_token_value = tokeniser.getValue();
         this->accepted_token_line = tokeniser.getLine();
@@ -25,7 +25,7 @@ int Parser::accept(Token t) {
     }
 }
 
-int Parser::expect(Token t) {
+int Parser::expect(Basic::Token t) {
     if (accept(t)) {
         return 1;  
     } 
@@ -41,12 +41,12 @@ void Parser::error(int argc, ...) {
     va_start(argv, argc);
     for (int i=0; i<argc; i++) {
         int token = va_arg(argv, int);
-        if (token >= Tk_MIN && token < Tk_MAX) {
-            fprintf(stderr, " `%s',", Tokeniser::tokenDescriptions[va_arg(argv, int)]);
+        if (token >= Basic::Tk_MIN && token < Basic::Tk_MAX) {
+            fprintf(stderr, " `%s',", Basic::Tokeniser::tokenDescriptions[va_arg(argv, int)]);
         }
     }
     va_end(argv);
-    fprintf(stderr, " got `%s'\n", Tokeniser::tokenDescriptions[this->token]);
+    fprintf(stderr, " got `%s'\n", Basic::Tokeniser::tokenDescriptions[this->token]);
 }
 
 
@@ -56,10 +56,10 @@ void Parser::error(int argc, ...) {
 Basic::ASTNode* Parser::unit(void) {
     Basic::ASTNode *unit = NULL;
 
-    if (accept(TkFUNCTION)) {
+    if (accept(Basic::TkFUNCTION)) {
         unit = functionDefinitionBody();
     }
-    else if (accept(TkSUB)) {
+    else if (accept(Basic::TkSUB)) {
         unit = subDefinitionBody();
     }
     else {
@@ -67,7 +67,7 @@ Basic::ASTNode* Parser::unit(void) {
     }
 
     if (unit) {
-        if (expect(TkEOL)) {
+        if (expect(Basic::TkEOL)) {
             return unit;
         }
         else {
@@ -84,18 +84,18 @@ Basic::ASTNode* Parser::unit(void) {
 Basic::FunctionDefinition* Parser::functionDefinitionBody(void) {
     Basic::AcceptedParamList *a = NULL;
     Basic::Block *b = NULL;
-    if (expect(TkIDENTIFIER)) {
+    if (expect(Basic::TkIDENTIFIER)) {
         String identifier(accepted_token_value.getStringValue());
-        if (expect(TkLPAREN)) {
-            if (this->token != TkRPAREN) {
+        if (expect(Basic::TkLPAREN)) {
+            if (this->token != Basic::TkRPAREN) {
                 if (not (a = acceptedParamList())) {
                     return NULL;
                 }
             }
 
-            if (expect(TkRPAREN)) {
+            if (expect(Basic::TkRPAREN)) {
                 if ((b = block())) {
-                    if (expect(TkEND) and expect(TkFUNCTION)) {
+                    if (expect(Basic::TkEND) and expect(Basic::TkFUNCTION)) {
                         return new Basic::FunctionDefinition(identifier, a, b);
                     }
                 }
@@ -112,18 +112,18 @@ Basic::FunctionDefinition* Parser::functionDefinitionBody(void) {
 Basic::SubDefinition* Parser::subDefinitionBody(void) {
     Basic::AcceptedParamList *a = NULL;
     Basic::Block *b = NULL;
-    if (expect(TkIDENTIFIER)) {
+    if (expect(Basic::TkIDENTIFIER)) {
         String identifier(accepted_token_value.getStringValue());
-        if (expect(TkLPAREN)) {
-            if (this->token != TkRPAREN) {
+        if (expect(Basic::TkLPAREN)) {
+            if (this->token != Basic::TkRPAREN) {
                 if (not (a = acceptedParamList())) {
                     return NULL;
                 }
             }
             
-            if (expect(TkRPAREN)) {
+            if (expect(Basic::TkRPAREN)) {
                 if ((b = block())) {
-                    if (expect(TkEND) and expect(TkSUB)) {
+                    if (expect(Basic::TkEND) and expect(Basic::TkSUB)) {
                         return new Basic::SubDefinition(identifier, a, b);
                     }
                 }
@@ -148,53 +148,53 @@ Basic::SubDefinition* Parser::subDefinitionBody(void) {
 //               | <let-statement-body>
 //               | <call-statement-body>
 Basic::Statement* Parser::statement(void) {
-    if (accept(TkPRINT)) {
+    if (accept(Basic::TkPRINT)) {
         return printStatementBody();
     }
-    else if (accept(TkINPUT)) {
+    else if (accept(Basic::TkINPUT)) {
         return inputStatementBody();
     }
-    else if (accept(TkLET)) {
+    else if (accept(Basic::TkLET)) {
         return letStatementBody();
     }
-    else if (accept(TkCALL)) {
+    else if (accept(Basic::TkCALL)) {
         return callStatementBody();
     }
-    else if (accept(TkIF)) {
+    else if (accept(Basic::TkIF)) {
         return ifStatementBody();
     }
-    else if (accept(TkDO)) {
+    else if (accept(Basic::TkDO)) {
         return doStatementBody();
     }
-    else if (accept(TkFOR)) {
+    else if (accept(Basic::TkFOR)) {
         return forStatementBody();
     }
-    else if (accept(TkDIM)) {
+    else if (accept(Basic::TkDIM)) {
         return dimStatementBody();
     }
-//    else if (accept(TkEXIT)) {
+//    else if (accept(Basic::TkEXIT)) {
 //        expression();
 //    }
-//    else if (accept(TkIDENTIFIER)) {
-//        if (accept(TkEQUALS)) {
+//    else if (accept(Basic::TkIDENTIFIER)) {
+//        if (accept(Basic::TkEQUALS)) {
 //            expression();
 //        }
-//        else if (accept(TkLPAREN)) {
+//        else if (accept(Basic::TkLPAREN)) {
 //            paramList();
-//            expect(TkRPAREN);
+//            expect(Basic::TkRPAREN);
 //        }
-//        else if (accept(TkLBRACKET)) {
+//        else if (accept(Basic::TkLBRACKET)) {
 //            expression();
-//            expect(TkRBRACKET);
-//            expect(TkEQUALS);
+//            expect(Basic::TkRBRACKET);
+//            expect(Basic::TkEQUALS);
 //            expression();
 //        }
 //        else {
-//            error(3, TkEQUALS, TkLPAREN, TkLBRACKET);
+//            error(3, Basic::TkEQUALS, Basic::TkLPAREN, Basic::TkLBRACKET);
 //        }
 //    }
     else {
-        error(10, TkPRINT, TkINPUT, TkLET, TkCALL, TkIF, TkDO, TkFOR, TkDIM, TkEXIT, TkIDENTIFIER);
+        error(10, Basic::TkPRINT, Basic::TkINPUT, Basic::TkLET, Basic::TkCALL, Basic::TkIF, Basic::TkDO, Basic::TkFOR, Basic::TkDIM, Basic::TkEXIT, Basic::TkIDENTIFIER);
         return NULL;
     }
 }
@@ -207,16 +207,16 @@ Basic::Block* Parser::block(void) {
     Basic::Statement *s = NULL;
     do {
         switch (this->token) {
-            case TkPRINT:
-            case TkINPUT:
-            case TkLET:
-            case TkCALL:
-            case TkIF:
-            case TkDO:
-            case TkFOR:
-            case TkDIM:
-            case TkEXIT:
-            case TkIDENTIFIER:
+            case Basic::TkPRINT:
+            case Basic::TkINPUT:
+            case Basic::TkLET:
+            case Basic::TkCALL:
+            case Basic::TkIF:
+            case Basic::TkDO:
+            case Basic::TkFOR:
+            case Basic::TkDIM:
+            case Basic::TkEXIT:
+            case Basic::TkIDENTIFIER:
                 if ((s = statement())) {
                     block->appendStatement(s);
                 }
@@ -229,7 +229,7 @@ Basic::Block* Parser::block(void) {
             default:
                 ;
         }
-    } while (accept(TkCOLON) or accept(TkEOL));
+    } while (accept(Basic::TkCOLON) or accept(Basic::TkEOL));
     return block;    
 }
         
@@ -237,10 +237,10 @@ Basic::Block* Parser::block(void) {
 //                         | <null> 
 Basic::AcceptedParamList* Parser::acceptedParamList(void) {
     Basic::AcceptedParamList *a = new Basic::AcceptedParamList();
-    if (accept(TkIDENTIFIER)) {
+    if (accept(Basic::TkIDENTIFIER)) {
         a->appendIdentifier(accepted_token_value.getStringValue());
-        while(accept(TkCOMMA)) {
-            if (expect(TkIDENTIFIER)) {
+        while(accept(Basic::TkCOMMA)) {
+            if (expect(Basic::TkIDENTIFIER)) {
                 a->appendIdentifier(accepted_token_value.getStringValue());
             }
             else {
@@ -255,10 +255,10 @@ Basic::AcceptedParamList* Parser::acceptedParamList(void) {
 // <array-subscript> ::= "(" <expression> [ "," <expression> ]... ")"
 Basic::ArraySubscript* Parser::arraySubscript(void) {
     Basic::Expression *e = NULL;
-    if (expect(TkLPAREN)) {
+    if (expect(Basic::TkLPAREN)) {
         if ((e = expression())) {
             Basic::ArraySubscript *sub = new Basic::ArraySubscript(e);
-            while (accept(TkCOMMA)) {
+            while (accept(Basic::TkCOMMA)) {
                 if ((e = expression())) {
                     sub->appendExpression(e);
                 }
@@ -267,7 +267,7 @@ Basic::ArraySubscript* Parser::arraySubscript(void) {
                     return NULL;
                 }
             }
-            if (expect(TkRPAREN)) {
+            if (expect(Basic::TkRPAREN)) {
                 return sub;                
             }
             else {
@@ -288,9 +288,9 @@ Basic::ArraySubscript* Parser::arraySubscript(void) {
 Basic::ArrayDimension* Parser::arrayDimension(void) {
     Basic::Expression *a = NULL;
     Basic::Expression *b = NULL;
-    if (expect(TkLPAREN)) {
+    if (expect(Basic::TkLPAREN)) {
         if ((a = expression())) {
-            if (accept(TkTO)) {
+            if (accept(Basic::TkTO)) {
                 if (not (b = expression())) {
                     delete a;
                     return NULL;
@@ -298,9 +298,9 @@ Basic::ArrayDimension* Parser::arrayDimension(void) {
             }
             Basic::ArrayDimension *dim = new Basic::ArrayDimension(a, b);
             
-            while (accept(TkCOMMA)) {
+            while (accept(Basic::TkCOMMA)) {
                 if ((a = expression())) {
-                    if (accept(TkTO)) {
+                    if (accept(Basic::TkTO)) {
                         if ((b = expression())) {
                             dim->appendDimension(a, b);
                         }
@@ -330,7 +330,7 @@ Basic::ParamList* Parser::paramList(void) {
     Basic::Expression *e = expression();
     if (e) {
         p->appendExpression(e);
-        while (accept(TkCOMMA)) {
+        while (accept(Basic::TkCOMMA)) {
             if ((e = expression())) {
                 p->appendExpression(e);
             }
@@ -350,12 +350,12 @@ Basic::ParamList* Parser::paramList(void) {
 Basic::PrintStatement* Parser::printStatementBody(void) {
     Basic::PrintStatement *s = new Basic::PrintStatement();
 
-    if (this->token == TkLITERAL or this->token == TkIDENTIFIER or this->token == TkLPAREN) {
+    if (this->token == Basic::TkLITERAL or this->token == Basic::TkIDENTIFIER or this->token == Basic::TkLPAREN) {
         Basic::Expression *e = NULL;
         if ((e = expression())) {
             s->appendExpression(e);
-            while (accept(TkCOMMA)) {
-                if (this->token == TkLITERAL or this->token == TkIDENTIFIER or this->token == TkLPAREN) {
+            while (accept(Basic::TkCOMMA)) {
+                if (this->token == Basic::TkLITERAL or this->token == Basic::TkIDENTIFIER or this->token == Basic::TkLPAREN) {
                     if ((e = expression())) {
                         s->appendExpression(e);
                     }
@@ -382,16 +382,16 @@ Basic::PrintStatement* Parser::printStatementBody(void) {
 
 // <input-statement-body> ::= <identifier> [ <array-subscript> ] [ "," <expression> ]
 Basic::InputStatement* Parser::inputStatementBody(void) {
-    if (expect(TkIDENTIFIER)) {
+    if (expect(Basic::TkIDENTIFIER)) {
         String identifier(this->accepted_token_value.getStringValue());
         Basic::ArraySubscript *subscript = NULL;
         Basic::Expression *prompt = NULL;
-        if (this->token == TkLPAREN) {
+        if (this->token == Basic::TkLPAREN) {
             if (not (subscript = arraySubscript())) {
                 return NULL;
             }
         }
-        if (accept(TkCOMMA)) {
+        if (accept(Basic::TkCOMMA)) {
             if (not (prompt = expression())) {
                 if (subscript)  delete subscript;
                 return NULL;
@@ -409,12 +409,12 @@ Basic::LetStatement* Parser::letStatementBody(void) {
     Basic::ArraySubscript *s = NULL;
     Basic::Expression *e = NULL;
 
-    if (expect(TkIDENTIFIER)) {
+    if (expect(Basic::TkIDENTIFIER)) {
         String identifier(this->accepted_token_value.getStringValue());
-        if (this->token == TkLPAREN and not (s = arraySubscript())) {
+        if (this->token == Basic::TkLPAREN and not (s = arraySubscript())) {
             return NULL;
         }
-        if (expect(TkEQUALS)) {
+        if (expect(Basic::TkEQUALS)) {
             if ((e = expression())) {
                 return new Basic::LetStatement(identifier, s, e);
             }
@@ -430,11 +430,11 @@ Basic::LetStatement* Parser::letStatementBody(void) {
 Basic::CallStatement* Parser::callStatementBody(void) {
     Basic::ParamList *p = NULL;
 
-    if (expect(TkIDENTIFIER)) {
+    if (expect(Basic::TkIDENTIFIER)) {
         String identifier(this->accepted_token_value.getStringValue());
-        if (expect(TkLPAREN)) {
+        if (expect(Basic::TkLPAREN)) {
             if((p = paramList())) {
-                if (expect(TkRPAREN)) {
+                if (expect(Basic::TkRPAREN)) {
                     return new Basic::CallStatement(identifier, p);     
                 }
             }
@@ -454,20 +454,20 @@ Basic::IfStatement* Parser::ifStatementBody(void) {
     
     if ((e = expression())) {
         s = new Basic::IfStatement();
-        if (expect(TkTHEN) and (b = block())) {
+        if (expect(Basic::TkTHEN) and (b = block())) {
             s->appendCondition(e, b);
             
-            while (accept(TkELSEIF)) {
+            while (accept(Basic::TkELSEIF)) {
                 if ((e = expression())) {
-                    if (expect(TkTHEN) and (b = block())) {
+                    if (expect(Basic::TkTHEN) and (b = block())) {
                         s->appendCondition(e, b);
                     }
                 }
             }
-            if (accept(TkELSE) and (b=block())) {
+            if (accept(Basic::TkELSE) and (b=block())) {
                 s->setElseBlock(b);
             }
-            if (expect(TkEND) and expect(TkIF)) {
+            if (expect(Basic::TkEND) and expect(Basic::TkIF)) {
                 return s;
             }
         }
@@ -487,40 +487,40 @@ Basic::DoStatement* Parser::doStatementBody(void) {
     Basic::Expression *c = NULL;
     Basic::Block *b = NULL;
     
-    if (accept(TkWHILE)) {
+    if (accept(Basic::TkWHILE)) {
         t = Basic::DoStatement::WHILE;
         w = Basic::DoStatement::PRECONDITION;
         if ((c = expression())) {
             if ((b = block())) {
-                if (expect(TkLOOP)) {
+                if (expect(Basic::TkLOOP)) {
                     return new Basic::DoStatement(t, w, c, b);
                 }
             }
         }
     }
-    else if (accept(TkUNTIL)) {
+    else if (accept(Basic::TkUNTIL)) {
         t = Basic::DoStatement::UNTIL;
         w = Basic::DoStatement::PRECONDITION;
         if ((c = expression())) {
             if ((b = block())) {
-                if (expect(TkLOOP)) {
+                if (expect(Basic::TkLOOP)) {
                     return new Basic::DoStatement(t, w, c, b);
                 }
             }
         }
     }
     else if ((b = block())) {
-        if (accept(TkDONE)) {
+        if (accept(Basic::TkDONE)) {
             t = Basic::DoStatement::ONCE;
             w = Basic::DoStatement::POSTCONDITION;
             return new Basic::DoStatement(t, w, NULL, b);
         }
-        else if (accept(TkLOOP)) {
+        else if (accept(Basic::TkLOOP)) {
             w = Basic::DoStatement::POSTCONDITION;
-            if (accept(TkWHILE) and ((c = expression()))) {
+            if (accept(Basic::TkWHILE) and ((c = expression()))) {
                 return new Basic::DoStatement(Basic::DoStatement::WHILE, w, c, b);
             }
-            else if (accept(TkUNTIL) and ((c = expression()))) {
+            else if (accept(Basic::TkUNTIL) and ((c = expression()))) {
                 return new Basic::DoStatement(Basic::DoStatement::UNTIL, w, c, b);
             }
             else {
@@ -528,7 +528,7 @@ Basic::DoStatement* Parser::doStatementBody(void) {
             }
         }
         else {
-            error(2, TkLOOP, TkDONE);
+            error(2, Basic::TkLOOP, Basic::TkDONE);
         }
     }
 
@@ -543,13 +543,13 @@ Basic::ForStatement* Parser::forStatementBody(void) {
     Basic::Expression *end = NULL;
     Basic::Expression *step = NULL;
     Basic::Block *body = NULL;
-    if (expect(TkIDENTIFIER)) {
+    if (expect(Basic::TkIDENTIFIER)) {
         String identifier(this->accepted_token_value.getStringValue());
-        if (expect(TkEQUALS)) {
+        if (expect(Basic::TkEQUALS)) {
             if ((start = expression())) {
-                if (expect(TkTO)) {
+                if (expect(Basic::TkTO)) {
                     if ((end = expression())) {
-                        if (accept(TkSTEP)) {
+                        if (accept(Basic::TkSTEP)) {
                             if (not (step = expression())) {
                                 delete end;
                                 delete start;
@@ -557,8 +557,8 @@ Basic::ForStatement* Parser::forStatementBody(void) {
                             }
                         }
                         if ((body = block())) {
-                            if (expect(TkNEXT)) {
-                                accept(TkIDENTIFIER);  // FIXME just ignoring it for now
+                            if (expect(Basic::TkNEXT)) {
+                                accept(Basic::TkIDENTIFIER);  // FIXME just ignoring it for now
                                 return new Basic::ForStatement(identifier, start, end, step, body);
                             }
                         }
@@ -578,14 +578,14 @@ Basic::ForStatement* Parser::forStatementBody(void) {
 // <dim-statement-body> ::= <identifier> [ <array-dimension> ] [ "," <identifier> [ <array-dimension> ] ]...
 Basic::DimStatement* Parser::dimStatementBody(void) {
     Basic::ArrayDimension *dim = NULL;
-    if (expect(TkIDENTIFIER)) {
+    if (expect(Basic::TkIDENTIFIER)) {
         String identifier(this->accepted_token_value.getStringValue());
         dim = arrayDimension();
         Basic::DimStatement *s = new Basic::DimStatement(identifier, dim);
-        while (accept(TkCOMMA)) {
-            if (expect(TkIDENTIFIER)) {
+        while (accept(Basic::TkCOMMA)) {
+            if (expect(Basic::TkIDENTIFIER)) {
                 String identifier(this->accepted_token_value.getStringValue());
-                if (this->token == TkLPAREN) {
+                if (this->token == Basic::TkLPAREN) {
                     if ((dim = arrayDimension())) {
                         s->appendDimensionable(identifier, dim);
                     }
@@ -614,16 +614,16 @@ Basic::DimStatement* Parser::dimStatementBody(void) {
 //                        | <identifier> [ "(" <param-list> ")" ]
 //                        | "(" <expression> ")"
 Basic::Expression* Parser::primaryExpression(void) {
-    if (accept(TkLITERAL)) {
+    if (accept(Basic::TkLITERAL)) {
         return new Basic::LiteralExpression(this->accepted_token_value);
     }
-    else if (accept(TkIDENTIFIER)) {
+    else if (accept(Basic::TkIDENTIFIER)) {
         String identifier(this->accepted_token_value.getStringValue());
-        if (accept(TkLPAREN)) {
+        if (accept(Basic::TkLPAREN)) {
             Basic::ParamList *p = NULL;
             if ((p = paramList())) {
                 Basic::ParamList *p = paramList();
-                if (expect(TkRPAREN)) {
+                if (expect(Basic::TkRPAREN)) {
                     return new Basic::IdentifierExpression(identifier, p);
                 }
                 else {
@@ -639,10 +639,10 @@ Basic::Expression* Parser::primaryExpression(void) {
             return new Basic::IdentifierExpression(identifier);
         }
     }
-    else if (accept(TkLPAREN)) {
+    else if (accept(Basic::TkLPAREN)) {
         Basic::Expression *e = NULL;
         if ((e = expression())) {
-            if (expect(TkRPAREN)) {
+            if (expect(Basic::TkRPAREN)) {
                 return e;
             }
             else {
@@ -655,7 +655,7 @@ Basic::Expression* Parser::primaryExpression(void) {
         }
     }
     else {
-        error(3, TkLITERAL, TkIDENTIFIER, TkLPAREN);
+        error(3, Basic::TkLITERAL, Basic::TkIDENTIFIER, Basic::TkLPAREN);
         return NULL;
     }
 }
@@ -664,14 +664,14 @@ Basic::Expression* Parser::primaryExpression(void) {
 // <unary-operator> ::= "not" | "-"
 Basic::Expression* Parser::unaryExpression(void) {
     Basic::Expression *e = NULL;
-    if (accept(TkNOT)) {
+    if (accept(Basic::TkNOT)) {
         if ((e = primaryExpression())) {
-            return new Basic::UnaryExpression(TkNOT, e);            
+            return new Basic::UnaryExpression(Basic::TkNOT, e);            
         }
     }
-    else if (accept(TkMINUS)) {
+    else if (accept(Basic::TkMINUS)) {
         if ((e = primaryExpression())) {
-            return new Basic::UnaryExpression(TkMINUS, e);            
+            return new Basic::UnaryExpression(Basic::TkMINUS, e);            
         }
     }
     else {
@@ -688,14 +688,14 @@ Basic::Expression* Parser::multiplicativeExpression(void) {
     Basic::Expression *term = NULL;
     
     if ((term = unaryExpression())) {
-        if (this->token == TkMULTIPLY or this->token == TkDIVIDE or this->token == TkMOD) {
+        if (this->token == Basic::TkMULTIPLY or this->token == Basic::TkDIVIDE or this->token == Basic::TkMOD) {
             Basic::MultiplicativeExpression *e = new Basic::MultiplicativeExpression();
             e->appendTerm(term);
             e->appendOperator(this->token);
-            while (accept(TkMULTIPLY) or accept(TkDIVIDE) or accept(TkMOD)) {
+            while (accept(Basic::TkMULTIPLY) or accept(Basic::TkDIVIDE) or accept(Basic::TkMOD)) {
                 if ((term = unaryExpression())) {
                     e->appendTerm(term);
-                    if (this->token == TkMULTIPLY or this->token == TkDIVIDE or this->token == TkMOD) {
+                    if (this->token == Basic::TkMULTIPLY or this->token == Basic::TkDIVIDE or this->token == Basic::TkMOD) {
                         e->appendOperator(this->token);
                     }                    
                 }
@@ -721,14 +721,14 @@ Basic::Expression* Parser::additiveExpression(void) {
     Basic::Expression *term = NULL;
     
     if ((term = multiplicativeExpression())) {
-        if (this->token == TkPLUS or this->token == TkMINUS) {
+        if (this->token == Basic::TkPLUS or this->token == Basic::TkMINUS) {
             Basic::AdditiveExpression *e = new Basic::AdditiveExpression();
             e->appendTerm(term);
             e->appendOperator(this->token);
-            while (accept(TkPLUS) or accept(TkMINUS)) {
+            while (accept(Basic::TkPLUS) or accept(Basic::TkMINUS)) {
                 if ((term = multiplicativeExpression())) {
                     e->appendTerm(multiplicativeExpression());
-                    if (this->token == TkPLUS or this->token == TkMINUS) {
+                    if (this->token == Basic::TkPLUS or this->token == Basic::TkMINUS) {
                         e->appendOperator(this->token);
                     }                    
                 }
@@ -755,8 +755,8 @@ Basic::Expression* Parser::comparitiveExpression(void) {
     Basic::Expression *second = NULL;
     
     if ((first = additiveExpression())) {
-        Token t = this->token;
-        if (accept(TkEQUALS) || accept(TkNOTEQUALS) || accept(TkLT) || accept(TkGT) || accept(TkLTEQUALS) || accept(TkGTEQUALS)) {
+        Basic::Token t = this->token;
+        if (accept(Basic::TkEQUALS) || accept(Basic::TkNOTEQUALS) || accept(Basic::TkLT) || accept(Basic::TkGT) || accept(Basic::TkLTEQUALS) || accept(Basic::TkGTEQUALS)) {
             if ((second = additiveExpression())) {
                 return new Basic::ComparitiveExpression(first, t, second);                
             }
@@ -779,10 +779,10 @@ Basic::Expression* Parser::andExpression(void) {
     Basic::Expression *term = NULL;
     
     if ((term = comparitiveExpression())) {
-        if (this->token == TkAND) {
+        if (this->token == Basic::TkAND) {
             Basic::AndExpression *e = new Basic::AndExpression();
             e->appendTerm(term);
-            while (accept(TkAND)) {
+            while (accept(Basic::TkAND)) {
                 if ((term = comparitiveExpression())) {
                     e->appendTerm(term);                    
                 }
@@ -807,10 +807,10 @@ Basic::Expression* Parser::orExpression(void) {
     Basic::Expression *term = NULL;
     
     if ((term = andExpression())) {
-        if (this->token == TkOR) {
+        if (this->token == Basic::TkOR) {
             Basic::OrExpression *e = new Basic::OrExpression();
             e->appendTerm(term);
-            while (accept(TkOR)) {
+            while (accept(Basic::TkOR)) {
                 if ((term = andExpression())) {
                     e->appendTerm(term);
                 }
@@ -837,16 +837,16 @@ Basic::Expression* Parser::expression(void) {
 
 // <type> ::= "integer" | "real" | "string"
 void Parser::type(void) {
-    if (accept(TkINTEGER)) {
+    if (accept(Basic::TkINTEGER)) {
         ;
     }
-    else if (accept(TkREAL)) {
+    else if (accept(Basic::TkREAL)) {
         ;
     }
-    else if (accept(TkSTRING)) {
+    else if (accept(Basic::TkSTRING)) {
         ;
     }
     else {
-        error(3, TkINTEGER, TkREAL, TkSTRING);
+        error(3, Basic::TkINTEGER, Basic::TkREAL, Basic::TkSTRING);
     }    
 }

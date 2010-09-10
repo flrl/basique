@@ -14,46 +14,46 @@
 
 #include "tokeniser.h"
 
-TokenMap Tokeniser::keywords = TokenMap();
+std::map<const String, Basic::Token> Basic::Tokeniser::keywords = std::map<const String, Basic::Token>();
 
-void Tokeniser::setupKeywords(void) {
+void Basic::Tokeniser::setupKeywords(void) {
     if (keywords.empty()) {
-        keywords["and"] = TkAND;
-        keywords["or"] = TkOR;
-        keywords["not"] = TkNOT;
-        keywords["print"] = TkPRINT;
-        keywords["input"] = TkINPUT;
-        keywords["let"] = TkLET;
-        keywords["mod"] = TkMOD;
-        keywords["if"] = TkIF;
-        keywords["then"] = TkTHEN;
-        keywords["elseif"] = TkELSEIF;
-        keywords["else"] = TkELSE;
-        keywords["end"] = TkEND;
-        keywords["do"] = TkDO;
-        keywords["loop"] = TkLOOP;
-        keywords["while"] = TkWHILE;
-        keywords["until"] = TkUNTIL;
-        keywords["done"] = TkDONE;
-        keywords["for"] = TkFOR;
-        keywords["to"] = TkTO;
-        keywords["step"] = TkSTEP;
-        keywords["next"] = TkNEXT;
-        keywords["function"] = TkFUNCTION;
-        keywords["as"] = TkAS;
-        keywords["return"] = TkRETURN;
-        keywords["sub"] = TkSUB;
-        keywords["call"] = TkCALL;
-        keywords["exit"] = TkEXIT;
-        keywords["dim"] = TkDIM;
-        keywords["integer"] = TkINTEGER;
-        keywords["real"] = TkREAL;
-        keywords["string"] = TkSTRING;
-        keywords["variant"] = TkVARIANT;
+        keywords["and"] = Basic::TkAND;
+        keywords["or"] = Basic::TkOR;
+        keywords["not"] = Basic::TkNOT;
+        keywords["print"] = Basic::TkPRINT;
+        keywords["input"] = Basic::TkINPUT;
+        keywords["let"] = Basic::TkLET;
+        keywords["mod"] = Basic::TkMOD;
+        keywords["if"] = Basic::TkIF;
+        keywords["then"] = Basic::TkTHEN;
+        keywords["elseif"] = Basic::TkELSEIF;
+        keywords["else"] = Basic::TkELSE;
+        keywords["end"] = Basic::TkEND;
+        keywords["do"] = Basic::TkDO;
+        keywords["loop"] = Basic::TkLOOP;
+        keywords["while"] = Basic::TkWHILE;
+        keywords["until"] = Basic::TkUNTIL;
+        keywords["done"] = Basic::TkDONE;
+        keywords["for"] = Basic::TkFOR;
+        keywords["to"] = Basic::TkTO;
+        keywords["step"] = Basic::TkSTEP;
+        keywords["next"] = Basic::TkNEXT;
+        keywords["function"] = Basic::TkFUNCTION;
+        keywords["as"] = Basic::TkAS;
+        keywords["return"] = Basic::TkRETURN;
+        keywords["sub"] = Basic::TkSUB;
+        keywords["call"] = Basic::TkCALL;
+        keywords["exit"] = Basic::TkEXIT;
+        keywords["dim"] = Basic::TkDIM;
+        keywords["integer"] = Basic::TkINTEGER;
+        keywords["real"] = Basic::TkREAL;
+        keywords["string"] = Basic::TkSTRING;
+        keywords["variant"] = Basic::TkVARIANT;
     }
 }
 
-const char* Tokeniser::tokenDescriptions[] = {
+const char* Basic::Tokeniser::tokenDescriptions[] = {
     "invalid token",
     "end of file", "end of line", ":", ",", ";",
     "identifier", "literal",
@@ -71,7 +71,7 @@ const char* Tokeniser::tokenDescriptions[] = {
     "dim", "integer", "real", "string", "variant",
 };
 
-Tokeniser::Tokeniser(const char * filename) {
+Basic::Tokeniser::Tokeniser(const char * filename) {
     this->source = fopen(filename, "r");
     this->token_line = this->cursor_line = 0;
     this->token_column = this->cursor_column = 0;
@@ -79,7 +79,7 @@ Tokeniser::Tokeniser(const char * filename) {
     setupKeywords();
 }
 
-Tokeniser::Tokeniser(int fd) {
+Basic::Tokeniser::Tokeniser(int fd) {
     this->source = fdopen(fd, "r");
     this->token_line = this->cursor_line = 0;
     this->token_column = this->cursor_column = 0;
@@ -87,51 +87,51 @@ Tokeniser::Tokeniser(int fd) {
     setupKeywords();
 }
 
-Token Tokeniser::getToken(void) {
-    Token token;
+Basic::Token Basic::Tokeniser::getToken(void) {
+    Basic::Token token;
     int ch;
     
     skipWhitespace();
     updateTokenPosition();
     switch ((ch = getChar())) {
-        case EOF:   token = TkEOF;          break;  // FIXME think about this
-        case '+':   token = TkPLUS;         break;
-        case '-':   token = TkMINUS;        break;
-        case '*':   token = TkMULTIPLY;     break;
-        case '/':   token = TkDIVIDE;       break;
-        case '(':   token = TkLPAREN;       break;
-        case ')':   token = TkRPAREN;       break;
-        case '[':   token = TkLBRACKET;     break;
-        case ']':   token = TkRBRACKET;     break;
-        case ':':   token = TkCOLON;        break;
+        case EOF:   token = Basic::TkEOF;          break;  // FIXME think about this
+        case '+':   token = Basic::TkPLUS;         break;
+        case '-':   token = Basic::TkMINUS;        break;
+        case '*':   token = Basic::TkMULTIPLY;     break;
+        case '/':   token = Basic::TkDIVIDE;       break;
+        case '(':   token = Basic::TkLPAREN;       break;
+        case ')':   token = Basic::TkRPAREN;       break;
+        case '[':   token = Basic::TkLBRACKET;     break;
+        case ']':   token = Basic::TkRBRACKET;     break;
+        case ':':   token = Basic::TkCOLON;        break;
         case '\n':  
-            token = TkEOL;
+            token = Basic::TkEOL;
             while (peekChar() == '\n')  {
                 getChar();  // consume \n+ as if it were \n   
             }
             break;
-        case '=':   token = TkEQUALS;       break;
+        case '=':   token = Basic::TkEQUALS;       break;
         case '>':
             if (peekChar() == '=') {
                 getChar();  // consume the '='
-                token = TkGTEQUALS;
+                token = Basic::TkGTEQUALS;
             }
             else {
-                token = TkGT;
+                token = Basic::TkGT;
             }
             break;
         case '<':
             switch (peekChar()) {
                 case '>':
                     getChar();  // consume the '>'
-                    token = TkNOTEQUALS;
+                    token = Basic::TkNOTEQUALS;
                     break;
                 case '=':
                     getChar();  // consume the '='
-                    token = TkLTEQUALS;
+                    token = Basic::TkLTEQUALS;
                     break;
                 default:
-                    token = TkLT;
+                    token = Basic::TkLT;
                     break;
             }
             break;
@@ -146,7 +146,7 @@ Token Tokeniser::getToken(void) {
                 token = readAlphanumeric(ch);
             }
             else {
-                token = TkINVALID;
+                token = Basic::TkINVALID;
                 fprintf(stderr, "Unrecognised token at line %i, column %i: \"%c...\"\n",
                         token_line, token_column, ch);
             }
@@ -160,7 +160,7 @@ Token Tokeniser::getToken(void) {
 // 'first' as a character (i.e. this is not an int value!).
 // Sets 'value' to the value found.
 // Hint: to start without supplying an initial digit, pass in a leading '0'.
-Token Tokeniser::readNumeric(char first) {
+Basic::Token Basic::Tokeniser::readNumeric(char first) {
     int ch = first, i;
     double d, div;
     
@@ -186,15 +186,15 @@ Token Tokeniser::readNumeric(char first) {
         // it's just an integer
         value.setIntValue(i);
     }
-    return TkLITERAL;
+    return Basic::TkLITERAL;
 }
 
 // Tries to parse an alphanumeric string.  The first character is provided in 'first'.
 // If the string is not a recognised keyword, sets 'value' to the string found and returns 
-// TkIDENTIFIER; otherwise returns an appropriate Token value for the keyword matched.
+// Basic::TkIDENTIFIER; otherwise returns an appropriate Token value for the keyword matched.
 // This function treats the underscore character as an alphanumeric character.
-Token Tokeniser::readAlphanumeric(char first) {
-    Token token;
+Basic::Token Basic::Tokeniser::readAlphanumeric(char first) {
+    Basic::Token token;
     int ch = first, i = 0, len = MAX_IDENTIFIER_LENGTH;
     char *buffer = new char[len];
     
@@ -219,7 +219,7 @@ Token Tokeniser::readAlphanumeric(char first) {
     else {
         // if not, assume it's an identifier
         // FIXME possibly look up a symbol table to identify valid identifiers? -- but when defining one, it won't be there yet
-        token = TkIDENTIFIER;
+        token = Basic::TkIDENTIFIER;
         value.setStringValue(buffer);
     }
     
@@ -229,9 +229,9 @@ Token Tokeniser::readAlphanumeric(char first) {
 
 // Tries to parse a quoted string constant.  The 'first' argument is there for consistency;
 // its value is assumed to be a double-quote character and is ignored.
-// On success, stores the string parsed in 'value' and returns TkSTRING.  On failure
-// returns TkINVALID;
-Token Tokeniser::readQuoted(char first) {
+// On success, stores the string parsed in 'value' and returns Basic::TkSTRING.  On failure
+// returns Basic::TkINVALID;
+Basic::Token Basic::Tokeniser::readQuoted(char first) {
     int ch = first, i = 0, len = 32;
     char *buffer = new char[len];
     bool found_closing_double_quote = false;
@@ -288,7 +288,7 @@ Token Tokeniser::readQuoted(char first) {
                 fprintf(stderr, "Unterminated string literal at line %i, column %i: \"%s\"\n",
                         token_line, token_column, buffer);
                 delete[] buffer;
-                return TkINVALID;
+                return Basic::TkINVALID;
             
             default:
                 buffer[i++] = ch;
@@ -297,10 +297,10 @@ Token Tokeniser::readQuoted(char first) {
     buffer[i] = '\0';
     value.setStringValue(buffer);
     delete[] buffer;
-    return TkLITERAL;
+    return Basic::TkLITERAL;
 }
 
-int Tokeniser::readHexByte(void) {
+int Basic::Tokeniser::readHexByte(void) {
     int val;
     char digits[3], *endptr;
     int i = 0, line = cursor_line, column = cursor_column;
@@ -318,7 +318,7 @@ int Tokeniser::readHexByte(void) {
     return (char) val;
 }
 
-int Tokeniser::readOctalByte(void) {
+int Basic::Tokeniser::readOctalByte(void) {
     int val;
     char digits[4], *endptr;
     int i = 0, line = cursor_line, column = cursor_column;
@@ -338,7 +338,7 @@ int Tokeniser::readOctalByte(void) {
     return (char) val;
 }
 
-void Tokeniser::skipWhitespace(void) {
+void Basic::Tokeniser::skipWhitespace(void) {
     int ch=0, saved=0;
     while ((ch = peekChar()) != EOF) {
         // look ahead to see what's next

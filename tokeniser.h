@@ -17,36 +17,36 @@
 
 #define MAX_IDENTIFIER_LENGTH (31)
 
-enum Token {
-    /* special stuff */
-    TkINVALID = 0,  Tk_MIN = 0,
-    TkEOF, TkEOL, TkCOLON, TkCOMMA, TkSEMICOLON,
-    TkIDENTIFIER, TkLITERAL, 
-    
-    /* symbols */
-    TkPLUS, TkMINUS, TkMULTIPLY, TkDIVIDE, 
-    TkLPAREN, TkRPAREN, TkLBRACKET, TkRBRACKET,
-    TkEQUALS, TkNOTEQUALS, TkLT, TkGT, TkLTEQUALS, TkGTEQUALS,
+namespace Basic {
+    class Tokeniser;
+    enum Token {
+        /* special stuff */
+        TkINVALID = 0,  Tk_MIN = 0,
+        TkEOF, TkEOL, TkCOLON, TkCOMMA, TkSEMICOLON,
+        TkIDENTIFIER, TkLITERAL, 
+        
+        /* symbols */
+        TkPLUS, TkMINUS, TkMULTIPLY, TkDIVIDE, 
+        TkLPAREN, TkRPAREN, TkLBRACKET, TkRBRACKET,
+        TkEQUALS, TkNOTEQUALS, TkLT, TkGT, TkLTEQUALS, TkGTEQUALS,
 
-    /* keywords */
-    TkAND, TkOR, TkNOT,
-    TkPRINT, TkINPUT,
-    TkLET,
-    TkMOD,
-    TkIF, TkTHEN, TkELSEIF, TkELSE, TkEND,
-    TkDO, TkLOOP, TkWHILE, TkUNTIL, TkDONE,
-    TkFOR, TkTO, TkSTEP, TkNEXT,
-    TkFUNCTION, TkAS, TkRETURN, TkSUB, TkCALL, TkEXIT,
-    TkDIM, TkINTEGER, TkREAL, TkSTRING, TkVARIANT,
-    
-    /* that's all, folks */
-    Tk_MAX,
-};
+        /* keywords */
+        TkAND, TkOR, TkNOT,
+        TkPRINT, TkINPUT,
+        TkLET,
+        TkMOD,
+        TkIF, TkTHEN, TkELSEIF, TkELSE, TkEND,
+        TkDO, TkLOOP, TkWHILE, TkUNTIL, TkDONE,
+        TkFOR, TkTO, TkSTEP, TkNEXT,
+        TkFUNCTION, TkAS, TkRETURN, TkSUB, TkCALL, TkEXIT,
+        TkDIM, TkINTEGER, TkREAL, TkSTRING, TkVARIANT,
+        
+        /* that's all, folks */
+        Tk_MAX,
+    };
+}
 
-//typedef std::map<const char*,Token,StrComparator> TokenMap;
-typedef std::map<const String, Token> TokenMap;
-
-class Tokeniser {
+class Basic::Tokeniser {
 public:
     Tokeniser(const char *);
     Tokeniser(int);
@@ -61,7 +61,7 @@ public:
     static const char *tokenDescriptions[Tk_MAX];
 
 private:
-    static TokenMap keywords;
+    static std::map<const String, Token> keywords;
     static void setupKeywords(void);
     
     FILE *source;
