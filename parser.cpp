@@ -488,8 +488,8 @@ Basic::DoStatement* Basic::Parser::doStatementBody(void) {
     Block *b = NULL;
     
     if (accept(TkWHILE)) {
-        t = DoStatement::WHILE;
-        w = DoStatement::PRECONDITION;
+        t = DoStatement::DcWHILE;
+        w = DoStatement::DcPRECONDITION;
         if ((c = expression())) {
             if ((b = block())) {
                 if (expect(TkLOOP)) {
@@ -499,8 +499,8 @@ Basic::DoStatement* Basic::Parser::doStatementBody(void) {
         }
     }
     else if (accept(TkUNTIL)) {
-        t = DoStatement::UNTIL;
-        w = DoStatement::PRECONDITION;
+        t = DoStatement::DcUNTIL;
+        w = DoStatement::DcPRECONDITION;
         if ((c = expression())) {
             if ((b = block())) {
                 if (expect(TkLOOP)) {
@@ -511,20 +511,20 @@ Basic::DoStatement* Basic::Parser::doStatementBody(void) {
     }
     else if ((b = block())) {
         if (accept(TkDONE)) {
-            t = DoStatement::ONCE;
-            w = DoStatement::POSTCONDITION;
+            t = DoStatement::DcONCE;
+            w = DoStatement::DcPOSTCONDITION;
             return new DoStatement(t, w, NULL, b);
         }
         else if (accept(TkLOOP)) {
-            w = DoStatement::POSTCONDITION;
+            w = DoStatement::DcPOSTCONDITION;
             if (accept(TkWHILE) and ((c = expression()))) {
-                return new DoStatement(DoStatement::WHILE, w, c, b);
+                return new DoStatement(DoStatement::DcWHILE, w, c, b);
             }
             else if (accept(TkUNTIL) and ((c = expression()))) {
-                return new DoStatement(DoStatement::UNTIL, w, c, b);
+                return new DoStatement(DoStatement::DcUNTIL, w, c, b);
             }
             else {
-                return new DoStatement(DoStatement::FOREVER, w, c, b);
+                return new DoStatement(DoStatement::DcFOREVER, w, c, b);
             }
         }
         else {

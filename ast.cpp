@@ -211,7 +211,7 @@ Basic::ArraySubscript::~ArraySubscript() {
 }
 
 Basic::ArrayDimension::~ArrayDimension() {
-    for (std::list<ArrayDimensionSpecification>::iterator d = dimensions.begin(); d != dimensions.end(); d++) {
+    for (std::list<ArrayDimension::Specification>::iterator d = dimensions.begin(); d != dimensions.end(); d++) {
         delete d->first;
         if (d->second)  delete d->second;
     }
