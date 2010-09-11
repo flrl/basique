@@ -33,7 +33,7 @@ Basic::Array::~Array() {
 bool Basic::Array::isValidIndex(const Index &index) const {
     if (index.size() != _dimensions.size())  return false;
 
-    for (int d = 0; d < _dimensions.size(); d++) {
+    for (size_t d = 0; d < _dimensions.size(); d++) {
         if (_dimensions[d].first > index[d])  return false;
         if (_dimensions[d].second < index[d])  return false;
     }
