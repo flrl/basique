@@ -14,49 +14,52 @@
 #include "tokeniser.h"
 #include "variant.h"
 
-class Parser {
+namespace Basic {
+    class Parser;
+}
+
+class Basic::Parser {
 public:
     Parser(void);
     
 private:
-    Basic::Token token;
-    Basic::Tokeniser tokeniser;
+    Token token;
+    Tokeniser tokeniser;
     
-    Basic::Variant accepted_token_value;
+    Variant accepted_token_value;
     int accepted_token_line;
     int accepted_token_column;
     
-    int accept(Basic::Token t);
-    int expect(Basic::Token t);
+    bool accept(Token t);
+    bool expect(Token t);
     void error(int, ...);
     
-    Basic::ASTNode* unit(void);
-    Basic::ArraySubscript* arraySubscript(void);
-    Basic::ArrayDimension* arrayDimension(void);
-    Basic::Statement* statement(void);
-    Basic::Block* block(void);
-    Basic::FunctionDefinition* functionDefinitionBody(void);
-    Basic::SubDefinition* subDefinitionBody(void);
-    Basic::AcceptedParamList* acceptedParamList(void);
-    Basic::ParamList* paramList(void);
-    Basic::PrintStatement* printStatementBody(void);
-    Basic::InputStatement* inputStatementBody(void);
-    Basic::LetStatement* letStatementBody(void);
-    Basic::CallStatement* callStatementBody(void);
-    Basic::IfStatement* ifStatementBody(void);
-    Basic::DoStatement* doStatementBody(void);
-    Basic::ForStatement* forStatementBody(void);
-    Basic::DimStatement* dimStatementBody(void);
+    ASTNode* unit(void);
+    ArraySubscript* arraySubscript(void);
+    ArrayDimension* arrayDimension(void);
+    Statement* statement(void);
+    Block* block(void);
+    FunctionDefinition* functionDefinitionBody(void);
+    SubDefinition* subDefinitionBody(void);
+    AcceptedParamList* acceptedParamList(void);
+    ParamList* paramList(void);
+    PrintStatement* printStatementBody(void);
+    InputStatement* inputStatementBody(void);
+    LetStatement* letStatementBody(void);
+    CallStatement* callStatementBody(void);
+    IfStatement* ifStatementBody(void);
+    DoStatement* doStatementBody(void);
+    ForStatement* forStatementBody(void);
+    DimStatement* dimStatementBody(void);
     
-    Basic::Expression* primaryExpression(void);
-    Basic::Expression* unaryExpression(void);
-    Basic::Expression* multiplicativeExpression(void);
-    Basic::Expression* additiveExpression(void);
-    Basic::Expression* comparitiveExpression(void);
-    Basic::Expression* andExpression(void);
-    Basic::Expression* orExpression(void);
-    Basic::Expression* expression(void);
-    void type(void);
+    Expression* primaryExpression(void);
+    Expression* unaryExpression(void);
+    Expression* multiplicativeExpression(void);
+    Expression* additiveExpression(void);
+    Expression* comparitiveExpression(void);
+    Expression* andExpression(void);
+    Expression* orExpression(void);
+    Expression* expression(void);
 };
 
 // <unit> ::= "function" <function-definition-body> <eol>
