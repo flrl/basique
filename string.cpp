@@ -91,7 +91,10 @@ String &String::operator+=(const String &other) {
 }
 
 String operator+(const String &left, const String &right) {
-    String result(left);
-    result += right;
+    char *tmp = new char[1 + left.length() + right.length()];
+    strcpy(tmp, left);
+    strcat(tmp, right);
+    String result(tmp);
+    delete[] tmp;
     return result;
 }
