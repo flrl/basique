@@ -28,6 +28,23 @@ public:
     void call(Basic::ParamList *);
 };
 
+class BF_right : public BuiltinFunction {
+public:
+    ~BF_right() { }
+    void call(Basic::ParamList *);
+};
+
+class BF_mid : public BuiltinFunction {
+public:
+    ~BF_mid() { }
+    void call(Basic::ParamList *);
+}
+
+class BF_len : public BuiltinFunction {
+public:
+    ~BF_len() { }
+    void call(Basic::ParamList *);
+};
 
 
 #endif
