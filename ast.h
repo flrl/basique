@@ -132,16 +132,16 @@ private:
     std::list<Expression *> expressions;
 };
 
-typedef std::pair<Basic::Expression*, Basic::Expression*> ArrayDimensionSpecification;
-
 class Basic::ArrayDimension : public ASTNode {
 public:
+    typedef std::pair<Expression*, Expression*> Specification;    
+    
     ArrayDimension(Expression *d1, Expression *d2) { dimensions.push_back(std::make_pair(d1, d2)); }
     ~ArrayDimension();
     virtual void execute();
     void appendDimension(Expression *d1, Expression *d2) { dimensions.push_back(std::make_pair(d1, d2)); }
 private:
-    std::list<ArrayDimensionSpecification> dimensions;
+    std::list<ArrayDimension::Specification> dimensions;
 };
 
 class Basic::Expression : public ASTNode {
@@ -300,8 +300,8 @@ private:
 
 class Basic::DoStatement : public Statement {
 public:
-    enum Type { WHILE, UNTIL, FOREVER, ONCE };
-    enum When { PRECONDITION, POSTCONDITION };
+    enum Type { DcWHILE, DcUNTIL, DcFOREVER, DcONCE };
+    enum When { DcPRECONDITION, DcPOSTCONDITION };
     
     DoStatement(Type t, When w, Expression *c, Block *b) 
         : condition_type(t), condition_when(w), condition(c), body(b) { }

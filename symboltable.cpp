@@ -18,14 +18,6 @@ const SymbolTable::Entry *SymbolTable::find(const String &identifier) const {
     return NULL;
 }
 
-//SymbolTable::Entry *SymbolTable::find(const String &identifier) {
-//    for (std::vector<Frame>::reverse_iterator frame = frames.rbegin(); frame != frames.rend(); frame++) {
-//        Frame::iterator result = frame->find(identifier);
-//        if (result != frame->end())  return &result->second;  // iterator of map derefs to pair<key_t, value_t>
-//    }
-//    return NULL;
-//}
-
 bool SymbolTable::defined(const String &identifier) const {
     for (std::vector<Frame>::const_reverse_iterator frame = frames.rbegin(); frame != frames.rend(); frame++) {
         if (frame->count(identifier) > 0)  return true;
