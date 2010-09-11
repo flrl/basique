@@ -38,7 +38,7 @@ class BF_mid : public BuiltinFunction {
 public:
     ~BF_mid() { }
     void call(Basic::ParamList *);
-}
+};
 
 class BF_len : public BuiltinFunction {
 public:
