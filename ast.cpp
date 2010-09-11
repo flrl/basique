@@ -35,7 +35,7 @@ void Basic::UnaryExpression::execute (void) {
                 this->value.setDoubleValue(0.0 - intermediate.getDoubleValue());
                 break;
             default:
-                fprintf(stderr, "warning: attempt to negate non-numeric value at line %i, column %i\n", this-line, this->column);
+                fprintf(stderr, "warning: attempt to negate non-numeric value at line %i, column %i\n", this->line, this->column);
                 this->value = intermediate;
         }
     }

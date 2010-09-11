@@ -531,6 +531,9 @@ Basic::DoStatement* Basic::Parser::doStatementBody(void) {
             error(2, TkLOOP, TkDONE);
         }
     }
+    else {
+        error(2, TkWHILE, TkUNTIL);  // FIXME error should say "expected while, until or block"
+    }
 
     if (c)  delete c;
     if (b)  delete b;
