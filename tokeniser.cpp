@@ -18,38 +18,38 @@ std::map<const String, Basic::Token> Basic::Tokeniser::keywords = std::map<const
 
 void Basic::Tokeniser::setupKeywords(void) {
     if (keywords.empty()) {
-        keywords["and"] = Basic::TkAND;
-        keywords["or"] = Basic::TkOR;
-        keywords["not"] = Basic::TkNOT;
-        keywords["print"] = Basic::TkPRINT;
-        keywords["input"] = Basic::TkINPUT;
-        keywords["let"] = Basic::TkLET;
-        keywords["mod"] = Basic::TkMOD;
-        keywords["if"] = Basic::TkIF;
-        keywords["then"] = Basic::TkTHEN;
-        keywords["elseif"] = Basic::TkELSEIF;
-        keywords["else"] = Basic::TkELSE;
-        keywords["end"] = Basic::TkEND;
-        keywords["do"] = Basic::TkDO;
-        keywords["loop"] = Basic::TkLOOP;
-        keywords["while"] = Basic::TkWHILE;
-        keywords["until"] = Basic::TkUNTIL;
-        keywords["done"] = Basic::TkDONE;
-        keywords["for"] = Basic::TkFOR;
-        keywords["to"] = Basic::TkTO;
-        keywords["step"] = Basic::TkSTEP;
-        keywords["next"] = Basic::TkNEXT;
-        keywords["function"] = Basic::TkFUNCTION;
-        keywords["as"] = Basic::TkAS;
-        keywords["return"] = Basic::TkRETURN;
-        keywords["sub"] = Basic::TkSUB;
-        keywords["call"] = Basic::TkCALL;
-        keywords["exit"] = Basic::TkEXIT;
-        keywords["dim"] = Basic::TkDIM;
-        keywords["integer"] = Basic::TkINTEGER;
-        keywords["real"] = Basic::TkREAL;
-        keywords["string"] = Basic::TkSTRING;
-        keywords["variant"] = Basic::TkVARIANT;
+        keywords["and"] = TkAND;
+        keywords["or"] = TkOR;
+        keywords["not"] = TkNOT;
+        keywords["print"] = TkPRINT;
+        keywords["input"] = TkINPUT;
+        keywords["let"] = TkLET;
+        keywords["mod"] = TkMOD;
+        keywords["if"] = TkIF;
+        keywords["then"] = TkTHEN;
+        keywords["elseif"] = TkELSEIF;
+        keywords["else"] = TkELSE;
+        keywords["end"] = TkEND;
+        keywords["do"] = TkDO;
+        keywords["loop"] = TkLOOP;
+        keywords["while"] = TkWHILE;
+        keywords["until"] = TkUNTIL;
+        keywords["done"] = TkDONE;
+        keywords["for"] = TkFOR;
+        keywords["to"] = TkTO;
+        keywords["step"] = TkSTEP;
+        keywords["next"] = TkNEXT;
+        keywords["function"] = TkFUNCTION;
+        keywords["as"] = TkAS;
+        keywords["return"] = TkRETURN;
+        keywords["sub"] = TkSUB;
+        keywords["call"] = TkCALL;
+        keywords["exit"] = TkEXIT;
+        keywords["dim"] = TkDIM;
+        keywords["integer"] = TkINTEGER;
+        keywords["real"] = TkREAL;
+        keywords["string"] = TkSTRING;
+        keywords["variant"] = TkVARIANT;
     }
 }
 
@@ -75,7 +75,7 @@ Basic::Tokeniser::Tokeniser(const char * filename) {
     this->source = fopen(filename, "r");
     this->token_line = this->cursor_line = 0;
     this->token_column = this->cursor_column = 0;
-    this->value = Basic::Variant();
+    this->value = Variant();
     setupKeywords();
 }
 
@@ -83,55 +83,55 @@ Basic::Tokeniser::Tokeniser(int fd) {
     this->source = fdopen(fd, "r");
     this->token_line = this->cursor_line = 0;
     this->token_column = this->cursor_column = 0;
-    this->value = Basic::Variant();
+    this->value = Variant();
     setupKeywords();
 }
 
 Basic::Token Basic::Tokeniser::getToken(void) {
-    Basic::Token token;
+    Token token;
     int ch;
     
     skipWhitespace();
     updateTokenPosition();
     switch ((ch = getChar())) {
-        case EOF:   token = Basic::TkEOF;          break;  // FIXME think about this
-        case '+':   token = Basic::TkPLUS;         break;
-        case '-':   token = Basic::TkMINUS;        break;
-        case '*':   token = Basic::TkMULTIPLY;     break;
-        case '/':   token = Basic::TkDIVIDE;       break;
-        case '(':   token = Basic::TkLPAREN;       break;
-        case ')':   token = Basic::TkRPAREN;       break;
-        case '[':   token = Basic::TkLBRACKET;     break;
-        case ']':   token = Basic::TkRBRACKET;     break;
-        case ':':   token = Basic::TkCOLON;        break;
+        case EOF:   token = TkEOF;          break;  // FIXME think about this
+        case '+':   token = TkPLUS;         break;
+        case '-':   token = TkMINUS;        break;
+        case '*':   token = TkMULTIPLY;     break;
+        case '/':   token = TkDIVIDE;       break;
+        case '(':   token = TkLPAREN;       break;
+        case ')':   token = TkRPAREN;       break;
+        case '[':   token = TkLBRACKET;     break;
+        case ']':   token = TkRBRACKET;     break;
+        case ':':   token = TkCOLON;        break;
         case '\n':  
-            token = Basic::TkEOL;
+            token = TkEOL;
             while (peekChar() == '\n')  {
                 getChar();  // consume \n+ as if it were \n   
             }
             break;
-        case '=':   token = Basic::TkEQUALS;       break;
+        case '=':   token = TkEQUALS;       break;
         case '>':
             if (peekChar() == '=') {
                 getChar();  // consume the '='
-                token = Basic::TkGTEQUALS;
+                token = TkGTEQUALS;
             }
             else {
-                token = Basic::TkGT;
+                token = TkGT;
             }
             break;
         case '<':
             switch (peekChar()) {
                 case '>':
                     getChar();  // consume the '>'
-                    token = Basic::TkNOTEQUALS;
+                    token = TkNOTEQUALS;
                     break;
                 case '=':
                     getChar();  // consume the '='
-                    token = Basic::TkLTEQUALS;
+                    token = TkLTEQUALS;
                     break;
                 default:
-                    token = Basic::TkLT;
+                    token = TkLT;
                     break;
             }
             break;
@@ -146,7 +146,7 @@ Basic::Token Basic::Tokeniser::getToken(void) {
                 token = readAlphanumeric(ch);
             }
             else {
-                token = Basic::TkINVALID;
+                token = TkINVALID;
                 fprintf(stderr, "Unrecognised token at line %i, column %i: \"%c...\"\n",
                         token_line, token_column, ch);
             }
@@ -186,15 +186,15 @@ Basic::Token Basic::Tokeniser::readNumeric(char first) {
         // it's just an integer
         value.setIntValue(i);
     }
-    return Basic::TkLITERAL;
+    return TkLITERAL;
 }
 
 // Tries to parse an alphanumeric string.  The first character is provided in 'first'.
 // If the string is not a recognised keyword, sets 'value' to the string found and returns 
-// Basic::TkIDENTIFIER; otherwise returns an appropriate Token value for the keyword matched.
+// TkIDENTIFIER; otherwise returns an appropriate Token value for the keyword matched.
 // This function treats the underscore character as an alphanumeric character.
 Basic::Token Basic::Tokeniser::readAlphanumeric(char first) {
-    Basic::Token token;
+    Token token;
     int ch = first, i = 0, len = MAX_IDENTIFIER_LENGTH;
     char *buffer = new char[len];
     
@@ -219,7 +219,7 @@ Basic::Token Basic::Tokeniser::readAlphanumeric(char first) {
     else {
         // if not, assume it's an identifier
         // FIXME possibly look up a symbol table to identify valid identifiers? -- but when defining one, it won't be there yet
-        token = Basic::TkIDENTIFIER;
+        token = TkIDENTIFIER;
         value.setStringValue(buffer);
     }
     
@@ -229,8 +229,8 @@ Basic::Token Basic::Tokeniser::readAlphanumeric(char first) {
 
 // Tries to parse a quoted string constant.  The 'first' argument is there for consistency;
 // its value is assumed to be a double-quote character and is ignored.
-// On success, stores the string parsed in 'value' and returns Basic::TkSTRING.  On failure
-// returns Basic::TkINVALID;
+// On success, stores the string parsed in 'value' and returns TkSTRING.  On failure
+// returns TkINVALID;
 Basic::Token Basic::Tokeniser::readQuoted(char first) {
     int ch = first, i = 0, len = 32;
     char *buffer = new char[len];
@@ -288,7 +288,7 @@ Basic::Token Basic::Tokeniser::readQuoted(char first) {
                 fprintf(stderr, "Unterminated string literal at line %i, column %i: \"%s\"\n",
                         token_line, token_column, buffer);
                 delete[] buffer;
-                return Basic::TkINVALID;
+                return TkINVALID;
             
             default:
                 buffer[i++] = ch;
@@ -297,7 +297,7 @@ Basic::Token Basic::Tokeniser::readQuoted(char first) {
     buffer[i] = '\0';
     value.setStringValue(buffer);
     delete[] buffer;
-    return Basic::TkLITERAL;
+    return TkLITERAL;
 }
 
 int Basic::Tokeniser::readHexByte(void) {
