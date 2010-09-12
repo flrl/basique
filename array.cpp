@@ -13,17 +13,17 @@
 
 Basic::Array::Array(const std::vector<DimensionSpecification> &dimspecs) {
     size_t total_size = 1;
-    _dimensions.reserve(dimspecs.size());
+    m_dimensions.reserve(dimspecs.size());
     if (dimspecs.size() == 0)  throw BadDimensionSpecification();
     for (std::vector<DimensionSpecification>::const_iterator ds = dimspecs.begin(); ds != dimspecs.end(); ds++) {
         if (ds->first > ds->second)  throw BadDimensionSpecification();
         size_t size = (1 + ds->second - ds->first);
-        _sizes.push_back(size);
+        m_sizes.push_back(size);
         total_size *= size;
-        _dimensions.push_back(std::make_pair(ds->first, ds->second));
+        m_dimensions.push_back(std::make_pair(ds->first, ds->second));
     }
     assert(total_size > 0);
-    _data.resize(total_size);
+    m_data.resize(total_size);
 }
 
 Basic::Array::~Array() {
@@ -31,11 +31,11 @@ Basic::Array::~Array() {
 }
 
 bool Basic::Array::isValidIndex(const Index &index) const {
-    if (index.size() != _dimensions.size())  return false;
+    if (index.size() != m_dimensions.size())  return false;
 
-    for (size_t d = 0; d < _dimensions.size(); d++) {
-        if (_dimensions[d].first > index[d])  return false;
-        if (_dimensions[d].second < index[d])  return false;
+    for (size_t d = 0; d < m_dimensions.size(); d++) {
+        if (m_dimensions[d].first > index[d])  return false;
+        if (m_dimensions[d].second < index[d])  return false;
     }
     
     return true;
@@ -51,16 +51,16 @@ bool Basic::Array::isValidIndex(const Index &index) const {
 //                          k * sizeof(T)
 
 const Basic::Variant& Basic::Array::itemAt(const Index &index) const {
-    if (index.size() != _dimensions.size())  throw IndexOutOfBounds();
+    if (index.size() != m_dimensions.size())  throw IndexOutOfBounds();
     size_t actual_index = 0;
     size_t size_of_last_dimension = 1;
     for (int d = index.size() - 1; d >= 0; d--) {
-        if (_dimensions[d].first > index[d])  throw IndexOutOfBounds();
-        if (_dimensions[d].second < index[d])  throw IndexOutOfBounds();
-        actual_index += (_dimensions[d].first + index[d]) * size_of_last_dimension;
-        size_of_last_dimension *= _sizes[d];
+        if (m_dimensions[d].first > index[d])  throw IndexOutOfBounds();
+        if (m_dimensions[d].second < index[d])  throw IndexOutOfBounds();
+        actual_index += (m_dimensions[d].first + index[d]) * size_of_last_dimension;
+        size_of_last_dimension *= m_sizes[d];
     }
     assert(actual_index >= 0);
-    assert(actual_index < _data.size());
-    return _data[actual_index];    
+    assert(actual_index < m_data.size());
+    return m_data[actual_index];    
 }

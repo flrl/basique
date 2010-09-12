@@ -39,9 +39,9 @@ private:
     Array();
     Array &operator=(const Array &);
     
-    std::vector<DimensionSpecification> _dimensions;
-    std::vector<size_t> _sizes;
-    std::vector<Variant> _data;
+    std::vector<DimensionSpecification> m_dimensions;
+    std::vector<size_t> m_sizes;
+    std::vector<Variant> m_data;
 };
 
 #endif
