@@ -13,104 +13,83 @@
 
 #include "variant.h"
 
-Basic::Variant::Variant(void) : string_value("") {
-    this->bool_value = 0;
-    this->int_value = 0;
-    this->double_value = 0.0;
-    this->type = Basic::Variant::is_undef;
-}
-
-Basic::Variant::Variant(const Variant &other) {
-    switch(other.type) {
-        case is_bool:
-            this->setBoolValue(other.bool_value);
-            break;
-        case is_int:
-            this->setIntValue(other.int_value);
-            break;
-        case is_double:
-            this->setDoubleValue(other.double_value);
-            break;
-        case is_string:
-            this->setStringValue(other.string_value);
-            break;
-        case is_undef:
-        default:
-            this->type = other.type;
-            break;
-    }
+Basic::Variant::Variant(const Variant &v) : m_bool_value(v.m_bool_value), 
+                                            m_int_value(v.m_int_value), 
+                                            m_double_value(v.m_double_value), 
+                                            m_string_value (v.m_string_value), 
+                                            m_type (v.m_type) 
+{
+    ;
 }
 
 bool Basic::Variant::getBoolValue(void) const {
-    switch (this->type) {
-        case is_bool:
-            return bool_value;
-        case is_int:
-            return int_value != 0;
-        case is_double:
-            return double_value != 0.0;
-        case is_string:
-            return string_value.length() > 0 && strcmp(string_value, "0") != 0;
-        case is_undef:
+    switch (m_type) {
+        case VaBOOL:
+            return m_bool_value;
+        case VaINT:
+            return m_int_value != 0;
+        case VaDOUBLE:
+            return m_double_value != 0.0;
+        case VaSTRING:
+            return m_string_value.length() > 0 && strcmp(m_string_value, "0") != 0;
+        case VaUNDEF:
         default:
             return false;
     }
 }
 
 int Basic::Variant::getIntValue(void) const {
-    switch (this->type) {
-        case is_bool:
-            return bool_value ? 1 : 0;
-        case is_int:
-            return int_value;
-        case is_double:
-            return static_cast<int>(double_value);
-        case is_string:
-            return strtol(string_value, NULL, 10);
-        case is_undef:
+    switch (m_type) {
+        case VaBOOL:
+            return m_bool_value ? 1 : 0;
+        case VaINT:
+            return m_int_value;
+        case VaDOUBLE:
+            return static_cast<int>(m_double_value);
+        case VaSTRING:
+            return strtol(m_string_value, NULL, 10);
+        case VaUNDEF:
         default:
             return 0;
     }
 }
 
 double Basic::Variant::getDoubleValue(void) const {
-    switch (this->type) {
-        case is_bool:
-            return this->bool_value ? 1.0 : 0.0 ;
-        case is_int:
-            return 1.0 * this->int_value;
-        case is_double:
-            return this->double_value;
-        case is_string:
-            return strtod(this->string_value, NULL);
-        case is_undef:
+    switch (m_type) {
+        case VaBOOL:
+            return m_bool_value ? 1.0 : 0.0 ;
+        case VaINT:
+            return 1.0 * m_int_value;
+        case VaDOUBLE:
+            return m_double_value;
+        case VaSTRING:
+            return strtod(m_string_value, NULL);
+        case VaUNDEF:
         default:
             return 0.0; /* FIXME */
 
     }
 }
 
-/* uses dynamically allocated memory, but manages it itself. 
- memory allocated at last call is freed next time. */
 String Basic::Variant::getStringValue(void) const {
     char *buffer = NULL;
     
-    switch (this->type) {
-        case is_bool:
+    switch (m_type) {
+        case VaBOOL:
             buffer = new char[6];
-            strcpy(buffer, this->bool_value ? "true" : "false");
+            strcpy(buffer, m_bool_value ? "true" : "false");
             break;
-        case is_int:
+        case VaINT:
             buffer = new char[16]; //?
-            sprintf(buffer, "%d", this->int_value);
+            sprintf(buffer, "%d", m_int_value);
             break;
-        case is_double:
+        case VaDOUBLE:
             buffer = new char[32]; //?
-            sprintf(buffer, "%f", this->double_value);
+            sprintf(buffer, "%f", m_double_value);
             break;
-        case is_string:
-            return this->string_value;
-        case is_undef:
+        case VaSTRING:
+            return m_string_value;
+        case VaUNDEF:
             buffer = new char[1];
             buffer[0] = '\0';
             break;
@@ -122,54 +101,54 @@ String Basic::Variant::getStringValue(void) const {
 }
 
 void Basic::Variant::setBoolValue(bool b) {
-    this->bool_value = b;
-    this->int_value = 0;
-    this->double_value = 0.0;
-    this->string_value = "";
-    this->type = is_bool;
+    m_bool_value = b;
+    m_int_value = 0;
+    m_double_value = 0.0;
+    m_string_value = "";
+    m_type = VaBOOL;
 }
 
 void Basic::Variant::setIntValue(int i) {
-    this->bool_value = false;
-    this->int_value = i;
-    this->double_value = 0.0;
-    this->string_value = "";
-    this->type = is_int;    
+    m_bool_value = false;
+    m_int_value = i;
+    m_double_value = 0.0;
+    m_string_value = "";
+    m_type = VaINT;    
 }
 
 void Basic::Variant::setDoubleValue(double d) {
-    this->bool_value = false;
-    this->int_value = 0;
-    this->double_value = d;
-    this->string_value = "";
-    this->type = is_double;
+    m_bool_value = false;
+    m_int_value = 0;
+    m_double_value = d;
+    m_string_value = "";
+    m_type = VaDOUBLE;
 }
 
 void Basic::Variant::setStringValue(const String &s) {
-    this->bool_value = false;
-    this->int_value = 0;
-    this->double_value = 0.0;
-    this->string_value = s;
-    this->type = is_string;   
+    m_bool_value = false;
+    m_int_value = 0;
+    m_double_value = 0.0;
+    m_string_value = s;
+    m_type = VaSTRING;   
 }
 
 void Basic::Variant::setDefaultValueForType(Basic::Variant::Type type){
     switch (type) {
-        case is_bool:
+        case VaBOOL:
             setBoolValue(false);
             break;
-        case is_int:
+        case VaINT:
             setIntValue(0);
             break;
-        case is_double:
+        case VaDOUBLE:
             setDoubleValue(0.0);
             break;
-        case is_string:
+        case VaSTRING:
             setStringValue("");
             break;
-        case is_undef:
+        case VaUNDEF:
         default:
-            type = is_undef;
+            m_type = VaUNDEF;
     }
 }
 
