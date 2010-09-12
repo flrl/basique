@@ -42,7 +42,7 @@ public:
     void setDoubleValue(double);
     void setStringValue(const String &);
     void setDefaultValueForType(Type);
-    void setUndefined(void);
+    void setUndefined(void) { setDefaultValueForType(VaUNDEF); }
     
     bool isDefined(void) const  { return m_type != VaUNDEF; }
     bool isUndef(void) const    { return m_type == VaUNDEF; }
@@ -50,6 +50,12 @@ public:
     bool isInt(void) const      { return m_type == VaINT; }
     bool isDouble(void) const   { return m_type == VaDOUBLE; }
     bool isString(void) const   { return m_type == VaSTRING; }
+    
+//    Variant &operator=(const Variant &);
+    Variant &operator+=(const Variant &);
+    Variant &operator-=(const Variant &);
+    Variant &operator*=(const Variant &);
+    Variant &operator/=(const Variant &);
     
 private:
     bool    m_bool_value;
@@ -59,11 +65,29 @@ private:
     Type    m_type;
 };
 
-Basic::Variant operator+(const Basic::Variant &, const Basic::Variant &);
-Basic::Variant operator-(const Basic::Variant &, const Basic::Variant &);
+inline Basic::Variant operator+(const Basic::Variant &left, const Basic::Variant &right) {
+    Basic::Variant result(left);
+    result += right;
+    return result;
+}
 
+inline Basic::Variant operator-(const Basic::Variant &left, const Basic::Variant &right) {
+    Basic::Variant result(left);
+    result -= right;
+    return result;
+}
 
-// FIXME operator overloads
+inline Basic::Variant operator*(const Basic::Variant &left, const Basic::Variant &right) {
+    Basic::Variant result(left);
+    result *= right;
+    return result;
+}
+
+inline Basic::Variant operator/(const Basic::Variant &left, const Basic::Variant &right) {
+    Basic::Variant result(left);
+    result /= right;
+    return result;
+}
 
 /*
  types are bool, int, double, string, undef
