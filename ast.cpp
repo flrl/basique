@@ -10,15 +10,15 @@
 #include "ast.h"
 #include "symboltable.h"
 
-void Basic::LiteralExpression::execute (void) {
+void Basic::LiteralExpression::execute (void) const {
     ; // m_result is set at initialisation
 }
 
-void Basic::IdentifierExpression::execute (void) {
+void Basic::IdentifierExpression::execute (void) const {
     
 }
 
-void Basic::UnaryExpression::execute (void) {
+void Basic::UnaryExpression::execute (void) const {
     m_term->execute();
     Variant intermediate = m_term->getResult();
     if (m_op == TkNOT) {
@@ -42,7 +42,7 @@ void Basic::UnaryExpression::execute (void) {
     }
 }
 
-void Basic::MultiplicativeExpression::execute (void) {
+void Basic::MultiplicativeExpression::execute (void) const {
     m_first_term->execute();
     Variant intermediate = m_first_term->getResult();
     
@@ -61,7 +61,7 @@ void Basic::MultiplicativeExpression::execute (void) {
     m_result = intermediate;
 }
 
-void Basic::AdditiveExpression::execute (void) {
+void Basic::AdditiveExpression::execute (void) const {
     m_first_term->execute();
     Variant intermediate = m_first_term->getResult();
     
@@ -80,7 +80,7 @@ void Basic::AdditiveExpression::execute (void) {
     m_result = intermediate;
 }
 
-void Basic::ComparitiveExpression::execute (void) {
+void Basic::ComparitiveExpression::execute (void) const {
     bool intermediate = false;
     switch (m_cmp) {
         case TkEQUALS:      intermediate = (m_first == m_second); break;
@@ -95,7 +95,7 @@ void Basic::ComparitiveExpression::execute (void) {
     m_result.setBoolValue(intermediate);
 }
 
-void Basic::AndExpression::execute (void) {
+void Basic::AndExpression::execute (void) const {
     bool intermediate = true;
     for (std::list<Basic::Expression*>::const_iterator e = m_terms.begin(); e != m_terms.end(); e++) {
         (*e)->execute();
@@ -104,7 +104,7 @@ void Basic::AndExpression::execute (void) {
     m_result.setBoolValue(intermediate);
 }
 
-void Basic::OrExpression::execute (void) {
+void Basic::OrExpression::execute (void) const {
     bool intermediate = false;
     for (std::list<Basic::Expression*>::const_iterator e = m_terms.begin(); e != m_terms.end(); e++) {
         (*e)->execute();
@@ -113,13 +113,13 @@ void Basic::OrExpression::execute (void) {
     m_result.setBoolValue(intermediate);
 }
 
-void Basic::Block::execute (void) {
+void Basic::Block::execute (void) const {
     for (std::list<Basic::Statement*>::const_iterator s = m_statements.begin(); s != m_statements.end(); s++) {
         (*s)->execute();
     }
 }
 
-void Basic::PrintStatement::execute (void) {
+void Basic::PrintStatement::execute (void) const {
     for (std::list<Basic::Expression*>::const_iterator e = m_expressions.begin(); e != m_expressions.end(); e++) {
         (*e)->execute();
         fputs((*e)->getResult().getStringValue(), stdout);
@@ -127,19 +127,19 @@ void Basic::PrintStatement::execute (void) {
     if (m_append_eol)  putchar('\n');
 }
 
-void Basic::InputStatement::execute (void) {
+void Basic::InputStatement::execute (void) const {
     
 }
 
-void Basic::LetStatement::execute (void) {
+void Basic::LetStatement::execute (void) const {
     
 }
 
-void Basic::CallStatement::execute (void) {
+void Basic::CallStatement::execute (void) const {
     
 }
 
-void Basic::IfStatement::execute (void) {
+void Basic::IfStatement::execute (void) const {
     for (std::list<ConditionalBlock>::const_iterator cb = m_conditional_blocks.begin(); cb != m_conditional_blocks.end(); cb++) {
         cb->condition->execute();
         if (cb->condition->getResult().getBoolValue() == true) {
@@ -151,7 +151,7 @@ void Basic::IfStatement::execute (void) {
     m_else_block->execute();
 }
 
-void Basic::DoStatement::execute (void) {
+void Basic::DoStatement::execute (void) const {
     bool condition_reached = false;
     while (condition_reached == false) {
         if (m_condition_when == DcPRECONDITION) {
@@ -201,35 +201,35 @@ void Basic::DoStatement::execute (void) {
     }
 }
 
-void Basic::ForStatement::execute (void) {
+void Basic::ForStatement::execute (void) const {
     
 }
 
-void Basic::DimStatement::execute (void) {
+void Basic::DimStatement::execute (void) const {
     
 }
 
-void Basic::AcceptedParamList::execute (void) {
+void Basic::AcceptedParamList::execute (void) const {
     
 }
 
-void Basic::ParamList::execute (void) {
+void Basic::ParamList::execute (void) const {
     ;  // does nothing
 }
 
-void Basic::ArraySubscript::execute (void) {
+void Basic::ArraySubscript::execute (void) const {
     
 }
 
-void Basic::ArrayDimension::execute (void) {
+void Basic::ArrayDimension::execute (void) const {
     
 }
 
-void Basic::FunctionDefinition::execute (void) {
+void Basic::FunctionDefinition::execute (void) const {
     
 }
 
-void Basic::SubDefinition::execute (void) {
+void Basic::SubDefinition::execute (void) const {
     
 }
 

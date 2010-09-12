@@ -29,12 +29,11 @@ namespace Basic {
 class Basic::SymbolTable {
 public:
     enum EntryType {
-        UNDEFINED,
         BUILTIN_FUNCTION,
         FUNCTION,
         SUBROUTINE,
         VARIANT,
-        VARIANT_ARRAY,
+        ARRAY,
         // etc        
     };
     struct Entry {

@@ -9,6 +9,8 @@
 
 #include "symboltable.h"
 
+// FIXME need a destructor that clears out all the frames and the stuff in them
+
 void Basic::SymbolTable::startScope(void) {
     m_frames.push_back(Frame());
 }
@@ -17,14 +19,13 @@ void Basic::SymbolTable::endScope(void) {
     Frame &frame = m_frames.back();
     for (Frame::iterator symbol = frame.begin(); symbol != frame.end(); symbol++) {
         Entry &entry = symbol->second;
-        switch (entry->type) {
+        switch (entry.type) {
                 // FIXME what type of cleanup does each of these require?
-            case UNDEFINED:         break;
             case BUILTIN_FUNCTION:  break;
             case FUNCTION:          break;
             case SUBROUTINE:        break;
-            case VARIANT:           break;
-            case VARIANT_ARRAY:     break;
+            case VARIANT:           delete static_cast<Variant *>(entry.binding);   break;
+            case ARRAY:             delete static_cast<Array *>(entry.binding);     break;
             default:
                 fprintf(stderr, "warning: unrecognised symbol table entry type in SymbolTable::endScope()\n");
         }
@@ -71,5 +72,5 @@ void Basic::SymbolTable::defineVariant(const String &identifier, Variant *bindin
 
 void Basic::SymbolTable::defineArray(const String &identifier, Array *binding) {
     Frame &frame = m_frames.back();
-    frame.insert(std::make_pair(identifier, Entry(VARIANT_ARRAY, binding)));
+    frame.insert(std::make_pair(identifier, Entry(ARRAY, binding)));
 }
