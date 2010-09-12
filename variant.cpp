@@ -152,65 +152,109 @@ void Basic::Variant::setDefaultValueForType(Basic::Variant::Type type){
     }
 }
 
-Basic::Variant operator+(const Basic::Variant &left, const Basic::Variant &right) {
-    Basic::Variant result;
-    
-    if (right.isUndef()) {
-        fprintf(stderr, "warning: undefined value in addition at line ..., column ...\n");        
+Basic::Variant &Basic::Variant::operator+=(const Basic::Variant &other) {
+    if (other.isUndef()) {
+        fprintf(stderr, "warning: undefined value in addition at line ..., column ...\n");
     }
     
-    if (left.isString()) {
-        result.setStringValue(left.getStringValue() + right.getStringValue());
+    if (m_type == VaSTRING) {
+        m_string_value += other.getStringValue();
     }
-    else if (left.isDouble() or (right.isDouble() and (left.isUndef() or left.isBool() or left.isInt()))) {
-        result.setDoubleValue(left.getDoubleValue() + right.getDoubleValue());
+    else if (m_type == VaDOUBLE or (other.isDouble() and (m_type == VaUNDEF or m_type == VaBOOL or m_type == VaINT))) {
+        setDoubleValue(getDoubleValue() + other.getDoubleValue());
     }
-    else if (left.isInt() or (right.isInt() and left.isBool())) {
-        result.setIntValue(left.getIntValue() + right.getIntValue());
+    else if (m_type == VaINT or (other.isInt() and m_type == VaBOOL)) {
+        setIntValue(getIntValue() + other.getIntValue());
     }
-    else if (left.isBool()) {
-        result.setIntValue(left.getBoolValue() + right.getBoolValue()); // FIXME
+    else if (m_type == VaBOOL) {
+        setIntValue(getBoolValue() + other.getBoolValue()); // FIXME
     }
-    else if (left.isUndef()) {
-        fprintf(stderr, "warning: undefined value in addition at line ..., column ...\n");   
-        result = left;
+    else if (m_type == VaUNDEF) {
+        fprintf(stderr, "warning: undefined value in addition at line ..., column ...\n");
     }
     else {
-        fprintf(stderr, "debug: unhandled condition in Variant operator+\n");
-        result = left;
+        fprintf(stderr, "debug: unhandled condition in Variant operator+=\n");
     }
     
-    return result;
+    return *this;
 }
 
-Basic::Variant operator-(const Basic::Variant &left, const Basic::Variant &right) {
-    Basic::Variant result;
-    
-    if (right.isUndef()) {
+Basic::Variant &Basic::Variant::operator-=(const Basic::Variant &other) {
+    if (other.isUndef()) {
         fprintf(stderr, "warning: undefined value in subtraction at line ..., column ...\n");        
     }
     
-    if (left.isString()) {
+    if (isString()) {
         fprintf(stderr, "warning: attempt to subtract from a string at line ..., column ...\n");
-        result = left;
     }
-    else if (left.isDouble() or (right.isDouble() and (left.isUndef() or left.isBool() or left.isInt()))) {
-        result.setDoubleValue(left.getDoubleValue() - right.getDoubleValue());
+    else if (isDouble() or (other.isDouble() and (isUndef() or isBool() or isInt()))) {
+        setDoubleValue(getDoubleValue() - other.getDoubleValue());
     }
-    else if (left.isInt() or (right.isInt() and left.isBool())) {
-        result.setIntValue(left.getIntValue() - right.getIntValue());
+    else if (isInt() or (other.isInt() and isBool())) {
+        setIntValue(getIntValue() - other.getIntValue());
     }
-    else if (left.isBool()) {
-        result.setIntValue(left.getBoolValue() - right.getBoolValue()); // FIXME
+    else if (isBool()) {
+        setIntValue(getBoolValue() - other.getBoolValue()); // FIXME
     }
-    else if (left.isUndef()) {
+    else if (isUndef()) {
         fprintf(stderr, "warning: undefined value in subtraction at line ..., column ...\n");
-        result = left;
     }
     else {
-        fprintf(stderr, "debug: unhandled condition in Variant operator-\n");
-        result = left;
+        fprintf(stderr, "debug: unhandled condition in Variant operator-=\n");
     }    
     
-    return result;
+    return *this;
+}
+
+Basic::Variant &Basic::Variant::operator*=(const Basic::Variant &other) {
+    if (other.isUndef()) {
+        fprintf(stderr, "warning: undefined value in multiplication at line ..., column ...\n");
+    }
+    
+    if (isString()) {
+        fprintf(stderr, "warning: attempt to multiply a string at line ..., column ...\n");
+    }
+    else if (isDouble() or (other.isDouble() and (isUndef() or isBool() or isInt()))) {
+        setDoubleValue(getDoubleValue() * other.getDoubleValue());
+    }
+    else if (isInt() or (other.isInt() and isBool())) {
+        setIntValue(getIntValue() * other.getIntValue());
+    }
+    else if (isBool()) {
+        setBoolValue(getBoolValue() * other.getBoolValue()); // FIXME
+    }
+    else if (isUndef()) {
+        fprintf(stderr, "warning: undefined value in multiplication at line ..., column ...\n");
+    }
+    else {
+        fprintf(stderr, "debug: unhandled condition in Variant operator*=\n");
+    }
+    
+    return *this;
+}
+
+Basic::Variant &Basic::Variant::operator/=(const Basic::Variant &other) {
+    if (other.isUndef()) {
+        fprintf(stderr, "warning: undefined value in division at line ..., column ...\n");
+    }
+    
+    if (isString()) {
+        fprintf(stderr, "warning: attempt to divide a string at line ..., column ...\n");
+    }
+    else if (isDouble() or isInt() or isBool()) {
+        if (other.getIntValue() == 0) {
+            fprintf(stderr, "warning: attempt to divide by zero at line ..., column ...\n");
+        }
+        else {
+            setDoubleValue(getDoubleValue() / other.getDoubleValue());            
+        }
+    }
+    else if (isUndef()) {
+        fprintf(stderr, "warning: undefined value in division at line ..., column ...\n");
+    }
+    else {
+        fprintf(stderr, "debug: unhandled condition in Variant operator/=\n");
+    }
+    
+    return *this;
 }
