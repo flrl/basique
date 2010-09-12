@@ -23,13 +23,13 @@ public:
     Parser(void);
     
 private:
-    Token token;
-    Tokeniser tokeniser;
+    Token m_token;
+    Tokeniser m_tokeniser;
     
-    Variant accepted_token_value;
-    int accepted_token_line;
-    int accepted_token_column;
-    Token accepted_token;
+    Variant m_accepted_token_value;
+    int m_accepted_token_line;
+    int m_accepted_token_column;
+    Token m_accepted_token;
     
     bool accept(Token t);
     bool expect(Token t);
