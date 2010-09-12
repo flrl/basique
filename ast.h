@@ -68,12 +68,12 @@ class Basic::ASTNode {
 public:
     virtual ~ASTNode() { }
     virtual void execute(void) =0;
-    int getLine(void) { return line; }
-    int getColumn(void) { return column; }
-    void setPosition(int line, int column) { this->line = line; this->column = column; }
+    int getLine(void) { return m_line; }
+    int getColumn(void) { return m_column; }
+    void setPosition(int line, int column) { m_line = line; m_column = column; }
 protected:
-    int line;
-    int column;
+    int m_line;
+    int m_column;
 };
 
 class Basic::AcceptedParamList : public ASTNode {
@@ -158,9 +158,9 @@ class Basic::Expression : public ASTNode {
 public:
     Expression() { }
     virtual ~Expression() { }
-    Variant getResult() { return value; }
+    Variant getResult() { return m_result; }
 protected:
-    Variant value;
+    Variant m_result;
 };
 
 class Basic::IdentifierExpression : public Expression {
@@ -175,7 +175,7 @@ private:
 
 class Basic::LiteralExpression : public Expression {
 public:
-    LiteralExpression(Variant &v) { this->value = v; }
+    LiteralExpression(Variant &v) { m_result = v; }
     virtual void execute();
 };
 
