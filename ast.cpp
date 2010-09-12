@@ -170,7 +170,8 @@ void Basic::DoStatement::execute (void) {
                     condition_reached = true;
                     break;
                 default:
-                    fprintf(stderr, "warning: got here (DcPreCondition)\n");
+                    fprintf(stderr, "warning: got here (DoStatement->DcPRECONDITION)\n");
+                    condition_reached = true;
             }
             if (condition_reached) break;
         }
@@ -193,7 +194,8 @@ void Basic::DoStatement::execute (void) {
                     condition_reached = true;
                     break;
                 default:
-                    fprintf(stderr, "warning: got here (DcPostCondition)\n");
+                    fprintf(stderr, "warning: got here (DoStatment->DcPRECONDITION)\n");
+                    condition_reached = true;
             }
         }
     }
