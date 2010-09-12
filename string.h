@@ -30,7 +30,7 @@ public:
 private:
     size_t  m_size;
     size_t  m_length;
-    char    *m_cstring;
+    char   *m_cstring;
 };
 
 String operator+(const String &, const String &);

@@ -19,46 +19,44 @@ namespace Basic {
 
 class Basic::Variant {
 public:
-    enum Type {
-        is_undef, is_bool, is_int, is_double, is_string,
-    };
+    enum Type { VaUNDEF, VaBOOL, VaINT, VaDOUBLE, VaSTRING };
     
-    Variant(void);
-    Variant(const Variant&);
-    Variant(bool b) { this->setBoolValue(b); }
-    Variant(int i) { this->setIntValue(i); }    
-    Variant(double d) { this->setDoubleValue(d); }    
-    Variant(const String &s) { this->setStringValue(s); }
-    Variant(Type t) { this->setDefaultValueForType(t); }
+    Variant(void) : m_bool_value(false), m_int_value(0), m_double_value(0.0), m_string_value(""), m_type(VaUNDEF) {}
+    Variant(const Variant &);
+    Variant(bool b) { setBoolValue(b); }
+    Variant(int i) { setIntValue(i); }    
+    Variant(double d) { setDoubleValue(d); }    
+    Variant(const String &s) { setStringValue(s); }
+    Variant(Type t) { setDefaultValueForType(t); }
     
     ~Variant(void) { }
     
-    bool getBoolValue(void) const;
-    int getIntValue(void) const;
-    double getDoubleValue(void) const;
-    String getStringValue(void) const;
-    Type getType(void) const { return this->type; }
+    bool    getBoolValue(void) const;
+    int     getIntValue(void) const;
+    double  getDoubleValue(void) const;
+    String  getStringValue(void) const;
+    Type    getType(void) const { return m_type; }
 
     void setBoolValue(bool);
     void setIntValue(int);
     void setDoubleValue(double);
     void setStringValue(const String &);
-    
     void setDefaultValueForType(Type);
+    void setUndefined(void);
     
-    bool isDefined(void) const  { return this->type != is_undef; }
-    bool isUndef(void) const    { return this->type == is_undef; }
-    bool isBool(void) const     { return this->type == is_bool; }
-    bool isInt(void) const      { return this->type == is_int; }
-    bool isDouble(void) const   { return this->type == is_double; }
-    bool isString(void) const   { return this->type == is_string; }
+    bool isDefined(void) const  { return m_type != VaUNDEF; }
+    bool isUndef(void) const    { return m_type == VaUNDEF; }
+    bool isBool(void) const     { return m_type == VaBOOL; }
+    bool isInt(void) const      { return m_type == VaINT; }
+    bool isDouble(void) const   { return m_type == VaDOUBLE; }
+    bool isString(void) const   { return m_type == VaSTRING; }
     
 private:
-    bool bool_value;
-    int int_value;
-    double double_value;
-    String string_value;
-    Type type;
+    bool    m_bool_value;
+    int     m_int_value;
+    double  m_double_value;
+    String  m_string_value;
+    Type    m_type;
 };
 
 Basic::Variant operator+(const Basic::Variant &, const Basic::Variant &);

@@ -28,10 +28,10 @@ void Basic::UnaryExpression::execute (void) {
     }
     else if (this->op == TkMINUS) {
         switch(intermediate.getType()) {
-            case Basic::Variant::is_int:
+            case Basic::Variant::VaINT:
                 this->value.setIntValue(0 - intermediate.getIntValue());
                 break;
-            case Basic::Variant::is_double:
+            case Basic::Variant::VaDOUBLE:
                 this->value.setDoubleValue(0.0 - intermediate.getDoubleValue());
                 break;
             default:
