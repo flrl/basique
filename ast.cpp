@@ -45,7 +45,22 @@ void Basic::UnaryExpression::execute (void) {
 }
 
 void Basic::MultiplicativeExpression::execute (void) {
-    // FIXME this is where i really want operator overloads for variant    
+    first_term->execute();
+    Variant intermediate = first_term->getResult();
+    
+    for (std::list<OperatorTerm>::const_iterator term = other_terms.begin(); term != other_terms.end(); term++) {
+        term->term->execute();
+        Variant t = term->term->getResult();
+        
+        switch (term->op) {
+            case TkMULTIPLY:    intermediate *= t; break;
+            case TkDIVIDE:      intermediate /= t; break;
+            default:
+                fprintf(stderr, "debug: invalid operator `%s' in MultiplicativeExpression object\n", Tokeniser::tokenDescriptions[term->op]);
+        }
+    }
+    
+    this->value = intermediate;
 }
 
 void Basic::AdditiveExpression::execute (void) {
@@ -57,8 +72,8 @@ void Basic::AdditiveExpression::execute (void) {
         Variant t = term->term->getResult();
         
         switch (term->op) {
-            case TkPLUS:    intermediate = intermediate + t; break;
-            case TkMINUS:   intermediate = intermediate - t; break;
+            case TkPLUS:    intermediate += t; break;
+            case TkMINUS:   intermediate -= t; break;
             default:
                 fprintf(stderr, "debug: invalid operator `%s' in AdditiveExpression object\n", Tokeniser::tokenDescriptions[term->op]);
         }
