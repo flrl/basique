@@ -13,7 +13,7 @@
 using namespace Basic;
 
 void Basic::LiteralExpression::execute (void) {
-    ; // result value is set at initialisation
+    ; // m_result is set at initialisation
 }
 
 void Basic::IdentifierExpression::execute (void) {
@@ -24,19 +24,19 @@ void Basic::UnaryExpression::execute (void) {
     this->term->execute();
     Variant intermediate = term->getResult();
     if (this->op == TkNOT) {
-        this->value.setBoolValue(!intermediate.getBoolValue());
+        m_result.setBoolValue(!intermediate.getBoolValue());
     }
     else if (this->op == TkMINUS) {
         switch(intermediate.getType()) {
             case Basic::Variant::VaINT:
-                this->value.setIntValue(0 - intermediate.getIntValue());
+                m_result.setIntValue(0 - intermediate.getIntValue());
                 break;
             case Basic::Variant::VaDOUBLE:
-                this->value.setDoubleValue(0.0 - intermediate.getDoubleValue());
+                m_result.setDoubleValue(0.0 - intermediate.getDoubleValue());
                 break;
             default:
-                fprintf(stderr, "warning: attempt to negate non-numeric value at line %i, column %i\n", this->line, this->column);
-                this->value = intermediate;
+                fprintf(stderr, "warning: attempt to negate non-numeric value at line %i, column %i\n", m_line, m_column);
+                m_result = intermediate;
         }
     }
     else {
@@ -60,7 +60,7 @@ void Basic::MultiplicativeExpression::execute (void) {
         }
     }
     
-    this->value = intermediate;
+    m_result = intermediate;
 }
 
 void Basic::AdditiveExpression::execute (void) {
@@ -79,7 +79,7 @@ void Basic::AdditiveExpression::execute (void) {
         }
     }
     
-    this->value = intermediate;
+    m_result = intermediate;
 }
 
 void Basic::ComparitiveExpression::execute (void) {
@@ -94,7 +94,7 @@ void Basic::ComparitiveExpression::execute (void) {
         default: 
             fprintf(stderr, "debug: invalid operator `%s' in ComparitiveExpression object\n", Tokeniser::tokenDescriptions[this->cmp]);
     }
-    this->value.setBoolValue(intermediate);
+    m_result.setBoolValue(intermediate);
 }
 
 void Basic::AndExpression::execute (void) {
@@ -103,7 +103,7 @@ void Basic::AndExpression::execute (void) {
         (*e)->execute();
         intermediate = (intermediate and (*e)->getResult().getBoolValue());
     }
-    this->value.setBoolValue(intermediate);
+    m_result.setBoolValue(intermediate);
 }
 
 void Basic::OrExpression::execute (void) {
@@ -112,7 +112,7 @@ void Basic::OrExpression::execute (void) {
         (*e)->execute();
         intermediate = (intermediate and (*e)->getResult().getBoolValue());
     }
-    this->value.setBoolValue(intermediate);
+    m_result.setBoolValue(intermediate);
 }
 
 void Basic::Block::execute (void) {
