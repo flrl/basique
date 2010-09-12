@@ -18,12 +18,15 @@
 
 #include "array.h"
 #include "ast.h"
+#include "builtin.h"
 #include "string.h"
 #include "variant.h"
 
-// FIXME should be in namespace Basic
+namespace Basic {
+    class SymbolTable;
+}
 
-class SymbolTable {
+class Basic::SymbolTable {
 public:
     enum EntryType {
         UNDEFINED,
@@ -34,27 +37,32 @@ public:
         VARIANT_ARRAY,
         // etc        
     };
-    typedef std::pair<EntryType, void *> Entry;
+    struct Entry {
+        Entry(EntryType type, void *binding) : type(type), binding(binding) { }
+        EntryType type;
+        void *binding;
+    };
     typedef std::map<const String, Entry> Frame;
     
     SymbolTable();
     ~SymbolTable();
     
-    void push_frame();
-    void pop_frame();
+    void startScope();
+    void endScope();
     
     const Entry *find(const String &) const;
     Entry *find(const String &identifier) { return const_cast<Entry*>(find(identifier)); }
 
     bool defined(const String&) const;
 
-    void define_function(const String &, Basic::FunctionDefinition *);
-    void define_subroutine(const String &, Basic::SubDefinition *);
-    void define_variant(const String &, Basic::Variant *);
-    void define_array(const String &, Basic::Array *);
+    void defineBuiltinFunction(const String &, BuiltinFunction *);
+    void defineFunction(const String &, FunctionDefinition *);
+    void defineSubroutine(const String &, SubDefinition *);
+    void defineVariant(const String &, Variant *);
+    void defineArray(const String &, Array *);
     
 private:
-    std::vector<Frame> frames;
+    std::vector<Frame> m_frames;
     
 };
 
