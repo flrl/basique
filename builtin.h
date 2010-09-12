@@ -12,6 +12,8 @@
 
 #include "ast.h"
 
+// FIXME should be in namespace Basic
+
 class BuiltinFunction {
 public:
     virtual ~BuiltinFunction() { }
