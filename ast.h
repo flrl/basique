@@ -81,9 +81,9 @@ public:
     AcceptedParamList() { }
     ~AcceptedParamList();
     virtual void execute();
-    void appendIdentifier(const String &s) { identifiers.push_back(s); }
+    void appendIdentifier(const String &s) { m_identifiers.push_back(s); }
 private:
-    std::list<String> identifiers;
+    std::list<String> m_identifiers;
 };
 
 class Basic::Block : public ASTNode {
@@ -91,33 +91,33 @@ public:
     Block() { }
     ~Block();
     virtual void execute();
-    void appendStatement(Statement *s) { statements.push_back(s); }
+    void appendStatement(Statement *s) { m_statements.push_back(s); }
 private:
-    std::list<Statement *> statements;
+    std::list<Statement *> m_statements;
 };
 
 class Basic::FunctionDefinition : public ASTNode {
 public:
-    FunctionDefinition(const String &identifier, AcceptedParamList *a, Block *b) : identifier(identifier), accepted_params(a), body(b) { }
-    ~FunctionDefinition() { delete accepted_params; delete body; }
+    FunctionDefinition(const String &identifier, AcceptedParamList *a, Block *b) : m_identifier(identifier), m_accepted_params(a), m_body(b) { }
+    ~FunctionDefinition() { delete m_accepted_params; delete m_body; }
     virtual void execute();
     void call();
 private:
-    const String identifier;
-    AcceptedParamList *accepted_params;
-    Block *body;
+    const String m_identifier;
+    AcceptedParamList *m_accepted_params;
+    Block *m_body;
 };
 
 class Basic::SubDefinition : public ASTNode {
 public:
-    SubDefinition(const String &identifier, AcceptedParamList *a, Block *b) : identifier(identifier), accepted_params(a), body(b) { }
-    ~SubDefinition() { delete accepted_params; delete body; }
+    SubDefinition(const String &identifier, AcceptedParamList *a, Block *b) : m_identifier(identifier), m_accepted_params(a), m_body(b) { }
+    ~SubDefinition() { delete m_accepted_params; delete m_body; }
     virtual void execute();
     void call();
 private:
-    const String identifier;
-    AcceptedParamList *accepted_params;
-    Block *body;
+    const String m_identifier;
+    AcceptedParamList *m_accepted_params;
+    Block *m_body;
 };
 
 class Basic::ParamList : public ASTNode {
@@ -125,33 +125,33 @@ public:
     ParamList() { }
     ~ParamList();
     virtual void execute();
-    void appendExpression(Expression *e) { expressions.push_back(e); }
-    size_t size() const { return expressions.size(); }
-    Expression *param (size_t index) { return expressions[index]; }
+    void appendExpression(Expression *e) { m_expressions.push_back(e); }
+    size_t size() const { return m_expressions.size(); }
+    Expression *param (size_t index) { return m_expressions[index]; }
 private:
-    std::vector<Basic::Expression *> expressions;
+    std::vector<Basic::Expression *> m_expressions;
 };
 
 class Basic::ArraySubscript : public ASTNode {
 public:
-    ArraySubscript(Expression *e) { expressions.push_back(e); }
+    ArraySubscript(Expression *e) { m_expressions.push_back(e); }
     ~ArraySubscript();
     virtual void execute();
-    void appendExpression(Expression *e) { expressions.push_back(e); }
+    void appendExpression(Expression *e) { m_expressions.push_back(e); }
 private:
-    std::list<Expression *> expressions;
+    std::list<Expression *> m_expressions;
 };
 
 class Basic::ArrayDimension : public ASTNode {
 public:
     typedef std::pair<Expression*, Expression*> Specification;    
     
-    ArrayDimension(Expression *d1, Expression *d2) { dimensions.push_back(std::make_pair(d1, d2)); }
+    ArrayDimension(Expression *d1, Expression *d2) { m_dimensions.push_back(std::make_pair(d1, d2)); }
     ~ArrayDimension();
     virtual void execute();
-    void appendDimension(Expression *d1, Expression *d2) { dimensions.push_back(std::make_pair(d1, d2)); }
+    void appendDimension(Expression *d1, Expression *d2) { m_dimensions.push_back(std::make_pair(d1, d2)); }
 private:
-    std::list<ArrayDimension::Specification> dimensions;
+    std::list<ArrayDimension::Specification> m_dimensions;
 };
 
 class Basic::Expression : public ASTNode {
@@ -165,12 +165,12 @@ protected:
 
 class Basic::IdentifierExpression : public Expression {
 public:
-    IdentifierExpression(const String &id, ParamList *p=NULL) : identifier(id), params(p) { }
-    ~IdentifierExpression() { if (params) delete params; }
+    IdentifierExpression(const String &id, ParamList *p=NULL) : m_identifier(id), m_params(p) { }
+    ~IdentifierExpression() { if (m_params) delete m_params; }
     virtual void execute();
 private:
-    const String identifier;
-    ParamList *params;
+    const String m_identifier;
+    ParamList *m_params;
 };
 
 class Basic::LiteralExpression : public Expression {
@@ -181,45 +181,45 @@ public:
 
 class Basic::UnaryExpression : public Expression {
 public:
-    UnaryExpression(Token t, Expression *e) : op(t), term(e) { }
-    ~UnaryExpression() { delete term; }
+    UnaryExpression(Token t, Expression *e) : m_op(t), m_term(e) { }
+    ~UnaryExpression() { delete m_term; }
     virtual void execute();
 private:
-    Token op;
-    Expression *term;
+    Token m_op;
+    Expression *m_term;
 };
 
 class Basic::MultiplicativeExpression : public Expression {
 public:
-    MultiplicativeExpression(Expression *e) : first_term(e) { }
+    MultiplicativeExpression(Expression *e) : m_first_term(e) { }
     ~MultiplicativeExpression();
     virtual void execute();
-    void appendTerm(Token op, Expression *term) { other_terms.push_back(OperatorTerm(op, term)); }
+    void appendTerm(Token op, Expression *term) { m_other_terms.push_back(OperatorTerm(op, term)); }
 private:
-    Expression *first_term;
-    std::list<OperatorTerm> other_terms;
+    Expression *m_first_term;
+    std::list<OperatorTerm> m_other_terms;
 };
 
 class Basic::AdditiveExpression : public Expression {
 public:
-    AdditiveExpression(Expression *e) : first_term(e) { }
+    AdditiveExpression(Expression *e) : m_first_term(e) { }
     ~AdditiveExpression();
     virtual void execute();
-    void appendTerm(Token op, Expression *term) { other_terms.push_back(OperatorTerm(op, term)); }
+    void appendTerm(Token op, Expression *term) { m_other_terms.push_back(OperatorTerm(op, term)); }
 private:
-    Expression* first_term;
-    std::list<OperatorTerm> other_terms;
+    Expression* m_first_term;
+    std::list<OperatorTerm> m_other_terms;
 };
 
 class Basic::ComparitiveExpression : public Expression {
 public:
-    ComparitiveExpression(Expression *first, Token cmp, Expression *second) : first(first), cmp(cmp), second(second) { }
-    ~ComparitiveExpression() { delete first; delete second; }
+    ComparitiveExpression(Expression *first, Token cmp, Expression *second) : m_first(first), m_cmp(cmp), m_second(second) { }
+    ~ComparitiveExpression() { delete m_first; delete m_second; }
     virtual void execute();
 private:
-    Expression *first;
-    Token cmp;
-    Expression *second;
+    Expression *m_first;
+    Token m_cmp;
+    Expression *m_second;
 };
 
 class Basic::AndExpression : public Expression {
@@ -227,9 +227,9 @@ public:
     AndExpression() { }
     ~AndExpression();
     virtual void execute();
-    void appendTerm(Expression *term) { terms.push_back(term); }
+    void appendTerm(Expression *term) { m_terms.push_back(term); }
 private:
-    std::list<Expression *> terms;
+    std::list<Expression *> m_terms;
 };
 
 class Basic::OrExpression : public Expression {
@@ -237,9 +237,9 @@ public:
     OrExpression() { }
     ~OrExpression();
     virtual void execute();
-    void appendTerm(Expression *term) { terms.push_back(term); }
+    void appendTerm(Expression *term) { m_terms.push_back(term); }
 private:
-    std::list<Expression *> terms;
+    std::list<Expression *> m_terms;
 };
 
 
@@ -250,47 +250,47 @@ public:
 
 class Basic::PrintStatement : public Statement {
 public:
-    PrintStatement() : append_eol(true) { }
+    PrintStatement() : m_append_eol(true) { }
     ~PrintStatement();
     virtual void execute();
-    void appendExpression(Expression *e) { expressions.push_back(e); }
-    void setAppendEol(bool b) { append_eol = b; }
+    void appendExpression(Expression *e) { m_expressions.push_back(e); }
+    void setAppendEol(bool b) { m_append_eol = b; }
     
 private:
-    std::list<Expression *> expressions;
-    bool append_eol;
+    std::list<Expression *> m_expressions;
+    bool m_append_eol;
 };
 
 class Basic::InputStatement : public Statement {
 public:
-    InputStatement(const String &id, ArraySubscript *s, Expression *e) : identifier(id), subscript(s), prompt(e) { }
-    ~InputStatement() { if (subscript) delete subscript; if (prompt) delete prompt; }
+    InputStatement(const String &id, ArraySubscript *s, Expression *e) : m_identifier(id), m_subscript(s), m_prompt(e) { }
+    ~InputStatement() { if (m_subscript) delete m_subscript; if (m_prompt) delete m_prompt; }
     virtual void execute();
 private:
-    const String identifier;
-    ArraySubscript *subscript;
-    Expression *prompt;
+    const String m_identifier;
+    ArraySubscript *m_subscript;
+    Expression *m_prompt;
 };
 
 class Basic::LetStatement : public Statement {
 public:
-    LetStatement(const String &id, ArraySubscript *s, Expression *e) : identifier(id), subscript(s), expression(e) { }
-    ~LetStatement() { if (subscript) delete subscript; delete expression; }
+    LetStatement(const String &id, ArraySubscript *s, Expression *e) : m_identifier(id), m_subscript(s), m_expression(e) { }
+    ~LetStatement() { if (m_subscript) delete m_subscript; delete m_expression; }
     virtual void execute();
 private:
-    const String identifier;
-    ArraySubscript *subscript;
-    Expression *expression;
+    const String m_identifier;
+    ArraySubscript *m_subscript;
+    Expression *m_expression;
 };
 
 class Basic::CallStatement : public Statement {
 public:
-    CallStatement(const String &id, ParamList *params) : identifier(id), params(params) { }
-    ~CallStatement() { if (params) delete params; }
+    CallStatement(const String &id, ParamList *params) : m_identifier(id), m_params(params) { }
+    ~CallStatement() { if (m_params) delete m_params; }
     virtual void execute();
 private:
-    const String identifier;
-    ParamList *params;
+    const String m_identifier;
+    ParamList *m_params;
 };
 
 class Basic::IfStatement : public Statement {
@@ -304,11 +304,11 @@ public:
     IfStatement() { }
     ~IfStatement();
     virtual void execute();
-    void appendCondition(Expression *condition, Block *block) { conditional_blocks.push_back(ConditionalBlock(condition, block)); }
-    void setElseBlock(Block *block) { if (else_block) delete else_block; else_block = block; }
+    void appendCondition(Expression *condition, Block *block) { m_conditional_blocks.push_back(ConditionalBlock(condition, block)); }
+    void setElseBlock(Block *block) { if (m_else_block) delete m_else_block; m_else_block = block; }
 private:
-    std::list<ConditionalBlock> conditional_blocks;
-    Block *else_block;
+    std::list<ConditionalBlock> m_conditional_blocks;
+    Block *m_else_block;
 };
 
 class Basic::DoStatement : public Statement {
@@ -317,28 +317,28 @@ public:
     enum When { DcPRECONDITION, DcPOSTCONDITION };
     
     DoStatement(Type t, When w, Expression *c, Block *b) 
-        : condition_type(t), condition_when(w), condition(c), body(b) { }
-    ~DoStatement() { if (condition)  delete condition; delete body; }
+        : m_condition_type(t), m_condition_when(w), m_condition(c), m_body(b) { }
+    ~DoStatement() { if (m_condition) delete m_condition; delete m_body; }
     virtual void execute();
 private:
-    Type condition_type;
-    When condition_when;
-    Expression *condition;
-    Block *body;
+    Type m_condition_type;
+    When m_condition_when;
+    Expression *m_condition;
+    Block *m_body;
 };
 
 class Basic::ForStatement : public Statement {
 public:
     ForStatement(const String &id, Expression *s, Expression *e, Expression *t, Block *b) 
-        : identifier(id), start(s), end(e), step(t), body(b) { }
+        : m_identifier(id), m_start(s), m_end(e), m_step(t), m_body(b) { }
     ~ForStatement();
     virtual void execute();
 private:
-    const String identifier;
-    Expression *start;
-    Expression *end;
-    Expression *step;
-    Block *body;
+    const String m_identifier;
+    Expression *m_start;
+    Expression *m_end;
+    Expression *m_step;
+    Block *m_body;
 };
 
 typedef std::pair<const String, Basic::ArrayDimension*> Dimensionable;
@@ -346,15 +346,15 @@ typedef std::pair<const String, Basic::ArrayDimension*> Dimensionable;
 class Basic::DimStatement : public Statement {
 public:
     DimStatement(const String &identifier, ArrayDimension *dim) { 
-        dimensionables.push_back(std::make_pair(identifier, dim));
+        m_dimensionables.push_back(std::make_pair(identifier, dim));
     }
     ~DimStatement();
     virtual void execute();
     void appendDimensionable(const String &identifier, ArrayDimension *dim) {
-        dimensionables.push_back(std::make_pair(identifier, dim));
+        m_dimensionables.push_back(std::make_pair(identifier, dim));
     }
 private:
-    std::list<Dimensionable> dimensionables;
+    std::list<Dimensionable> m_dimensionables;
 };
 
 
