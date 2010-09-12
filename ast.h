@@ -52,7 +52,17 @@ namespace Basic {
     class Block;
     
     class Identifier;
+
+    struct OperatorTerm;
 }
+
+// n.b. This *doesn't* claim ownership of the Expression object.  The owner of an OperatorTerm
+// object *must* explicitly delete the contained Expression object when it's no longer needed.
+struct Basic::OperatorTerm {
+    OperatorTerm(Token op, Expression *term) : op(op), term(term) { }
+    Token op;
+    Expression *term;
+};
 
 class Basic::ASTNode {
 public:
@@ -181,26 +191,24 @@ private:
 
 class Basic::MultiplicativeExpression : public Expression {
 public:
-    MultiplicativeExpression() { }
+    MultiplicativeExpression(Expression *e) : first_term(e) { }
     ~MultiplicativeExpression();
     virtual void execute();
-    void appendTerm(Expression *term) { terms.push_back(term); }
-    void appendOperator(Token t) { operators.push_back(t); }
+    void appendTerm(Token op, Expression *term) { other_terms.push_back(OperatorTerm(op, term)); }
 private:
-    std::list<Expression *> terms;
-    std::list<Token> operators;
+    Expression *first_term;
+    std::list<OperatorTerm> other_terms;
 };
 
 class Basic::AdditiveExpression : public Expression {
 public:
-    AdditiveExpression() { }
+    AdditiveExpression(Expression *e) : first_term(e) { }
     ~AdditiveExpression();
     virtual void execute();
-    void appendTerm(Expression *term) { terms.push_back(term); }
-    void appendOperator(Token t) { operators.push_back(t); }
+    void appendTerm(Token op, Expression *term) { other_terms.push_back(OperatorTerm(op, term)); }
 private:
-    std::list<Expression *> terms;
-    std::list<Token> operators;
+    Expression* first_term;
+    std::list<OperatorTerm> other_terms;
 };
 
 class Basic::ComparitiveExpression : public Expression {
@@ -287,14 +295,19 @@ private:
 
 class Basic::IfStatement : public Statement {
 public:
+    struct ConditionalBlock {
+        ConditionalBlock(Expression *condition, Block *block) : condition(condition), block(block) { }
+        Expression *condition;
+        Block *block;
+    };
+    
     IfStatement() { }
     ~IfStatement();
     virtual void execute();
-    void appendCondition(Expression *condition, Block *block) { conditions.push_back(condition); blocks.push_back(block); }
+    void appendCondition(Expression *condition, Block *block) { conditional_blocks.push_back(ConditionalBlock(condition, block)); }
     void setElseBlock(Block *block) { if (else_block) delete else_block; else_block = block; }
 private:
-    std::list<Expression *> conditions;
-    std::list<Block *> blocks;
+    std::list<ConditionalBlock> conditional_blocks;
     Block *else_block;
 };
 

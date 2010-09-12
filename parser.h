@@ -29,6 +29,7 @@ private:
     Variant accepted_token_value;
     int accepted_token_line;
     int accepted_token_column;
+    Token accepted_token;
     
     bool accept(Token t);
     bool expect(Token t);

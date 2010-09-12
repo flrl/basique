@@ -49,26 +49,20 @@ void Basic::MultiplicativeExpression::execute (void) {
 }
 
 void Basic::AdditiveExpression::execute (void) {
-    std::list<Basic::Expression*>::const_iterator term = terms.begin();
-    (*term)->execute();
-    Variant intermediate = (*term)->getResult();
-    term++;
+    first_term->execute();
+    Variant intermediate = first_term->getResult();
     
-    std::list<Token>::const_iterator op = operators.begin();
-    
-    do {
-        (*term)->execute();
-        Variant t = (*term)->getResult();
+    for (std::list<OperatorTerm>::const_iterator term = other_terms.begin(); term != other_terms.end(); term++) {
+        term->term->execute();
+        Variant t = term->term->getResult();
         
-        switch (*op) {
+        switch (term->op) {
             case TkPLUS:    intermediate = intermediate + t; break;
             case TkMINUS:   intermediate = intermediate - t; break;
             default:
-                fprintf(stderr, "debug: invalid operator `%s' in AdditiveExpression object\n", Tokeniser::tokenDescriptions[*op]);
+                fprintf(stderr, "debug: invalid operator `%s' in AdditiveExpression object\n", Tokeniser::tokenDescriptions[term->op]);
         }
-        term++;
-        op++;
-    } while (term != terms.end() and op != operators.end());
+    }
     
     this->value = intermediate;
 }
@@ -180,12 +174,9 @@ Basic::PrintStatement::~PrintStatement() {
 }
 
 Basic::IfStatement::~IfStatement() {
-    for (std::list<Basic::Expression *>::iterator e = conditions.begin(); e != conditions.end(); e++) {
-        delete (*e);
-    }
-    
-    for (std::list<Basic::Block *>::iterator b = blocks.begin(); b != blocks.end(); b++) {
-        delete (*b);
+    for (std::list<ConditionalBlock>::iterator b = conditional_blocks.begin(); b != conditional_blocks.end(); b++) {
+        delete b->condition;
+        delete b->block;
     }
     
     if (else_block)  delete else_block;
@@ -234,16 +225,19 @@ Basic::Block::~Block() {
 }
 
 Basic::MultiplicativeExpression::~MultiplicativeExpression() {
-    for (std::list<Basic::Expression *>::iterator e = terms.begin(); e != terms.end(); e++) {
-        delete (*e);
+    delete first_term;
+    for (std::list<OperatorTerm>::iterator e = other_terms.begin(); e != other_terms.end(); e++) {
+        delete (e->term);
     }
 }
 
 Basic::AdditiveExpression::~AdditiveExpression() {
-    for (std::list<Basic::Expression *>::iterator e = terms.begin(); e != terms.end(); e++) {
-        delete (*e);
-    }    
+    delete first_term;
+    for (std::list<OperatorTerm>::iterator e = other_terms.begin(); e != other_terms.end(); e++) {
+        delete (e->term);
+    }
 }
+
 
 Basic::AndExpression::~AndExpression() {
     for (std::list<Basic::Expression *>::iterator e = terms.begin(); e != terms.end(); e++) {
