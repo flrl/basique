@@ -53,13 +53,14 @@ namespace Basic {
     
     class Identifier;
 
-    struct OperatorTerm;
+    struct OperatorTermWrapper;
 }
 
-// n.b. This *doesn't* claim ownership of the Expression object.  The owner of an OperatorTerm
-// object *must* explicitly delete the contained Expression object when it's no longer needed.
-struct Basic::OperatorTerm {
-    OperatorTerm(Token op, Expression *term) : op(op), term(term) { }
+// n.b. This *doesn't* claim ownership of the Expression object.  The owner of an 
+// OperatorTermWrapper object *must* explicitly delete the contained Expression 
+// object when it's no longer needed.
+struct Basic::OperatorTermWrapper {
+    OperatorTermWrapper(Token op, Expression *term) : op(op), term(term) { }
     Token op;
     Expression *term;
 };
@@ -101,11 +102,13 @@ public:
     FunctionDefinition(const String &identifier, AcceptedParamList *a, Block *b) : m_identifier(identifier), m_accepted_params(a), m_body(b) { }
     ~FunctionDefinition() { delete m_accepted_params; delete m_body; }
     virtual void execute() const;
-    void call() const;
+    void call(const ParamList *) const;
+    Variant getResult() const { return m_result; }
 private:
     const String m_identifier;
     AcceptedParamList *m_accepted_params;
     Block *m_body;
+    Variant m_result;
 };
 
 class Basic::SubDefinition : public ASTNode {
@@ -113,7 +116,7 @@ public:
     SubDefinition(const String &identifier, AcceptedParamList *a, Block *b) : m_identifier(identifier), m_accepted_params(a), m_body(b) { }
     ~SubDefinition() { delete m_accepted_params; delete m_body; }
     virtual void execute() const;
-    void call() const;
+    void call(const ParamList *) const;
 private:
     const String m_identifier;
     AcceptedParamList *m_accepted_params;
@@ -194,10 +197,10 @@ public:
     MultiplicativeExpression(Expression *e) : m_first_term(e) { }
     ~MultiplicativeExpression();
     virtual void execute() const;
-    void appendTerm(Token op, Expression *term) { m_other_terms.push_back(OperatorTerm(op, term)); }
+    void appendTerm(Token op, Expression *term) { m_other_terms.push_back(OperatorTermWrapper(op, term)); }
 private:
     Expression *m_first_term;
-    std::list<OperatorTerm> m_other_terms;
+    std::list<OperatorTermWrapper> m_other_terms;
 };
 
 class Basic::AdditiveExpression : public Expression {
@@ -205,10 +208,10 @@ public:
     AdditiveExpression(Expression *e) : m_first_term(e) { }
     ~AdditiveExpression();
     virtual void execute() const;
-    void appendTerm(Token op, Expression *term) { m_other_terms.push_back(OperatorTerm(op, term)); }
+    void appendTerm(Token op, Expression *term) { m_other_terms.push_back(OperatorTermWrapper(op, term)); }
 private:
     Expression* m_first_term;
-    std::list<OperatorTerm> m_other_terms;
+    std::list<OperatorTermWrapper> m_other_terms;
 };
 
 class Basic::ComparitiveExpression : public Expression {
