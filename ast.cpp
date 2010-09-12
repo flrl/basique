@@ -10,8 +10,6 @@
 #include "ast.h"
 #include "symboltable.h"
 
-using namespace Basic;
-
 void Basic::LiteralExpression::execute (void) {
     ; // m_result is set at initialisation
 }
@@ -142,11 +140,63 @@ void Basic::CallStatement::execute (void) {
 }
 
 void Basic::IfStatement::execute (void) {
+    for (std::list<ConditionalBlock>::const_iterator cb = m_conditional_blocks.begin(); cb != m_conditional_blocks.end(); cb++) {
+        cb->condition->execute();
+        if (cb->condition->getResult().getBoolValue() == true) {
+            cb->block->execute();
+            return;
+        }
+    }
     
+    m_else_block->execute();
 }
 
 void Basic::DoStatement::execute (void) {
-    
+    bool condition_reached = false;
+    while (condition_reached == false) {
+        if (m_condition_when == DcPRECONDITION) {
+            m_condition->execute();
+            switch (m_condition_type) {
+                case DcWHILE:
+                    condition_reached = not m_condition->getResult().getBoolValue();
+                    break;
+                case DcUNTIL:
+                    condition_reached = m_condition->getResult().getBoolValue();
+                    break;
+                case DcFOREVER:
+                    condition_reached = false;
+                    break;
+                case DcONCE:
+                    condition_reached = true;
+                    break;
+                default:
+                    fprintf(stderr, "warning: got here (DcPreCondition)\n");
+            }
+            if (condition_reached) break;
+        }
+        
+        m_body->execute();
+        
+        if (m_condition_when == DcPOSTCONDITION) {
+            m_condition->execute();
+            switch (m_condition_type) {
+                case DcWHILE:
+                    condition_reached = not m_condition->getResult().getBoolValue();
+                    break;
+                case DcUNTIL:
+                    condition_reached = m_condition->getResult().getBoolValue();
+                    break;
+                case DcFOREVER:
+                    condition_reached = false;
+                    break;
+                case DcONCE:
+                    condition_reached = true;
+                    break;
+                default:
+                    fprintf(stderr, "warning: got here (DcPostCondition)\n");
+            }
+        }
+    }
 }
 
 void Basic::ForStatement::execute (void) {
@@ -181,6 +231,7 @@ void Basic::SubDefinition::execute (void) {
     
 }
 
+#pragma mark Destructors
 
 Basic::PrintStatement::~PrintStatement() {
     for (std::list<Basic::Expression *>::iterator e = m_expressions.begin(); e != m_expressions.end(); e++) {

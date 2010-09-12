@@ -21,6 +21,8 @@
 #include "string.h"
 #include "variant.h"
 
+// FIXME should be in namespace Basic
+
 class SymbolTable {
 public:
     enum EntryType {
