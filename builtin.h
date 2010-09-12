@@ -12,40 +12,43 @@
 
 #include "ast.h"
 
-// FIXME should be in namespace Basic
+namespace Basic {
+    class BuiltinFunction;
+    
+    class BF_left;
+    class BF_right;
+    class BF_mid;
+    class BF_len;
+};
 
-class BuiltinFunction {
+class Basic::BuiltinFunction {
 public:
     virtual ~BuiltinFunction() { }
-    virtual void call(Basic::ParamList *) = 0;
-    Basic::Variant getResult() { return _result; }
+    virtual void call(const ParamList *) = 0;
+    Variant getResult() { return m_result; }
 protected:
-    Basic::Variant _result;
+    Variant m_result;
 };
 
 
-class BF_left : public BuiltinFunction {
+class Basic::BF_left : public BuiltinFunction {
 public:
-    ~BF_left() { }
-    void call(Basic::ParamList *);
+    void call(const ParamList *);
 };
 
-class BF_right : public BuiltinFunction {
+class Basic::BF_right : public BuiltinFunction {
 public:
-    ~BF_right() { }
-    void call(Basic::ParamList *);
+    void call(const ParamList *);
 };
 
-class BF_mid : public BuiltinFunction {
+class Basic::BF_mid : public BuiltinFunction {
 public:
-    ~BF_mid() { }
-    void call(Basic::ParamList *);
+    void call(const ParamList *);
 };
 
-class BF_len : public BuiltinFunction {
+class Basic::BF_len : public BuiltinFunction {
 public:
-    ~BF_len() { }
-    void call(Basic::ParamList *);
+    void call(const ParamList *);
 };
 
 
