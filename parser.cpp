@@ -13,12 +13,12 @@
 #include "parser.h"
 
 bool Basic::Parser::accept(Token t) {
-    if (this->token == t) {
-        this->accepted_token_value = tokeniser.getValue();
-        this->accepted_token_line = tokeniser.getLine();
-        this->accepted_token_column = tokeniser.getColumn();
-        this->accepted_token = this->token;
-        this->token = tokeniser.getToken();
+    if (m_token == t) {
+        m_accepted_token_value = m_tokeniser.getValue();
+        m_accepted_token_line = m_tokeniser.getLine();
+        m_accepted_token_column = m_tokeniser.getColumn();
+        m_accepted_token = m_token;
+        m_token = m_tokeniser.getToken();
         return true;
     }
     else {
@@ -37,7 +37,7 @@ bool Basic::Parser::expect(Token t) {
 }
 
 void Basic::Parser::error(int argc, ...) {
-    fprintf(stderr, "Syntax error at line %i, column %i: expected", tokeniser.getLine(), tokeniser.getColumn());
+    fprintf(stderr, "Syntax error at line %i, column %i: expected", m_tokeniser.getLine(), m_tokeniser.getColumn());
     va_list argv;
     va_start(argv, argc);
     for (int i=0; i<argc; i++) {
@@ -47,7 +47,7 @@ void Basic::Parser::error(int argc, ...) {
         }
     }
     va_end(argv);
-    fprintf(stderr, " got `%s'\n", Tokeniser::tokenDescriptions[this->token]);
+    fprintf(stderr, " got `%s'\n", Tokeniser::tokenDescriptions[m_token]);
 }
 
 
@@ -86,9 +86,9 @@ Basic::FunctionDefinition* Basic::Parser::functionDefinitionBody(void) {
     AcceptedParamList *a = NULL;
     Block *b = NULL;
     if (expect(TkIDENTIFIER)) {
-        String identifier(accepted_token_value.getStringValue());
+        String identifier(m_accepted_token_value.getStringValue());
         if (expect(TkLPAREN)) {
-            if (this->token != TkRPAREN) {
+            if (m_token != TkRPAREN) {
                 if (not (a = acceptedParamList())) {
                     return NULL;
                 }
@@ -114,9 +114,9 @@ Basic::SubDefinition* Basic::Parser::subDefinitionBody(void) {
     AcceptedParamList *a = NULL;
     Block *b = NULL;
     if (expect(TkIDENTIFIER)) {
-        String identifier(accepted_token_value.getStringValue());
+        String identifier(m_accepted_token_value.getStringValue());
         if (expect(TkLPAREN)) {
-            if (this->token != TkRPAREN) {
+            if (m_token != TkRPAREN) {
                 if (not (a = acceptedParamList())) {
                     return NULL;
                 }
@@ -207,7 +207,7 @@ Basic::Block* Basic::Parser::block(void) {
     Block *block = new Block();
     Statement *s = NULL;
     do {
-        switch (this->token) {
+        switch (m_token) {
             case TkPRINT:
             case TkINPUT:
             case TkLET:
@@ -239,10 +239,10 @@ Basic::Block* Basic::Parser::block(void) {
 Basic::AcceptedParamList* Basic::Parser::acceptedParamList(void) {
     AcceptedParamList *a = new AcceptedParamList();
     if (accept(TkIDENTIFIER)) {
-        a->appendIdentifier(accepted_token_value.getStringValue());
+        a->appendIdentifier(m_accepted_token_value.getStringValue());
         while(accept(TkCOMMA)) {
             if (expect(TkIDENTIFIER)) {
-                a->appendIdentifier(accepted_token_value.getStringValue());
+                a->appendIdentifier(m_accepted_token_value.getStringValue());
             }
             else {
                 delete a;
@@ -351,12 +351,12 @@ Basic::ParamList* Basic::Parser::paramList(void) {
 Basic::PrintStatement* Basic::Parser::printStatementBody(void) {
     PrintStatement *s = new PrintStatement();
 
-    if (this->token == TkLITERAL or this->token == TkIDENTIFIER or this->token == TkLPAREN) {
+    if (m_token == TkLITERAL or m_token == TkIDENTIFIER or m_token == TkLPAREN) {
         Expression *e = NULL;
         if ((e = expression())) {
             s->appendExpression(e);
             while (accept(TkCOMMA)) {
-                if (this->token == TkLITERAL or this->token == TkIDENTIFIER or this->token == TkLPAREN) {
+                if (m_token == TkLITERAL or m_token == TkIDENTIFIER or m_token == TkLPAREN) {
                     if ((e = expression())) {
                         s->appendExpression(e);
                     }
@@ -384,10 +384,10 @@ Basic::PrintStatement* Basic::Parser::printStatementBody(void) {
 // <input-statement-body> ::= <identifier> [ <array-subscript> ] [ "," <expression> ]
 Basic::InputStatement* Basic::Parser::inputStatementBody(void) {
     if (expect(TkIDENTIFIER)) {
-        String identifier(this->accepted_token_value.getStringValue());
+        String identifier(m_accepted_token_value.getStringValue());
         ArraySubscript *subscript = NULL;
         Expression *prompt = NULL;
-        if (this->token == TkLPAREN) {
+        if (m_token == TkLPAREN) {
             if (not (subscript = arraySubscript())) {
                 return NULL;
             }
@@ -411,8 +411,8 @@ Basic::LetStatement* Basic::Parser::letStatementBody(void) {
     Expression *e = NULL;
 
     if (expect(TkIDENTIFIER)) {
-        String identifier(this->accepted_token_value.getStringValue());
-        if (this->token == TkLPAREN and not (s = arraySubscript())) {
+        String identifier(m_accepted_token_value.getStringValue());
+        if (m_token == TkLPAREN and not (s = arraySubscript())) {
             return NULL;
         }
         if (expect(TkEQUALS)) {
@@ -432,7 +432,7 @@ Basic::CallStatement* Basic::Parser::callStatementBody(void) {
     ParamList *p = NULL;
 
     if (expect(TkIDENTIFIER)) {
-        String identifier(this->accepted_token_value.getStringValue());
+        String identifier(m_accepted_token_value.getStringValue());
         if (expect(TkLPAREN)) {
             if((p = paramList())) {
                 if (expect(TkRPAREN)) {
@@ -548,7 +548,7 @@ Basic::ForStatement* Basic::Parser::forStatementBody(void) {
     Expression *step = NULL;
     Block *body = NULL;
     if (expect(TkIDENTIFIER)) {
-        String identifier(this->accepted_token_value.getStringValue());
+        String identifier(m_accepted_token_value.getStringValue());
         if (expect(TkEQUALS)) {
             if ((start = expression())) {
                 if (expect(TkTO)) {
@@ -583,13 +583,13 @@ Basic::ForStatement* Basic::Parser::forStatementBody(void) {
 Basic::DimStatement* Basic::Parser::dimStatementBody(void) {
     ArrayDimension *dim = NULL;
     if (expect(TkIDENTIFIER)) {
-        String identifier(this->accepted_token_value.getStringValue());
+        String identifier(m_accepted_token_value.getStringValue());
         dim = arrayDimension();
         DimStatement *s = new DimStatement(identifier, dim);
         while (accept(TkCOMMA)) {
             if (expect(TkIDENTIFIER)) {
-                String identifier(this->accepted_token_value.getStringValue());
-                if (this->token == TkLPAREN) {
+                String identifier(m_accepted_token_value.getStringValue());
+                if (m_token == TkLPAREN) {
                     if ((dim = arrayDimension())) {
                         s->appendDimensionable(identifier, dim);
                     }
@@ -619,10 +619,10 @@ Basic::DimStatement* Basic::Parser::dimStatementBody(void) {
 //                        | "(" <expression> ")"
 Basic::Expression* Basic::Parser::primaryExpression(void) {
     if (accept(TkLITERAL)) {
-        return new LiteralExpression(this->accepted_token_value);
+        return new LiteralExpression(m_accepted_token_value);
     }
     else if (accept(TkIDENTIFIER)) {
-        String identifier(this->accepted_token_value.getStringValue());
+        String identifier(m_accepted_token_value.getStringValue());
         if (accept(TkLPAREN)) {
             ParamList *p = NULL;
             if ((p = paramList())) {
@@ -692,10 +692,10 @@ Basic::Expression* Basic::Parser::multiplicativeExpression(void) {
     Expression *term = NULL;
     
     if ((term = unaryExpression())) {
-        if (this->token == TkMULTIPLY or this->token == TkDIVIDE or this->token == TkMOD) {
+        if (m_token == TkMULTIPLY or m_token == TkDIVIDE or m_token == TkMOD) {
             MultiplicativeExpression *e = new MultiplicativeExpression(term);
             while (accept(TkMULTIPLY) or accept(TkDIVIDE) or accept(TkMOD)) {
-                Token op = this->accepted_token;
+                Token op = m_accepted_token;
                 if ((term = unaryExpression())) {
                     e->appendTerm(op, term);
                 }
@@ -722,10 +722,10 @@ Basic::Expression* Basic::Parser::additiveExpression(void) {
     
     
     if ((term = multiplicativeExpression())) {
-        if (this->token == TkPLUS or this->token == TkMINUS) {
+        if (m_token == TkPLUS or m_token == TkMINUS) {
             AdditiveExpression *e = new AdditiveExpression(term);
             while (accept(TkPLUS) or accept(TkMINUS)) {
-                Token op = this->accepted_token;
+                Token op = m_accepted_token;
                 if ((term = multiplicativeExpression())) {
                     e->appendTerm(op, term);
                 }
@@ -752,7 +752,7 @@ Basic::Expression* Basic::Parser::comparitiveExpression(void) {
     Expression *second = NULL;
     
     if ((first = additiveExpression())) {
-        Token t = this->token;
+        Token t = m_token;
         if (accept(TkEQUALS) || accept(TkNOTEQUALS) || accept(TkLT) || accept(TkGT) || accept(TkLTEQUALS) || accept(TkGTEQUALS)) {
             if ((second = additiveExpression())) {
                 return new ComparitiveExpression(first, t, second);                
@@ -776,7 +776,7 @@ Basic::Expression* Basic::Parser::andExpression(void) {
     Expression *term = NULL;
     
     if ((term = comparitiveExpression())) {
-        if (this->token == TkAND) {
+        if (m_token == TkAND) {
             AndExpression *e = new AndExpression();
             e->appendTerm(term);
             while (accept(TkAND)) {
@@ -804,7 +804,7 @@ Basic::Expression* Basic::Parser::orExpression(void) {
     Expression *term = NULL;
     
     if ((term = andExpression())) {
-        if (this->token == TkOR) {
+        if (m_token == TkOR) {
             OrExpression *e = new OrExpression();
             e->appendTerm(term);
             while (accept(TkOR)) {
