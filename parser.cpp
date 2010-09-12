@@ -17,6 +17,7 @@ bool Basic::Parser::accept(Token t) {
         this->accepted_token_value = tokeniser.getValue();
         this->accepted_token_line = tokeniser.getLine();
         this->accepted_token_column = tokeniser.getColumn();
+        this->accepted_token = this->token;
         this->token = tokeniser.getToken();
         return true;
     }
@@ -692,15 +693,11 @@ Basic::Expression* Basic::Parser::multiplicativeExpression(void) {
     
     if ((term = unaryExpression())) {
         if (this->token == TkMULTIPLY or this->token == TkDIVIDE or this->token == TkMOD) {
-            MultiplicativeExpression *e = new MultiplicativeExpression();
-            e->appendTerm(term);
-            e->appendOperator(this->token);
+            MultiplicativeExpression *e = new MultiplicativeExpression(term);
             while (accept(TkMULTIPLY) or accept(TkDIVIDE) or accept(TkMOD)) {
+                Token op = this->accepted_token;
                 if ((term = unaryExpression())) {
-                    e->appendTerm(term);
-                    if (this->token == TkMULTIPLY or this->token == TkDIVIDE or this->token == TkMOD) {
-                        e->appendOperator(this->token);
-                    }                    
+                    e->appendTerm(op, term);
                 }
                 else {
                     delete e;
@@ -723,17 +720,14 @@ Basic::Expression* Basic::Parser::multiplicativeExpression(void) {
 Basic::Expression* Basic::Parser::additiveExpression(void) {
     Expression *term = NULL;
     
+    
     if ((term = multiplicativeExpression())) {
         if (this->token == TkPLUS or this->token == TkMINUS) {
-            AdditiveExpression *e = new AdditiveExpression();
-            e->appendTerm(term);
-            e->appendOperator(this->token);
+            AdditiveExpression *e = new AdditiveExpression(term);
             while (accept(TkPLUS) or accept(TkMINUS)) {
+                Token op = this->accepted_token;
                 if ((term = multiplicativeExpression())) {
-                    e->appendTerm(multiplicativeExpression());
-                    if (this->token == TkPLUS or this->token == TkMINUS) {
-                        e->appendOperator(this->token);
-                    }                    
+                    e->appendTerm(op, term);
                 }
                 else {
                     delete e;
