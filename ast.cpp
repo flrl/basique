@@ -10,15 +10,55 @@
 #include "ast.h"
 #include "symboltable.h"
 
-void Basic::LiteralExpression::execute (void) const {
+/*extern*/ Basic::SymbolTable *g_symbol_table;
+
+void Basic::LiteralExpression::execute() const {
     ; // m_result is set at initialisation
 }
 
-void Basic::IdentifierExpression::execute (void) const {
-    
+void Basic::IdentifierExpression::execute() const {
+    // FIXME this needs lots of sanity checking
+    SymbolTable::Entry *object = g_symbol_table->find(m_identifier);
+    switch (object->type) {
+        case SymbolTable::BUILTIN_FUNCTION:
+            static_cast<BuiltinFunction*>(object->binding)->call(m_params);
+            m_result = static_cast<BuiltinFunction*>(object->binding)->getResult();
+            break;
+        case SymbolTable::FUNCTION:
+            static_cast<FunctionDefinition*>(object->binding)->call(m_params);
+            m_result = static_cast<BuiltinFunction*>(object->binding)->getResult();
+            break;
+        case SymbolTable::SUBROUTINE:
+            fprintf(stderr, "warning: attempting to call subroutine `%s' in expression at line %i, column %i\n",
+                    static_cast<const char *>(m_identifier), m_line, m_column);
+            static_cast<SubDefinition*>(object->binding)->call(m_params);
+            m_result.setUndefined();
+            break;
+        case SymbolTable::VARIANT:
+            m_result = *static_cast<Variant*>(object->binding);
+            break;
+        case SymbolTable::ARRAY: 
+            {
+                Array::Index index;
+                for (size_t i = 0; i < m_params->size(); i++) {
+                    m_params->param(i)->execute();
+                    index.push_back(m_params->param(i)->getResult().getIntValue());
+                }
+                const Array &array = *static_cast<Array*>(object->binding);
+                if (array.isValidIndex(index)) {
+                    m_result = array[index];                
+                }
+                else {
+                    m_result.setUndefined();
+                }
+            }
+            break;
+        default:
+            fprintf(stderr, "debug: unexpected symbol table entry type\n");
+    }
 }
 
-void Basic::UnaryExpression::execute (void) const {
+void Basic::UnaryExpression::execute() const {
     m_term->execute();
     Variant intermediate = m_term->getResult();
     if (m_op == TkNOT) {
@@ -42,11 +82,11 @@ void Basic::UnaryExpression::execute (void) const {
     }
 }
 
-void Basic::MultiplicativeExpression::execute (void) const {
+void Basic::MultiplicativeExpression::execute() const {
     m_first_term->execute();
     Variant intermediate = m_first_term->getResult();
     
-    for (std::list<OperatorTerm>::const_iterator term = m_other_terms.begin(); term != m_other_terms.end(); term++) {
+    for (std::list<OperatorTermWrapper>::const_iterator term = m_other_terms.begin(); term != m_other_terms.end(); term++) {
         term->term->execute();
         Variant t = term->term->getResult();
         
@@ -61,11 +101,11 @@ void Basic::MultiplicativeExpression::execute (void) const {
     m_result = intermediate;
 }
 
-void Basic::AdditiveExpression::execute (void) const {
+void Basic::AdditiveExpression::execute() const {
     m_first_term->execute();
     Variant intermediate = m_first_term->getResult();
     
-    for (std::list<OperatorTerm>::const_iterator term = m_other_terms.begin(); term != m_other_terms.end(); term++) {
+    for (std::list<OperatorTermWrapper>::const_iterator term = m_other_terms.begin(); term != m_other_terms.end(); term++) {
         term->term->execute();
         Variant t = term->term->getResult();
         
@@ -80,7 +120,7 @@ void Basic::AdditiveExpression::execute (void) const {
     m_result = intermediate;
 }
 
-void Basic::ComparitiveExpression::execute (void) const {
+void Basic::ComparitiveExpression::execute() const {
     bool intermediate = false;
     switch (m_cmp) {
         case TkEQUALS:      intermediate = (m_first == m_second); break;
@@ -95,7 +135,7 @@ void Basic::ComparitiveExpression::execute (void) const {
     m_result.setBoolValue(intermediate);
 }
 
-void Basic::AndExpression::execute (void) const {
+void Basic::AndExpression::execute() const {
     bool intermediate = true;
     for (std::list<Basic::Expression*>::const_iterator e = m_terms.begin(); e != m_terms.end(); e++) {
         (*e)->execute();
@@ -104,7 +144,7 @@ void Basic::AndExpression::execute (void) const {
     m_result.setBoolValue(intermediate);
 }
 
-void Basic::OrExpression::execute (void) const {
+void Basic::OrExpression::execute() const {
     bool intermediate = false;
     for (std::list<Basic::Expression*>::const_iterator e = m_terms.begin(); e != m_terms.end(); e++) {
         (*e)->execute();
@@ -113,13 +153,13 @@ void Basic::OrExpression::execute (void) const {
     m_result.setBoolValue(intermediate);
 }
 
-void Basic::Block::execute (void) const {
+void Basic::Block::execute() const {
     for (std::list<Basic::Statement*>::const_iterator s = m_statements.begin(); s != m_statements.end(); s++) {
         (*s)->execute();
     }
 }
 
-void Basic::PrintStatement::execute (void) const {
+void Basic::PrintStatement::execute() const {
     for (std::list<Basic::Expression*>::const_iterator e = m_expressions.begin(); e != m_expressions.end(); e++) {
         (*e)->execute();
         fputs((*e)->getResult().getStringValue(), stdout);
@@ -127,19 +167,19 @@ void Basic::PrintStatement::execute (void) const {
     if (m_append_eol)  putchar('\n');
 }
 
-void Basic::InputStatement::execute (void) const {
+void Basic::InputStatement::execute() const {
     
 }
 
-void Basic::LetStatement::execute (void) const {
+void Basic::LetStatement::execute() const {
     
 }
 
-void Basic::CallStatement::execute (void) const {
+void Basic::CallStatement::execute() const {
     
 }
 
-void Basic::IfStatement::execute (void) const {
+void Basic::IfStatement::execute() const {
     for (std::list<ConditionalBlock>::const_iterator cb = m_conditional_blocks.begin(); cb != m_conditional_blocks.end(); cb++) {
         cb->condition->execute();
         if (cb->condition->getResult().getBoolValue() == true) {
@@ -151,7 +191,7 @@ void Basic::IfStatement::execute (void) const {
     m_else_block->execute();
 }
 
-void Basic::DoStatement::execute (void) const {
+void Basic::DoStatement::execute() const {
     bool condition_reached = false;
     while (condition_reached == false) {
         if (m_condition_when == DcPRECONDITION) {
@@ -201,35 +241,43 @@ void Basic::DoStatement::execute (void) const {
     }
 }
 
-void Basic::ForStatement::execute (void) const {
+void Basic::ForStatement::execute() const {
     
 }
 
-void Basic::DimStatement::execute (void) const {
+void Basic::DimStatement::execute() const {
     
 }
 
-void Basic::AcceptedParamList::execute (void) const {
+void Basic::AcceptedParamList::execute() const {
     
 }
 
-void Basic::ParamList::execute (void) const {
+void Basic::ParamList::execute() const {
     ;  // does nothing
 }
 
-void Basic::ArraySubscript::execute (void) const {
+void Basic::ArraySubscript::execute() const {
     
 }
 
-void Basic::ArrayDimension::execute (void) const {
+void Basic::ArrayDimension::execute() const {
     
 }
 
-void Basic::FunctionDefinition::execute (void) const {
+void Basic::FunctionDefinition::execute() const {
     
 }
 
-void Basic::SubDefinition::execute (void) const {
+void Basic::FunctionDefinition::call(const ParamList *params) const {
+    
+}
+
+void Basic::SubDefinition::execute() const {
+    
+}
+
+void Basic::SubDefinition::call(const ParamList *params) const {
     
 }
 
@@ -294,14 +342,14 @@ Basic::Block::~Block() {
 
 Basic::MultiplicativeExpression::~MultiplicativeExpression() {
     delete m_first_term;
-    for (std::list<OperatorTerm>::iterator e = m_other_terms.begin(); e != m_other_terms.end(); e++) {
+    for (std::list<OperatorTermWrapper>::iterator e = m_other_terms.begin(); e != m_other_terms.end(); e++) {
         delete (e->term);
     }
 }
 
 Basic::AdditiveExpression::~AdditiveExpression() {
     delete m_first_term;
-    for (std::list<OperatorTerm>::iterator e = m_other_terms.begin(); e != m_other_terms.end(); e++) {
+    for (std::list<OperatorTermWrapper>::iterator e = m_other_terms.begin(); e != m_other_terms.end(); e++) {
         delete (e->term);
     }
 }
