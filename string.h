@@ -17,8 +17,8 @@ public:
     String();
     ~String();
     
-    operator const char*(void) const { return _cstring; }
-    size_t length(void) const { return _length; }
+    operator const char*(void) const { return m_cstring; }
+    size_t length(void) const { return m_length; }
     
     bool operator==(const String &) const;
     bool operator<(const String &) const;
@@ -28,9 +28,9 @@ public:
     String &operator+=(const String &);
     
 private:
-    size_t _length;
-    size_t _size;
-    char *_cstring;
+    size_t  m_size;
+    size_t  m_length;
+    char    *m_cstring;
 };
 
 String operator+(const String &, const String &);

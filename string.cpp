@@ -13,78 +13,78 @@
 
 String::String(const char *s) {
     if (s) {
-        _length = strlen(s);
-        _size = 1 + _length;
-        _cstring = new char[_size];
-        strcpy(_cstring, s);   
+        m_length = strlen(s);
+        m_size = 1 + m_length;
+        m_cstring = new char[m_size];
+        strcpy(m_cstring, s);   
     }
     else {
-        _length = 0;
-        _size = 1;
-        _cstring = new char[_size];
-        _cstring[0] = '\0';
+        m_length = 0;
+        m_size = 1;
+        m_cstring = new char[m_size];
+        m_cstring[0] = '\0';
     }
 }
 
 String::String(const String &s) {
-    _length = s.length();
-    _size = 1 + _length;
-    _cstring = new char[_size];
-    strcpy(_cstring, s);
+    m_length = s.length();
+    m_size = 1 + m_length;
+    m_cstring = new char[m_size];
+    strcpy(m_cstring, s);
 }
 
 String::String() {
-    _length = 0;
-    _size = 1;
-    _cstring = new char[_size];
-    _cstring[0] = '\0';
+    m_length = 0;
+    m_size = 1;
+    m_cstring = new char[m_size];
+    m_cstring[0] = '\0';
 }
 
 String::~String() {
-    delete[] _cstring;
+    delete[] m_cstring;
 }
 
 bool String::operator==(const String &other) const {
-    return strcmp(_cstring, other) == 0;
+    return strcmp(m_cstring, other) == 0;
 }
 
 bool String::operator<(const String &other) const {
-    return strcmp(_cstring, other) < 0;
+    return strcmp(m_cstring, other) < 0;
 }
 
 bool String::operator>(const String &other) const {
-    return strcmp(_cstring, other) > 0;
+    return strcmp(m_cstring, other) > 0;
 }
 
 String &String::operator=(const String &other) {
     if (this == &other)  return *this;
     
-    if (other.length() >= _size) {
-        delete[] _cstring;
-        _length = other.length();
-        _size = 1 + _length;
-        _cstring = new char[_size];
-        strcpy(_cstring, other);        
+    if (other.length() >= m_size) {
+        delete[] m_cstring;
+        m_length = other.length();
+        m_size = 1 + m_length;
+        m_cstring = new char[m_size];
+        strcpy(m_cstring, other);        
     }
     else {
-        strcpy(_cstring, other);
+        strcpy(m_cstring, other);
     }
     
     return *this;
 }
 
 String &String::operator+=(const String &other) {
-    _length += other.length();
-    if (_size <= _length) {
-        _size = 1 + _length;
-        char *tmp = new char[_size];
-        strcpy(tmp, _cstring);
+    m_length += other.length();
+    if (m_size <= m_length) {
+        m_size = 1 + m_length;
+        char *tmp = new char[m_size];
+        strcpy(tmp, m_cstring);
         strcat(tmp, other);
-        delete[] _cstring;
-        _cstring = tmp;
+        delete[] m_cstring;
+        m_cstring = tmp;
     }
     else {
-        strcat(_cstring, other);
+        strcat(m_cstring, other);
     }
     
     return *this;
