@@ -62,7 +62,7 @@ void Basic::UnaryExpression::execute() const {
     m_term->execute();
     Variant intermediate = m_term->getResult();
     if (m_op == TkNOT) {
-        m_result.setBoolValue(!intermediate.getBoolValue());
+        m_result.setBoolValue(not intermediate.getBoolValue());
     }
     else if (m_op == TkMINUS) {
         switch(intermediate.getType()) {

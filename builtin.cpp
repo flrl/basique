@@ -14,13 +14,9 @@ void Basic::BF_left::call(const ParamList *params) {
     m_result.setUndefined();
     if (params->size() != 2)  return;
 
-    const Expression *e_str = params->param(0);
-    e_str->execute();
-    String str(e_str->getResult().getStringValue());
+    String str(params->paramResult(0).getStringValue());
     
-    const Expression *e_len = params->param(1);
-    e_len->execute();
-    int len = e_len->getResult().getIntValue();
+    int len = params->paramResult(1).getIntValue();
     if (len < 1)  return;
 
     char *buffer = new char[1 + len];
@@ -34,13 +30,9 @@ void Basic::BF_right::call(const ParamList *params) {
     m_result.setUndefined();
     if (params->size() != 2)  return;
     
-    const Expression *e_str = params->param(0);
-    e_str->execute();
-    String str(e_str->getResult().getStringValue());
+    String str(params->paramResult(0).getStringValue());
     
-    const Expression *e_len = params->param(1);
-    e_len->execute();
-    int len = e_len->getResult().getIntValue();
+    int len = params->paramResult(1).getIntValue();
     if (len < 1)  return;
     
     const char *p = str;
@@ -53,18 +45,12 @@ void Basic::BF_mid::call(const ParamList *params) {
     m_result.setUndefined();
     if (params->size() != 3)  return;
     
-    const Expression *e_str = params->param(0);
-    e_str->execute();
-    String str(e_str->getResult().getStringValue());
+    String str(params->paramResult(0).getStringValue());
     
-    const Expression *e_start = params->param(1);
-    e_start->execute();
-    int start = e_start->getResult().getIntValue();
+    int start = params->paramResult(1).getIntValue();
     if (start < 0)  return;
     
-    const Expression *e_len = params->param(2);
-    e_len->execute();
-    int len = e_len->getResult().getIntValue();
+    int len = params->paramResult(2).getIntValue();
     if (len < 1)  return;
     
     const char *p = str;
@@ -80,9 +66,7 @@ void Basic::BF_len::call(const ParamList *params) {
     m_result.setUndefined();
     if (params->size() != 1)  return;
     
-    const Expression *e_str = params->param(0);
-    e_str->execute();
-    String str(e_str->getResult().getStringValue());
+    String str(params->paramResult(0).getStringValue());
     
     m_result.setIntValue(str.length());
 }

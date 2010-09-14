@@ -20,7 +20,9 @@
 
 namespace Basic {
     class ASTNode;
-
+    class Expression;
+    class Statement; 
+    
     class AcceptedParamList;
     class ParamList;
     class ArraySubscript;
@@ -29,17 +31,6 @@ namespace Basic {
     class FunctionDefinition;
     class SubDefinition;
     
-    class Expression;
-    class LiteralExpression;
-    class IdentifierExpression;
-    class UnaryExpression;
-    class MultiplicativeExpression;
-    class AdditiveExpression;
-    class ComparitiveExpression;
-    class AndExpression;
-    class OrExpression;
-    
-    class Statement;
     class PrintStatement;
     class InputStatement;
     class LetStatement;
@@ -49,6 +40,15 @@ namespace Basic {
     class ForStatement;
     class DimStatement;
 
+    class LiteralExpression;
+    class IdentifierExpression;
+    class UnaryExpression;
+    class MultiplicativeExpression;
+    class AdditiveExpression;
+    class ComparitiveExpression;
+    class AndExpression;
+    class OrExpression;
+    
     class Block;
     
     class Identifier;
@@ -76,6 +76,22 @@ protected:
     int m_line;
     int m_column;
 };
+
+class Basic::Expression : public ASTNode {
+public:
+//    Expression() { }
+    virtual ~Expression() { }
+    virtual void execute(void) const =0;
+    Variant getResult() const { return m_result; }
+protected:
+    mutable Variant m_result;
+};
+
+class Basic::Statement : public ASTNode { 
+public:
+    virtual ~Statement() { }
+};
+
 
 class Basic::AcceptedParamList : public ASTNode {
 public:
@@ -131,6 +147,7 @@ public:
     void appendExpression(Expression *e) { m_expressions.push_back(e); }
     size_t size() const { return m_expressions.size(); }
     const Expression *param(size_t index) const { return m_expressions[index]; }
+    Variant paramResult(size_t index) const { m_expressions[index]->execute(); return m_expressions[index]->getResult(); }
 private:
     std::vector<Basic::Expression *> m_expressions;
 };
@@ -157,14 +174,6 @@ private:
     std::list<ArrayDimension::Specification> m_dimensions;
 };
 
-class Basic::Expression : public ASTNode {
-public:
-    Expression() { }
-    virtual ~Expression() { }
-    Variant getResult() const { return m_result; }
-protected:
-    mutable Variant m_result;
-};
 
 class Basic::IdentifierExpression : public Expression {
 public:
@@ -245,11 +254,6 @@ private:
     std::list<Expression *> m_terms;
 };
 
-
-class Basic::Statement : public ASTNode { 
-public:
-    virtual ~Statement() { }
-};
 
 class Basic::PrintStatement : public Statement {
 public:
