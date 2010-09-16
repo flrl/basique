@@ -118,13 +118,11 @@ public:
     FunctionDefinition(const String &identifier, AcceptedParamList *a, Block *b) : m_identifier(identifier), m_accepted_params(a), m_body(b) { }
     ~FunctionDefinition() { delete m_accepted_params; delete m_body; }
     virtual void execute() const;
-    void call(const ParamList *) const;
-    Variant getResult() const { return m_result; }
+    Variant call(const ParamList *) const;
 private:
     const String m_identifier;
     AcceptedParamList *m_accepted_params;
     Block *m_body;
-    Variant m_result;
 };
 
 class Basic::SubDefinition : public ASTNode {
@@ -147,7 +145,7 @@ public:
     void appendExpression(Expression *e) { m_expressions.push_back(e); }
     size_t size() const { return m_expressions.size(); }
     const Expression *param(size_t index) const { return m_expressions[index]; }
-    Variant paramResult(size_t index) const { m_expressions[index]->execute(); return m_expressions[index]->getResult(); }
+    Variant evaluate(size_t index) const { m_expressions[index]->execute(); return m_expressions[index]->getResult(); }
 private:
     std::vector<Basic::Expression *> m_expressions;
 };

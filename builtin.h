@@ -11,45 +11,17 @@
 #define _BUILTIN_H
 
 #include "ast.h"
+#include "variant.h"
 
 namespace Basic {
-    class BuiltinFunction;
-    
-    class BF_left;
-    class BF_right;
-    class BF_mid;
-    class BF_len;
-};
-
-class Basic::BuiltinFunction {
-public:
-    virtual ~BuiltinFunction() { }
-    virtual void call(const ParamList *) = 0;
-    Variant getResult() { return m_result; }
-protected:
-    Variant m_result;
-};
-
-
-class Basic::BF_left : public BuiltinFunction {
-public:
-    void call(const ParamList *);
-};
-
-class Basic::BF_right : public BuiltinFunction {
-public:
-    void call(const ParamList *);
-};
-
-class Basic::BF_mid : public BuiltinFunction {
-public:
-    void call(const ParamList *);
-};
-
-class Basic::BF_len : public BuiltinFunction {
-public:
-    void call(const ParamList *);
-};
-
+    namespace builtin {
+        typedef Variant(function)(const ParamList *);
+        
+        Variant left(const ParamList *);
+        Variant right(const ParamList *);
+        Variant mid(const ParamList *);
+        Variant len(const ParamList *);
+    }
+}
 
 #endif

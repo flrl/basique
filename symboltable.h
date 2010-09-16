@@ -29,17 +29,28 @@ namespace Basic {
 class Basic::SymbolTable {
 public:
     enum EntryType {
-        BUILTIN_FUNCTION,
-        FUNCTION,
-        SUBROUTINE,
-        VARIANT,
-        ARRAY,
+        BUILTIN_FUNCTION =  1,
+        FUNCTION         =  2,
+        SUBROUTINE       =  4,
+        VARIANT          =  8,
+        ARRAY            = 16,
         // etc        
     };
     struct Entry {
-        Entry(EntryType type, void *binding) : type(type), binding(binding) { }
+        Entry(EntryType type, builtin::function *builtin_function) : type(type), builtin_function(builtin_function) {}
+        Entry(EntryType type, FunctionDefinition *function) : type(type), function(function) {}
+        Entry(EntryType type, SubDefinition *sub) : type(type), sub(sub) {}
+        Entry(EntryType type, Variant *variant) : type(type), variant(variant) {}
+        Entry(EntryType type, Array *array) : type(type), array(array) {}
+
         EntryType type;
-        void *binding;
+        union { 
+            builtin::function *builtin_function;
+            FunctionDefinition *function;
+            SubDefinition *sub;
+            Variant *variant;
+            Array *array;
+        };
     };
     typedef std::map<const String, Entry> Frame;
     
@@ -49,18 +60,19 @@ public:
     void startScope();
     void endScope();
     
-    const Entry *find(const String &) const;
-    Entry *find(const String &identifier) { return const_cast<Entry*>(find(identifier)); }
+    const Entry *find(const String &, unsigned int=all_entry_types) const;
+    Entry *find(const String &identifier, unsigned int mask=all_entry_types) { return const_cast<Entry*>(find(identifier, mask)); }
 
     bool defined(const String&) const;
 
-    void defineBuiltinFunction(const String &, BuiltinFunction *);
+    void defineBuiltinFunction(const String &, builtin::function);
     void defineFunction(const String &, FunctionDefinition *);
     void defineSubroutine(const String &, SubDefinition *);
     void defineVariant(const String &, Variant *);
     void defineArray(const String &, Array *);
     
 private:
+    static const unsigned int all_entry_types = BUILTIN_FUNCTION | FUNCTION | SUBROUTINE | VARIANT | ARRAY;
     std::vector<Frame> m_frames;
     
 };
