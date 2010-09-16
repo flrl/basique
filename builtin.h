@@ -13,7 +13,7 @@
 #include "ast.h"
 #include "variant.h"
 
-namespace Basic {
+namespace basic {
     namespace builtin {
         typedef Variant(function)(const ParamList *);
         

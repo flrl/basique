@@ -10,7 +10,7 @@
 #include "builtin.h"
 
 // str left(str, len)
-Basic::Variant Basic::builtin::left(const ParamList *params) {
+basic::Variant basic::builtin::left(const ParamList *params) {
     Variant result;
     if (params->size() != 2)  return result;
 
@@ -28,7 +28,7 @@ Basic::Variant Basic::builtin::left(const ParamList *params) {
 }
 
 // str right(str, len)
-Basic::Variant Basic::builtin::right(const ParamList *params) {
+basic::Variant basic::builtin::right(const ParamList *params) {
     Variant result;
     if (params->size() != 2)  return result;
     
@@ -45,7 +45,7 @@ Basic::Variant Basic::builtin::right(const ParamList *params) {
 }
 
 // str mid(str, start, len)
-Basic::Variant Basic::builtin::mid(const ParamList *params) {
+basic::Variant basic::builtin::mid(const ParamList *params) {
     Variant result;
     if (params->size() != 3)  return result;
     
@@ -68,7 +68,7 @@ Basic::Variant Basic::builtin::mid(const ParamList *params) {
 }
 
 // int len(str)
-Basic::Variant Basic::builtin::len(const ParamList *params) {
+basic::Variant basic::builtin::len(const ParamList *params) {
     Variant result;
     if (params->size() != 1)  return result;
     

@@ -14,11 +14,11 @@
 #include "tokeniser.h"
 #include "variant.h"
 
-namespace Basic {
+namespace basic {
     class Parser;
 }
 
-class Basic::Parser {
+class basic::Parser {
 public:
     Parser(void);
     

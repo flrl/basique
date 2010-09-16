@@ -14,9 +14,9 @@
 
 #include "tokeniser.h"
 
-std::map<const String, Basic::Token> Basic::Tokeniser::keywords = std::map<const String, Basic::Token>();
+std::map<const String, basic::Token> basic::Tokeniser::keywords = std::map<const String, basic::Token>();
 
-void Basic::Tokeniser::setupKeywords(void) {
+void basic::Tokeniser::setupKeywords(void) {
     if (keywords.empty()) {
         keywords["and"] = TkAND;
         keywords["or"] = TkOR;
@@ -53,7 +53,7 @@ void Basic::Tokeniser::setupKeywords(void) {
     }
 }
 
-const char* Basic::Tokeniser::tokenDescriptions[] = {
+const char* basic::Tokeniser::tokenDescriptions[] = {
     "invalid token",
     "end of file", "end of line", ":", ",", ";",
     "identifier", "literal",
@@ -71,7 +71,7 @@ const char* Basic::Tokeniser::tokenDescriptions[] = {
     "dim", "integer", "real", "string", "variant",
 };
 
-Basic::Tokeniser::Tokeniser(const char * filename) {
+basic::Tokeniser::Tokeniser(const char * filename) {
     this->source = fopen(filename, "r");
     this->token_line = this->cursor_line = 0;
     this->token_column = this->cursor_column = 0;
@@ -79,7 +79,7 @@ Basic::Tokeniser::Tokeniser(const char * filename) {
     setupKeywords();
 }
 
-Basic::Tokeniser::Tokeniser(int fd) {
+basic::Tokeniser::Tokeniser(int fd) {
     this->source = fdopen(fd, "r");
     this->token_line = this->cursor_line = 0;
     this->token_column = this->cursor_column = 0;
@@ -87,7 +87,7 @@ Basic::Tokeniser::Tokeniser(int fd) {
     setupKeywords();
 }
 
-Basic::Token Basic::Tokeniser::getToken(void) {
+basic::Token basic::Tokeniser::getToken(void) {
     Token token;
     int ch;
     
@@ -160,7 +160,7 @@ Basic::Token Basic::Tokeniser::getToken(void) {
 // 'first' as a character (i.e. this is not an int value!).
 // Sets 'value' to the value found.
 // Hint: to start without supplying an initial digit, pass in a leading '0'.
-Basic::Token Basic::Tokeniser::readNumeric(char first) {
+basic::Token basic::Tokeniser::readNumeric(char first) {
     int ch = first, i;
     double d, div;
     
@@ -193,7 +193,7 @@ Basic::Token Basic::Tokeniser::readNumeric(char first) {
 // If the string is not a recognised keyword, sets 'value' to the string found and returns 
 // TkIDENTIFIER; otherwise returns an appropriate Token value for the keyword matched.
 // This function treats the underscore character as an alphanumeric character.
-Basic::Token Basic::Tokeniser::readAlphanumeric(char first) {
+basic::Token basic::Tokeniser::readAlphanumeric(char first) {
     Token token;
     int ch = first, i = 0, len = MAX_IDENTIFIER_LENGTH;
     char *buffer = new char[len];
@@ -231,7 +231,7 @@ Basic::Token Basic::Tokeniser::readAlphanumeric(char first) {
 // its value is assumed to be a double-quote character and is ignored.
 // On success, stores the string parsed in 'value' and returns TkSTRING.  On failure
 // returns TkINVALID;
-Basic::Token Basic::Tokeniser::readQuoted(char first) {
+basic::Token basic::Tokeniser::readQuoted(char first) {
     int ch = first, i = 0, len = 32;
     char *buffer = new char[len];
     bool found_closing_double_quote = false;
@@ -300,7 +300,7 @@ Basic::Token Basic::Tokeniser::readQuoted(char first) {
     return TkLITERAL;
 }
 
-int Basic::Tokeniser::readHexByte(void) {
+int basic::Tokeniser::readHexByte(void) {
     int val;
     char digits[3], *endptr;
     int i = 0, line = cursor_line, column = cursor_column;
@@ -318,7 +318,7 @@ int Basic::Tokeniser::readHexByte(void) {
     return (char) val;
 }
 
-int Basic::Tokeniser::readOctalByte(void) {
+int basic::Tokeniser::readOctalByte(void) {
     int val;
     char digits[4], *endptr;
     int i = 0, line = cursor_line, column = cursor_column;
@@ -338,7 +338,7 @@ int Basic::Tokeniser::readOctalByte(void) {
     return (char) val;
 }
 
-void Basic::Tokeniser::skipWhitespace(void) {
+void basic::Tokeniser::skipWhitespace(void) {
     int ch=0, saved=0;
     while ((ch = peekChar()) != EOF) {
         // look ahead to see what's next
