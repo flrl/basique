@@ -13,11 +13,11 @@
 
 #include "string.h"
 
-namespace Basic {
+namespace basic {
     class Variant;
 }
 
-class Basic::Variant {
+class basic::Variant {
 public:
     enum Type { VaUNDEF, VaBOOL, VaINT, VaDOUBLE, VaSTRING };
     
@@ -65,26 +65,26 @@ private:
     Type    m_type;
 };
 
-inline Basic::Variant operator+(const Basic::Variant &left, const Basic::Variant &right) {
-    Basic::Variant result(left);
+inline basic::Variant operator+(const basic::Variant &left, const basic::Variant &right) {
+    basic::Variant result(left);
     result += right;
     return result;
 }
 
-inline Basic::Variant operator-(const Basic::Variant &left, const Basic::Variant &right) {
-    Basic::Variant result(left);
+inline basic::Variant operator-(const basic::Variant &left, const basic::Variant &right) {
+    basic::Variant result(left);
     result -= right;
     return result;
 }
 
-inline Basic::Variant operator*(const Basic::Variant &left, const Basic::Variant &right) {
-    Basic::Variant result(left);
+inline basic::Variant operator*(const basic::Variant &left, const basic::Variant &right) {
+    basic::Variant result(left);
     result *= right;
     return result;
 }
 
-inline Basic::Variant operator/(const Basic::Variant &left, const Basic::Variant &right) {
-    Basic::Variant result(left);
+inline basic::Variant operator/(const basic::Variant &left, const basic::Variant &right) {
+    basic::Variant result(left);
     result /= right;
     return result;
 }

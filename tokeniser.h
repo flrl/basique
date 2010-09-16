@@ -17,7 +17,7 @@
 
 #define MAX_IDENTIFIER_LENGTH (31)
 
-namespace Basic {
+namespace basic {
     class Tokeniser;
     enum Token {
         /* special stuff */
@@ -46,7 +46,7 @@ namespace Basic {
     };
 }
 
-class Basic::Tokeniser {
+class basic::Tokeniser {
 public:
     Tokeniser(const char *);
     Tokeniser(int);
@@ -56,7 +56,7 @@ public:
     int getLine(void) const { return token_line; }
     int getColumn(void) const { return token_column; }
     
-    Basic::Variant getValue(void) const { return value; }
+    basic::Variant getValue(void) const { return value; }
     
     static const char *tokenDescriptions[Tk_MAX];
 
@@ -69,7 +69,7 @@ private:
     int token_column;
     int cursor_line;
     int cursor_column;
-    Basic::Variant value;
+    basic::Variant value;
     
     void skipWhitespace(void);
     void updateTokenPosition(void) { token_line = cursor_line; token_column = cursor_column; }

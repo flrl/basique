@@ -11,7 +11,7 @@
 
 #include "array.h"
 
-Basic::Array::Array(const std::vector<DimensionSpecification> &dimspecs) {
+basic::Array::Array(const std::vector<DimensionSpecification> &dimspecs) {
     size_t total_size = 1;
     m_dimensions.reserve(dimspecs.size());
     if (dimspecs.size() == 0)  throw BadDimensionSpecification();
@@ -26,11 +26,11 @@ Basic::Array::Array(const std::vector<DimensionSpecification> &dimspecs) {
     m_data.resize(total_size);
 }
 
-Basic::Array::~Array() {
+basic::Array::~Array() {
     ;
 }
 
-bool Basic::Array::isValidIndex(const Index &index) const {
+bool basic::Array::isValidIndex(const Index &index) const {
     if (index.size() != m_dimensions.size())  return false;
 
     for (size_t d = 0; d < m_dimensions.size(); d++) {
@@ -50,7 +50,7 @@ bool Basic::Array::isValidIndex(const Index &index) const {
 //                          j * sizeof(k0..kn)      +
 //                          k * sizeof(T)
 
-const Basic::Variant& Basic::Array::itemAt(const Index &index) const {
+const basic::Variant& basic::Array::itemAt(const Index &index) const {
     if (index.size() != m_dimensions.size())  throw IndexOutOfBounds();
     size_t actual_index = 0;
     size_t size_of_last_dimension = 1;

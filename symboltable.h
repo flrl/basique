@@ -22,11 +22,11 @@
 #include "string.h"
 #include "variant.h"
 
-namespace Basic {
+namespace basic {
     class SymbolTable;
 }
 
-class Basic::SymbolTable {
+class basic::SymbolTable {
 public:
     enum EntryType {
         BUILTIN_FUNCTION =  1,

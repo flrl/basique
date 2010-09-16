@@ -13,7 +13,7 @@
 
 #include "variant.h"
 
-Basic::Variant::Variant(const Variant &v) : m_bool_value(v.m_bool_value), 
+basic::Variant::Variant(const Variant &v) : m_bool_value(v.m_bool_value), 
                                             m_int_value(v.m_int_value), 
                                             m_double_value(v.m_double_value), 
                                             m_string_value (v.m_string_value), 
@@ -22,7 +22,7 @@ Basic::Variant::Variant(const Variant &v) : m_bool_value(v.m_bool_value),
     ;
 }
 
-bool Basic::Variant::getBoolValue(void) const {
+bool basic::Variant::getBoolValue(void) const {
     switch (m_type) {
         case VaBOOL:
             return m_bool_value;
@@ -38,7 +38,7 @@ bool Basic::Variant::getBoolValue(void) const {
     }
 }
 
-int Basic::Variant::getIntValue(void) const {
+int basic::Variant::getIntValue(void) const {
     switch (m_type) {
         case VaBOOL:
             return m_bool_value ? 1 : 0;
@@ -54,7 +54,7 @@ int Basic::Variant::getIntValue(void) const {
     }
 }
 
-double Basic::Variant::getDoubleValue(void) const {
+double basic::Variant::getDoubleValue(void) const {
     switch (m_type) {
         case VaBOOL:
             return m_bool_value ? 1.0 : 0.0 ;
@@ -71,7 +71,7 @@ double Basic::Variant::getDoubleValue(void) const {
     }
 }
 
-String Basic::Variant::getStringValue(void) const {
+String basic::Variant::getStringValue(void) const {
     char *buffer = NULL;
     
     switch (m_type) {
@@ -100,7 +100,7 @@ String Basic::Variant::getStringValue(void) const {
     return result;
 }
 
-void Basic::Variant::setBoolValue(bool b) {
+void basic::Variant::setBoolValue(bool b) {
     m_bool_value = b;
     m_int_value = 0;
     m_double_value = 0.0;
@@ -108,7 +108,7 @@ void Basic::Variant::setBoolValue(bool b) {
     m_type = VaBOOL;
 }
 
-void Basic::Variant::setIntValue(int i) {
+void basic::Variant::setIntValue(int i) {
     m_bool_value = false;
     m_int_value = i;
     m_double_value = 0.0;
@@ -116,7 +116,7 @@ void Basic::Variant::setIntValue(int i) {
     m_type = VaINT;    
 }
 
-void Basic::Variant::setDoubleValue(double d) {
+void basic::Variant::setDoubleValue(double d) {
     m_bool_value = false;
     m_int_value = 0;
     m_double_value = d;
@@ -124,7 +124,7 @@ void Basic::Variant::setDoubleValue(double d) {
     m_type = VaDOUBLE;
 }
 
-void Basic::Variant::setStringValue(const String &s) {
+void basic::Variant::setStringValue(const String &s) {
     m_bool_value = false;
     m_int_value = 0;
     m_double_value = 0.0;
@@ -132,7 +132,7 @@ void Basic::Variant::setStringValue(const String &s) {
     m_type = VaSTRING;   
 }
 
-void Basic::Variant::setDefaultValueForType(Basic::Variant::Type type){
+void basic::Variant::setDefaultValueForType(basic::Variant::Type type){
     switch (type) {
         case VaBOOL:
             setBoolValue(false);
@@ -152,7 +152,7 @@ void Basic::Variant::setDefaultValueForType(Basic::Variant::Type type){
     }
 }
 
-Basic::Variant &Basic::Variant::operator+=(const Basic::Variant &other) {
+basic::Variant &basic::Variant::operator+=(const basic::Variant &other) {
     if (other.isUndef()) {
         fprintf(stderr, "warning: undefined value in addition at line ..., column ...\n");
     }
@@ -179,7 +179,7 @@ Basic::Variant &Basic::Variant::operator+=(const Basic::Variant &other) {
     return *this;
 }
 
-Basic::Variant &Basic::Variant::operator-=(const Basic::Variant &other) {
+basic::Variant &basic::Variant::operator-=(const basic::Variant &other) {
     if (other.isUndef()) {
         fprintf(stderr, "warning: undefined value in subtraction at line ..., column ...\n");        
     }
@@ -206,7 +206,7 @@ Basic::Variant &Basic::Variant::operator-=(const Basic::Variant &other) {
     return *this;
 }
 
-Basic::Variant &Basic::Variant::operator*=(const Basic::Variant &other) {
+basic::Variant &basic::Variant::operator*=(const basic::Variant &other) {
     if (other.isUndef()) {
         fprintf(stderr, "warning: undefined value in multiplication at line ..., column ...\n");
     }
@@ -233,7 +233,7 @@ Basic::Variant &Basic::Variant::operator*=(const Basic::Variant &other) {
     return *this;
 }
 
-Basic::Variant &Basic::Variant::operator/=(const Basic::Variant &other) {
+basic::Variant &basic::Variant::operator/=(const basic::Variant &other) {
     if (other.isUndef()) {
         fprintf(stderr, "warning: undefined value in division at line ..., column ...\n");
     }

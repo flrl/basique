@@ -15,11 +15,11 @@
 
 #include "variant.h"
 
-namespace Basic { 
+namespace basic { 
     class Array;
 }
 
-class Basic::Array {
+class basic::Array {
 public:
     typedef std::pair<int, int> DimensionSpecification;
     typedef std::vector<int> Index;
