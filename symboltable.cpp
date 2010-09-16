@@ -24,8 +24,8 @@ void Basic::SymbolTable::endScope(void) {
             case BUILTIN_FUNCTION:  break;
             case FUNCTION:          break;
             case SUBROUTINE:        break;
-            case VARIANT:           delete static_cast<Variant *>(entry.binding);   break;
-            case ARRAY:             delete static_cast<Array *>(entry.binding);     break;
+            case VARIANT:           delete entry.variant;   break;
+            case ARRAY:             delete entry.array;     break;
             default:
                 fprintf(stderr, "warning: unrecognised symbol table entry type in SymbolTable::endScope()\n");
         }
@@ -34,10 +34,11 @@ void Basic::SymbolTable::endScope(void) {
     m_frames.pop_back();
 }
 
-const Basic::SymbolTable::Entry *Basic::SymbolTable::find(const String &identifier) const {
+const Basic::SymbolTable::Entry *Basic::SymbolTable::find(const String &identifier, unsigned int accepted_types) const {
     for (std::vector<Frame>::const_reverse_iterator frame = m_frames.rbegin(); frame != m_frames.rend(); frame++) {
         Frame::const_iterator result = frame->find(identifier);
-        if (result != frame->end())  return &result->second;  // iterator of map derefs to pair<key_t, value_t>
+        // iterator of map derefs to a std::pair<key_T, value_T>
+        if (result != frame->end() and (accepted_types == 0 or (accepted_types & result->second.type)))  return &result->second;
     }
 
     return NULL;
@@ -50,7 +51,7 @@ bool Basic::SymbolTable::defined(const String &identifier) const {
     return false;
 }
 
-void Basic::SymbolTable::defineBuiltinFunction(const String &identifier, BuiltinFunction *binding) {
+void Basic::SymbolTable::defineBuiltinFunction(const String &identifier, builtin::function *binding) {
     Frame &frame = m_frames.back();
     frame.insert(std::make_pair(identifier, Entry(BUILTIN_FUNCTION, binding)));
 }

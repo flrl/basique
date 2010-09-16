@@ -21,21 +21,19 @@ void Basic::IdentifierExpression::execute() const {
     SymbolTable::Entry *object = g_symbol_table->find(m_identifier);
     switch (object->type) {
         case SymbolTable::BUILTIN_FUNCTION:
-            static_cast<BuiltinFunction*>(object->binding)->call(m_params);
-            m_result = static_cast<BuiltinFunction*>(object->binding)->getResult();
+            m_result = object->builtin_function(m_params);
             break;
         case SymbolTable::FUNCTION:
-            static_cast<FunctionDefinition*>(object->binding)->call(m_params);
-            m_result = static_cast<BuiltinFunction*>(object->binding)->getResult();
+            m_result = object->function->call(m_params);
             break;
         case SymbolTable::SUBROUTINE:
             fprintf(stderr, "warning: attempting to call subroutine `%s' in expression at line %i, column %i\n",
                     static_cast<const char *>(m_identifier), m_line, m_column);
-            static_cast<SubDefinition*>(object->binding)->call(m_params);
+            object->sub->call(m_params);
             m_result.setUndefined();
             break;
         case SymbolTable::VARIANT:
-            m_result = *static_cast<Variant*>(object->binding);
+            m_result = object->variant;
             break;
         case SymbolTable::ARRAY: 
             {
@@ -44,7 +42,7 @@ void Basic::IdentifierExpression::execute() const {
                     m_params->param(i)->execute();
                     index.push_back(m_params->param(i)->getResult().getIntValue());
                 }
-                const Array &array = *static_cast<Array*>(object->binding);
+                const Array &array = *object->array;
                 if (array.isValidIndex(index)) {
                     m_result = array[index];                
                 }
@@ -269,8 +267,8 @@ void Basic::FunctionDefinition::execute() const {
     
 }
 
-void Basic::FunctionDefinition::call(const ParamList *params) const {
-    
+Basic::Variant Basic::FunctionDefinition::call(const ParamList *params) const {
+    return Variant(); // FIXME
 }
 
 void Basic::SubDefinition::execute() const {

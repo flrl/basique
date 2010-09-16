@@ -10,63 +10,71 @@
 #include "builtin.h"
 
 // str left(str, len)
-void Basic::BF_left::call(const ParamList *params) {
-    m_result.setUndefined();
-    if (params->size() != 2)  return;
+Basic::Variant Basic::builtin::left(const ParamList *params) {
+    Variant result;
+    if (params->size() != 2)  return result;
 
-    String str(params->paramResult(0).getStringValue());
+    String str(params->evaluate(0).getStringValue());
     
-    int len = params->paramResult(1).getIntValue();
-    if (len < 1)  return;
+    int len = params->evaluate(1).getIntValue();
+    if (len < 1)  return result;
 
     char *buffer = new char[1 + len];
     strncpy(buffer, str, len);
-    m_result.setStringValue(buffer);
+    result.setStringValue(buffer);
     delete[] buffer;
+
+    return result;
 }
 
 // str right(str, len)
-void Basic::BF_right::call(const ParamList *params) {
-    m_result.setUndefined();
-    if (params->size() != 2)  return;
+Basic::Variant Basic::builtin::right(const ParamList *params) {
+    Variant result;
+    if (params->size() != 2)  return result;
     
-    String str(params->paramResult(0).getStringValue());
+    String str(params->evaluate(0).getStringValue());
     
-    int len = params->paramResult(1).getIntValue();
-    if (len < 1)  return;
+    int len = params->evaluate(1).getIntValue();
+    if (len < 1)  return result;
     
     const char *p = str;
     p += str.length() - len;
-    m_result.setStringValue(p);    
+    result.setStringValue(p);
+    
+    return result;
 }
 
 // str mid(str, start, len)
-void Basic::BF_mid::call(const ParamList *params) {
-    m_result.setUndefined();
-    if (params->size() != 3)  return;
+Basic::Variant Basic::builtin::mid(const ParamList *params) {
+    Variant result;
+    if (params->size() != 3)  return result;
     
-    String str(params->paramResult(0).getStringValue());
+    String str(params->evaluate(0).getStringValue());
     
-    int start = params->paramResult(1).getIntValue();
-    if (start < 0)  return;
+    int start = params->evaluate(1).getIntValue();
+    if (start < 0)  return result;
     
-    int len = params->paramResult(2).getIntValue();
-    if (len < 1)  return;
+    int len = params->evaluate(2).getIntValue();
+    if (len < 1)  return result;
     
     const char *p = str;
     p += start;
     char *buffer = new char[1 + len];
     strncpy(buffer, p, len);
-    m_result.setStringValue(buffer);
+    result.setStringValue(buffer);
     delete[] buffer;
+    
+    return result;
 }
 
 // int len(str)
-void Basic::BF_len::call(const ParamList *params) {
-    m_result.setUndefined();
-    if (params->size() != 1)  return;
+Basic::Variant Basic::builtin::len(const ParamList *params) {
+    Variant result;
+    if (params->size() != 1)  return result;
     
-    String str(params->paramResult(0).getStringValue());
+    String str(params->evaluate(0).getStringValue());
     
-    m_result.setIntValue(str.length());
+    result.setIntValue(str.length());
+    
+    return result;
 }
