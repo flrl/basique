@@ -174,26 +174,45 @@ void basic::PrintStatement::execute() const {
     fflush(stdout);
 }
 
-void basic::InputStatement::execute() const { // FIXME tidy this up
+void basic::InputStatement::execute() const {
     const size_t bufsize = 1024;
+    Variant value;
+    
     char *buffer = new char[bufsize];
+    assert(buffer != NULL);
+    
+    // display a prompt if we have one
     if (m_prompt) {
         m_prompt->execute();
         fputs(m_prompt->getResult().getStringValue(), stdout);
         fflush(stdout);
     }
+    
+    // read some input
     fgets(buffer, bufsize, stdin);
     int len = strlen(buffer);
     if (buffer[len - 1] == '\n')  buffer[--len] = '\0';
-    Variant value(buffer);
+
+    // convert value to "smallest" type that can contain it
+    char *endptr;
+    int int_value;
+    double double_value;
+    int_value = strtol(buffer, &endptr, 0);
+    if (buffer[0] != '\0' and endptr[0] == '\0') {
+        value.setIntValue(int_value);
+    }
+    else {
+        double_value = strtod(buffer, &endptr);
+        if (buffer[0] != '\0' and endptr[0] == '\0') {
+            value.setDoubleValue(double_value);
+        }
+        else {
+            value.setStringValue(buffer);
+        }
+    }
     delete[] buffer;
     
-    // FIXME convert value into "smallest" type that won't lose information
-    // FIXME e.g.  0 | 1 => bool
-    // FIXME       all digits, no decimal place => int
-    // FIXME       digits and decimal place => double
-    // FIXME       anything else => string
-    
+    // insert it into the symbol table
     SymbolTable::Entry *object = NULL;
     if (m_subscript) {
         // FIXME handle assigning to array subscripts
