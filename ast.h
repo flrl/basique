@@ -217,7 +217,7 @@ public:
     virtual void execute() const;
     void appendTerm(Token op, Expression *term) { m_other_terms.push_back(OperatorTermWrapper(op, term)); }
 private:
-    Expression* m_first_term;
+    Expression *m_first_term;
     std::list<OperatorTermWrapper> m_other_terms;
 };
 
@@ -306,7 +306,7 @@ public:
         Block *block;
     };
     
-    IfStatement() { }
+    IfStatement() : m_else_block(NULL) { }
     ~IfStatement();
     virtual void execute() const;
     void appendCondition(Expression *condition, Block *block) { m_conditional_blocks.push_back(ConditionalBlock(condition, block)); }
