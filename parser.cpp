@@ -54,9 +54,14 @@ void basic::Parser::error(int argc, ...) {
 // <unit> ::= "function" <function-definition-body> <eol>
 //          | "sub" <sub-definition-body> <eol>
 //          | <statement> <eol>
+//          | <null> <eol>
 basic::ASTNode* basic::Parser::unit(void) {
     ASTNode *unit = NULL;
 
+    while (accept(TkEOL)) {
+        ; // skip any empty lines
+    }
+    
     if (accept(TkEOF)) {
         return NULL;
     }
@@ -71,7 +76,8 @@ basic::ASTNode* basic::Parser::unit(void) {
     }
 
     if (unit) {
-        if (accept(TkEOL) or m_token == TkEOF) {
+        // N.B. don't use accept() here, otherwise it will wait until there's another token ready before executing the current line
+        if (m_token == TkEOL or m_token == TkEOF) {
             return unit;
         }
         else {

@@ -74,21 +74,21 @@ const char* basic::Tokeniser::tokenDescriptions[] = {
 };
 
 basic::Tokeniser::Tokeniser(const char *filename) {
-    this->source = fopen(filename, "r");
-    if (source == NULL)  perror(filename);
-    assert(source != NULL);
-    this->token_line = this->cursor_line = 0;
-    this->token_column = this->cursor_column = 0;
-    this->value = Variant();
+    m_source = fopen(filename, "r");
+    if (m_source == NULL)  perror(filename);
+    assert(m_source != NULL);
+    m_token_line = m_cursor_line = 1;
+    m_token_column = m_cursor_column = 1;
+    m_value = Variant();
     setupKeywords();
 }
 
-basic::Tokeniser::Tokeniser(int fd) {
-    this->source = fdopen(fd, "r");
-    assert(source != NULL);
-    this->token_line = this->cursor_line = 0;
-    this->token_column = this->cursor_column = 0;
-    this->value = Variant();
+basic::Tokeniser::Tokeniser(FILE *file) {
+    m_source = file;
+    assert(m_source != NULL);
+    m_token_line = m_cursor_line = 1;
+    m_token_column = m_cursor_column = 1;
+    m_value = Variant();
     setupKeywords();
 }
 
@@ -100,6 +100,9 @@ basic::Token basic::Tokeniser::getToken(void) {
     updateTokenPosition();
     switch ((ch = getChar())) {
         case EOF:   token = TkEOF;          break;  // FIXME think about this
+        case ':':   token = TkCOLON;        break;
+        case ',':   token = TkCOMMA;        break;
+        case ';':   token = TkSEMICOLON;    break;
         case '+':   token = TkPLUS;         break;
         case '-':   token = TkMINUS;        break;
         case '*':   token = TkMULTIPLY;     break;
@@ -108,13 +111,7 @@ basic::Token basic::Tokeniser::getToken(void) {
         case ')':   token = TkRPAREN;       break;
         case '[':   token = TkLBRACKET;     break;
         case ']':   token = TkRBRACKET;     break;
-        case ':':   token = TkCOLON;        break;
-        case '\n':  
-            token = TkEOL;
-            while (peekChar() == '\n')  {
-                getChar();  // consume \n+ as if it were \n   
-            }
-            break;
+        case '\n':  token = TkEOL;          break;
         case '=':   token = TkEQUALS;       break;
         case '>':
             if (peekChar() == '=') {
@@ -153,7 +150,7 @@ basic::Token basic::Tokeniser::getToken(void) {
             else {
                 token = TkINVALID;
                 fprintf(stderr, "Unrecognised token at line %i, column %i: \"%c...\"\n",
-                        token_line, token_column, ch);
+                        m_token_line, m_token_column, ch);
             }
             break;
     }
@@ -185,11 +182,11 @@ basic::Token basic::Tokeniser::readNumeric(char first) {
             div *= 10.0;
         }
         // FIXME if (tolower(peekChar()) == 'e')  parse an exponent as well
-        value.setDoubleValue(d);
+        m_value.setDoubleValue(d);
     }
     else {
         // it's just an integer
-        value.setIntValue(i);
+        m_value.setIntValue(i);
     }
     return TkLITERAL;
 }
@@ -225,7 +222,7 @@ basic::Token basic::Tokeniser::readAlphanumeric(char first) {
         // if not, assume it's an identifier
         // FIXME possibly look up a symbol table to identify valid identifiers? -- but when defining one, it won't be there yet
         token = TkIDENTIFIER;
-        value.setStringValue(buffer);
+        m_value.setStringValue(buffer);
     }
     
     delete[] buffer;
@@ -291,7 +288,7 @@ basic::Token basic::Tokeniser::readQuoted(char first) {
             case '\n':
                 buffer[i] = '\0';
                 fprintf(stderr, "Unterminated string literal at line %i, column %i: \"%s\"\n",
-                        token_line, token_column, buffer);
+                        m_token_line, m_token_column, buffer);
                 delete[] buffer;
                 return TkINVALID;
             
@@ -300,7 +297,7 @@ basic::Token basic::Tokeniser::readQuoted(char first) {
         }
     }
     buffer[i] = '\0';
-    value.setStringValue(buffer);
+    m_value.setStringValue(buffer);
     delete[] buffer;
     return TkLITERAL;
 }
@@ -308,7 +305,7 @@ basic::Token basic::Tokeniser::readQuoted(char first) {
 int basic::Tokeniser::readHexByte(void) {
     int val;
     char digits[3], *endptr;
-    int i = 0, line = cursor_line, column = cursor_column;
+    int i = 0, line = m_cursor_line, column = m_cursor_column;
     
     getChar(); // consume the leading 'x'
     memset(digits, 0, sizeof(digits));
@@ -326,7 +323,7 @@ int basic::Tokeniser::readHexByte(void) {
 int basic::Tokeniser::readOctalByte(void) {
     int val;
     char digits[4], *endptr;
-    int i = 0, line = cursor_line, column = cursor_column;
+    int i = 0, line = m_cursor_line, column = m_cursor_column;
     
     memset(digits, 0, sizeof(digits));
     while (i < 3 and isdigit(peekChar())) {
@@ -365,10 +362,10 @@ void basic::Tokeniser::skipWhitespace(void) {
                 
             case '_':
                 // join up continued lines
-                saved = fgetc(source);  // read the underscore
-                ch = fgetc(source);     // read the next character
-                ungetc(ch, source);     // put them both back
-                ungetc(saved, source);
+                saved = fgetc(m_source);  // read the underscore
+                ch = fgetc(m_source);     // read the next character
+                ungetc(ch, m_source);     // put them both back
+                ungetc(saved, m_source);
                 if (isspace(ch)) {      // if continuation char is followed by whitespace...
                     ch = getChar();     // consume the continuation properly
                     ch = getChar();     // consume the space properly

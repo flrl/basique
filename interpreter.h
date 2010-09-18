@@ -10,6 +10,8 @@
 #ifndef _INTERPRETER_H
 #define _INTERPRETER_H
 
+#include <cstdio>
+
 #include "parser.h"
 #include "string.h"
 #include "tokeniser.h"
@@ -21,7 +23,7 @@ namespace basic {
 class basic::Interpreter {
 public:
     Interpreter(const String &);
-    Interpreter(int);
+    Interpreter(FILE *);
     ~Interpreter();
     
     void interpret() const;
