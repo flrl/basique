@@ -32,7 +32,7 @@ void basic::IdentifierExpression::execute() const {
                 m_result.setUndefined();
                 break;
             case SymbolTable::VARIANT:
-                m_result = object->variant;
+                m_result = *object->variant;
                 break;
             case SymbolTable::ARRAY: 
                 {
@@ -124,13 +124,17 @@ void basic::AdditiveExpression::execute() const {
 
 void basic::ComparitiveExpression::execute() const {
     bool intermediate = false;
+    m_first->execute();
+    Variant v1 = m_first->getResult();
+    m_second->execute();
+    Variant v2 = m_second->getResult();
     switch (m_cmp) {
-        case TkEQUALS:      intermediate = (m_first == m_second); break;
-        case TkNOTEQUALS:   intermediate = (m_first != m_second); break;
-        case TkLT:          intermediate = (m_first <  m_second); break;
-        case TkGT:          intermediate = (m_first >  m_second); break;
-        case TkLTEQUALS:    intermediate = (m_first <= m_second); break;
-        case TkGTEQUALS:    intermediate = (m_first >= m_second); break;
+        case TkEQUALS:      intermediate = (v1 == v2); break;
+        case TkNOTEQUALS:   intermediate = (v1 != v2); break;
+        case TkLT:          intermediate = (v1 <  v2); break;
+        case TkGT:          intermediate = (v1 >  v2); break;
+        case TkLTEQUALS:    intermediate = (v1 <= v2); break;
+        case TkGTEQUALS:    intermediate = (v1 >= v2); break;
         default: 
             fprintf(stderr, "debug: invalid operator `%s' in ComparitiveExpression object\n", Tokeniser::tokenDescriptions[m_cmp]);
     }
@@ -175,11 +179,42 @@ void basic::InputStatement::execute() const {
 }
 
 void basic::LetStatement::execute() const {
-    
+    SymbolTable::Entry *object = NULL;
+    m_expression->execute();
+
+    if (m_subscript) {
+        // FIXME handle assigning to array subscripts
+    }
+    else {
+        if ((object = g_symbol_table.find(m_identifier, SymbolTable::VARIANT))) {
+            *object->variant = m_expression->getResult();
+        }
+        else {
+            g_symbol_table.defineVariant(m_identifier, new Variant(m_expression->getResult()));
+        }
+    }
 }
 
 void basic::CallStatement::execute() const {
-    
+    SymbolTable::Entry *object = NULL;
+    if ((object = g_symbol_table.find(m_identifier, SymbolTable::BUILTIN_FUNCTION | SymbolTable::FUNCTION | SymbolTable::SUBROUTINE))) {
+        switch (object->type) {
+            case SymbolTable::BUILTIN_FUNCTION:
+                object->builtin_function(m_params);
+                break;
+            case SymbolTable::FUNCTION:
+                object->function->call(m_params);
+                break;
+            case SymbolTable::SUBROUTINE:
+                object->sub->call(m_params);
+                break;
+            default:
+                fprintf(stderr, "debug: unexpected object type in call for identifier `%s`\n", m_identifier.c_str());
+        }
+    }
+    else {
+        fprintf(stderr, "warning: undefined identifer `%s' in call\n", m_identifier.c_str());
+    }
 }
 
 void basic::IfStatement::execute() const {
@@ -195,6 +230,7 @@ void basic::IfStatement::execute() const {
 }
 
 void basic::DoStatement::execute() const {
+    g_symbol_table.startScope();
     bool condition_reached = false;
     while (condition_reached == false) {
         if (m_condition_when == DcPRECONDITION) {
@@ -243,6 +279,7 @@ void basic::DoStatement::execute() const {
             }
         }
     }
+    g_symbol_table.endScope();
 }
 
 void basic::ForStatement::execute() const {

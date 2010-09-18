@@ -57,6 +57,8 @@ public:
     Variant &operator*=(const Variant &);
     Variant &operator/=(const Variant &);
     
+    int compare(const Variant &) const;
+    
 private:
     bool    m_bool_value;
     int     m_int_value;
@@ -87,6 +89,30 @@ inline basic::Variant operator/(const basic::Variant &left, const basic::Variant
     basic::Variant result(left);
     result /= right;
     return result;
+}
+
+inline bool operator<(const basic::Variant &left, const basic::Variant &right) {
+    return left.compare(right) < 0;
+}
+
+inline bool operator>(const basic::Variant &left, const basic::Variant &right) {
+    return left.compare(right) > 0;
+}
+
+inline bool operator>=(const basic::Variant &left, const basic::Variant &right) {
+    return left.compare(right) >= 0;
+}
+
+inline bool operator<=(const basic::Variant &left, const basic::Variant &right) {
+    return left.compare(right) <= 0;
+}
+
+inline bool operator==(const basic::Variant &left, const basic::Variant &right) {
+    return left.compare(right) == 0;
+}
+
+inline bool operator!=(const basic::Variant &left, const basic::Variant &right) {
+    return left.compare(right) != 0;
 }
 
 /*
