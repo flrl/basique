@@ -152,6 +152,48 @@ void basic::Variant::setDefaultValueForType(basic::Variant::Type type){
     }
 }
 
+int basic::Variant::compare(const basic::Variant &other) const {
+    Type comparison_type = VaUNDEF;
+    
+    // choose the "biggest" type to use for the comparison
+    if (m_type == other.getType()) {
+        comparison_type = m_type;
+    }
+    else if (m_type == VaSTRING or other.getType() == VaSTRING) {
+        comparison_type = VaSTRING;
+    }
+    else if (m_type == VaDOUBLE or other.getType() == VaDOUBLE) {
+        comparison_type = VaDOUBLE;
+    }
+    else if (m_type == VaINT or other.getType() == VaINT) {
+        comparison_type = VaINT;
+    }
+    else if (m_type == VaBOOL or other.getType() == VaBOOL) {
+        comparison_type = VaBOOL;
+    }
+    else {
+        comparison_type = VaUNDEF;
+    }
+
+    switch(comparison_type) {
+        case VaUNDEF:
+            if (other.isDefined())        return m_type == VaUNDEF ? -1 : 0;
+            else                        return m_type == VaUNDEF ?  0 : 1;
+        case VaBOOL:
+            if (other.getBoolValue())   return getBoolValue() ? 0 : -1;
+            else                        return getBoolValue() ? 1 :  0;
+        case VaINT:
+            return getIntValue() > other.getIntValue() ? 1 : getIntValue() < other.getIntValue() ? -1 : 0;
+        case VaDOUBLE:
+            return getDoubleValue() > other.getDoubleValue() ? 1 : getDoubleValue() < other.getDoubleValue() ? -1 : 0;
+        case VaSTRING:
+            return strcmp(getStringValue(), other.getStringValue());
+        default:
+            fprintf(stderr, "debug: weird value for comparison_type\n");
+            return -2;
+    }
+}
+
 basic::Variant &basic::Variant::operator+=(const basic::Variant &other) {
     if (other.isUndef()) {
         fprintf(stderr, "warning: undefined value in addition at line ..., column ...\n");
