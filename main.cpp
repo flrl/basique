@@ -2,6 +2,8 @@
 
 #include "interpreter.h"
 
+basic::SymbolTable g_symbol_table;
+
 int main (int argc, char * const argv[]) {
     basic::Interpreter *interpreter = NULL;
 

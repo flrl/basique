@@ -338,17 +338,24 @@ basic::ArrayDimension* basic::Parser::arrayDimension(void) {
 //                | <null>
 basic::ParamList* basic::Parser::paramList(void) {
     ParamList *p = new ParamList();
-    Expression *e = expression();
-    if (e) {
-        p->appendExpression(e);
-        while (accept(TkCOMMA)) {
-            if ((e = expression())) {
-                p->appendExpression(e);
+    Expression *e = NULL;
+    
+    if (m_token == TkLITERAL or m_token == TkIDENTIFIER or m_token == TkLPAREN) {        
+        if ((e = expression())) {
+            p->appendExpression(e);
+            while (accept(TkCOMMA)) {
+                if ((e = expression())) {
+                    p->appendExpression(e);
+                }
+                else {
+                    delete p;
+                    return NULL;
+                }
             }
-            else {
-                delete p;
-                return NULL;
-            }
+        }
+        else {
+            delete p;
+            return NULL;
         }
     }
     
@@ -640,7 +647,6 @@ basic::Expression* basic::Parser::primaryExpression(void) {
         if (accept(TkLPAREN)) {
             ParamList *p = NULL;
             if ((p = paramList())) {
-                ParamList *p = paramList();
                 if (expect(TkRPAREN)) {
                     return new IdentifierExpression(identifier, p);
                 }
@@ -650,7 +656,7 @@ basic::Expression* basic::Parser::primaryExpression(void) {
                 }                
             }
             else {
-                return NULL;
+                return NULL;                    
             }
         }
         else {

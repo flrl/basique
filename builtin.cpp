@@ -11,7 +11,7 @@
 
 // str left(str, len)
 basic::Variant basic::builtin::left(const ParamList *params) {
-    Variant result;
+    Variant result = Variant();
     if (params->size() != 2)  return result;
 
     String str(params->evaluate(0).getStringValue());
@@ -20,6 +20,7 @@ basic::Variant basic::builtin::left(const ParamList *params) {
     if (len < 1)  return result;
 
     char *buffer = new char[1 + len];
+    memset(buffer, 0, 1 + len);
     strncpy(buffer, str, len);
     result.setStringValue(buffer);
     delete[] buffer;
@@ -29,7 +30,7 @@ basic::Variant basic::builtin::left(const ParamList *params) {
 
 // str right(str, len)
 basic::Variant basic::builtin::right(const ParamList *params) {
-    Variant result;
+    Variant result = Variant();
     if (params->size() != 2)  return result;
     
     String str(params->evaluate(0).getStringValue());
@@ -46,7 +47,7 @@ basic::Variant basic::builtin::right(const ParamList *params) {
 
 // str mid(str, start, len)
 basic::Variant basic::builtin::mid(const ParamList *params) {
-    Variant result;
+    Variant result = Variant();
     if (params->size() != 3)  return result;
     
     String str(params->evaluate(0).getStringValue());
@@ -60,6 +61,7 @@ basic::Variant basic::builtin::mid(const ParamList *params) {
     const char *p = str;
     p += start;
     char *buffer = new char[1 + len];
+    memset(buffer, 0, 1 + len);
     strncpy(buffer, p, len);
     result.setStringValue(buffer);
     delete[] buffer;
@@ -69,7 +71,7 @@ basic::Variant basic::builtin::mid(const ParamList *params) {
 
 // int len(str)
 basic::Variant basic::builtin::len(const ParamList *params) {
-    Variant result;
+    Variant result = Variant();
     if (params->size() != 1)  return result;
     
     String str(params->evaluate(0).getStringValue());

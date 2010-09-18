@@ -9,7 +9,22 @@
 
 #include "symboltable.h"
 
-// FIXME need a destructor that clears out all the frames and the stuff in them
+basic::SymbolTable::SymbolTable() : m_frames() {
+    startScope();
+    installBuiltins();
+}
+
+basic::SymbolTable::~SymbolTable() {
+    // FIXME clear out all the frames and the stuff in them    
+    endScope();
+}
+
+void basic::SymbolTable::installBuiltins() {
+    defineBuiltinFunction("left", &basic::builtin::left);
+    defineBuiltinFunction("right", &basic::builtin::right);
+    defineBuiltinFunction("mid", &basic::builtin::mid);
+    defineBuiltinFunction("len", &basic::builtin::len);
+}
 
 void basic::SymbolTable::startScope(void) {
     m_frames.push_back(Frame());
@@ -34,7 +49,7 @@ void basic::SymbolTable::endScope(void) {
     m_frames.pop_back();
 }
 
-const basic::SymbolTable::Entry *basic::SymbolTable::find(const String &identifier, unsigned int accepted_types) const {
+const basic::SymbolTable::Entry *basic::SymbolTable::find_helper(const String &identifier, unsigned int accepted_types) const {
     for (std::vector<Frame>::const_reverse_iterator frame = m_frames.rbegin(); frame != m_frames.rend(); frame++) {
         Frame::const_iterator result = frame->find(identifier);
         // iterator of map derefs to a std::pair<key_T, value_T>
