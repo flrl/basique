@@ -174,8 +174,38 @@ void basic::PrintStatement::execute() const {
     fflush(stdout);
 }
 
-void basic::InputStatement::execute() const {
+void basic::InputStatement::execute() const { // FIXME tidy this up
+    const size_t bufsize = 1024;
+    char *buffer = new char[bufsize];
+    if (m_prompt) {
+        m_prompt->execute();
+        fputs(m_prompt->getResult().getStringValue(), stdout);
+        fflush(stdout);
+    }
+    fgets(buffer, bufsize, stdin);
+    int len = strlen(buffer);
+    if (buffer[len - 1] == '\n')  buffer[--len] = '\0';
+    Variant value(buffer);
+    delete[] buffer;
     
+    // FIXME convert value into "smallest" type that won't lose information
+    // FIXME e.g.  0 | 1 => bool
+    // FIXME       all digits, no decimal place => int
+    // FIXME       digits and decimal place => double
+    // FIXME       anything else => string
+    
+    SymbolTable::Entry *object = NULL;
+    if (m_subscript) {
+        // FIXME handle assigning to array subscripts
+    }
+    else {
+        if ((object = g_symbol_table.find(m_identifier, SymbolTable::VARIANT))) {
+            *object->variant = value;
+        }
+        else {
+            g_symbol_table.defineVariant(m_identifier, new Variant(value));
+        }
+    }
 }
 
 void basic::LetStatement::execute() const {
@@ -311,7 +341,14 @@ void basic::FunctionDefinition::execute() const {
 }
 
 basic::Variant basic::FunctionDefinition::call(const ParamList *params) const {
-    return Variant(); // FIXME
+    SymbolTable::Entry *object = NULL;
+    if ((object = g_symbol_table.find(m_identifier, SymbolTable::FUNCTION))) {
+        return object->function->call(params);
+    }
+    else {
+        fprintf(stderr, "warning: function `%s' is not defined\n", m_identifier.c_str());
+        return Variant();
+    }
 }
 
 void basic::SubDefinition::execute() const {
@@ -319,7 +356,13 @@ void basic::SubDefinition::execute() const {
 }
 
 void basic::SubDefinition::call(const ParamList *params) const {
-    
+    SymbolTable::Entry *object = NULL;
+    if ((object = g_symbol_table.find(m_identifier, SymbolTable::SUBROUTINE))) {
+        object->sub->call(params);
+    }
+    else {
+        fprintf(stderr, "warning: subroutine `%s' is not defined\n", m_identifier.c_str());        
+    }
 }
 
 #pragma mark Destructors
