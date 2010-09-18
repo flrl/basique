@@ -14,11 +14,11 @@
 
 bool basic::Parser::accept(Token t) {
     if (m_token == t) {
-        m_accepted_token_value = m_tokeniser.getValue();
-        m_accepted_token_line = m_tokeniser.getLine();
-        m_accepted_token_column = m_tokeniser.getColumn();
+        m_accepted_token_value = m_tokeniser->getValue();
+        m_accepted_token_line = m_tokeniser->getLine();
+        m_accepted_token_column = m_tokeniser->getColumn();
         m_accepted_token = m_token;
-        m_token = m_tokeniser.getToken();
+        m_token = m_tokeniser->getToken();
         return true;
     }
     else {
@@ -37,13 +37,13 @@ bool basic::Parser::expect(Token t) {
 }
 
 void basic::Parser::error(int argc, ...) {
-    fprintf(stderr, "Syntax error at line %i, column %i: expected", m_tokeniser.getLine(), m_tokeniser.getColumn());
+    fprintf(stderr, "Syntax error at line %i, column %i: expected", m_tokeniser->getLine(), m_tokeniser->getColumn());
     va_list argv;
     va_start(argv, argc);
     for (int i=0; i<argc; i++) {
         int token = va_arg(argv, int);
         if (token >= Tk_MIN && token < Tk_MAX) {
-            fprintf(stderr, " `%s',", Tokeniser::tokenDescriptions[va_arg(argv, int)]);
+            fprintf(stderr, " `%s',", Tokeniser::tokenDescriptions[token]);
         }
     }
     va_end(argv);
@@ -57,7 +57,10 @@ void basic::Parser::error(int argc, ...) {
 basic::ASTNode* basic::Parser::unit(void) {
     ASTNode *unit = NULL;
 
-    if (accept(TkFUNCTION)) {
+    if (accept(TkEOF)) {
+        return NULL;
+    }
+    else if (accept(TkFUNCTION)) {
         unit = functionDefinitionBody();
     }
     else if (accept(TkSUB)) {
@@ -68,10 +71,11 @@ basic::ASTNode* basic::Parser::unit(void) {
     }
 
     if (unit) {
-        if (expect(TkEOL)) {
+        if (accept(TkEOL) or m_token == TkEOF) {
             return unit;
         }
         else {
+            error(2, TkEOL, TkEOF);
             delete unit;
             return NULL;
         }
@@ -464,8 +468,12 @@ basic::IfStatement* basic::Parser::ifStatementBody(void) {
                         s->appendCondition(e, b);
                     }
                 }
+                else {
+                    if (s)  delete s;
+                    return NULL;
+                }
             }
-            if (accept(TkELSE) and (b=block())) {
+            if (accept(TkELSE) and (b = block())) {
                 s->setElseBlock(b);
             }
             if (expect(TkEND) and expect(TkIF)) {

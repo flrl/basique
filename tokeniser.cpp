@@ -7,6 +7,8 @@
  *
  */
 
+#include <cerrno>
+
 #include <cctype>
 #include <cstdio>
 #include <cstring>
@@ -71,8 +73,10 @@ const char* basic::Tokeniser::tokenDescriptions[] = {
     "dim", "integer", "real", "string", "variant",
 };
 
-basic::Tokeniser::Tokeniser(const char * filename) {
+basic::Tokeniser::Tokeniser(const char *filename) {
     this->source = fopen(filename, "r");
+    if (source == NULL)  perror(filename);
+    assert(source != NULL);
     this->token_line = this->cursor_line = 0;
     this->token_column = this->cursor_column = 0;
     this->value = Variant();
@@ -81,6 +85,7 @@ basic::Tokeniser::Tokeniser(const char * filename) {
 
 basic::Tokeniser::Tokeniser(int fd) {
     this->source = fdopen(fd, "r");
+    assert(source != NULL);
     this->token_line = this->cursor_line = 0;
     this->token_column = this->cursor_column = 0;
     this->value = Variant();

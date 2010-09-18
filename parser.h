@@ -20,16 +20,18 @@ namespace basic {
 
 class basic::Parser {
 public:
-    Parser(void);
+    Parser(Tokeniser *tokeniser) : m_tokeniser(tokeniser) { m_token = m_tokeniser->getToken(); }
+    ~Parser() {}
+    
+    ASTNode *parse() { return unit(); }
     
 private:
-    Token m_token;
-    Tokeniser m_tokeniser;
-    
-    Variant m_accepted_token_value;
-    int m_accepted_token_line;
-    int m_accepted_token_column;
-    Token m_accepted_token;
+    Tokeniser   *m_tokeniser;
+    Token       m_token;
+    Variant     m_accepted_token_value;
+    int         m_accepted_token_line;
+    int         m_accepted_token_column;
+    Token       m_accepted_token;
     
     bool accept(Token t);
     bool expect(Token t);
