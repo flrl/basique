@@ -19,8 +19,8 @@ basic::Interpreter::Interpreter(const String &filename) {
     assert(m_parser != NULL);
 }
 
-basic::Interpreter::Interpreter(int fd) {
-    m_tokeniser = new Tokeniser(fd);
+basic::Interpreter::Interpreter(FILE *file) {
+    m_tokeniser = new Tokeniser(file);
     assert(m_tokeniser != NULL);
     m_parser = new Parser(m_tokeniser);
     assert(m_parser != NULL);

@@ -49,14 +49,14 @@ namespace basic {
 class basic::Tokeniser {
 public:
     Tokeniser(const char *);
-    Tokeniser(int);
-    ~Tokeniser(void) { fclose(source); }
+    Tokeniser(FILE *);
+    ~Tokeniser(void) { fclose(m_source); }
     
     Token getToken(void);
-    int getLine(void) const { return token_line; }
-    int getColumn(void) const { return token_column; }
+    int getLine(void) const { return m_token_line; }
+    int getColumn(void) const { return m_token_column; }
     
-    basic::Variant getValue(void) const { return value; }
+    basic::Variant getValue(void) const { return m_value; }
     
     static const char *tokenDescriptions[Tk_MAX];
 
@@ -64,15 +64,15 @@ private:
     static std::map<const String, Token> keywords;
     static void setupKeywords(void);
     
-    FILE *source;
-    int token_line;
-    int token_column;
-    int cursor_line;
-    int cursor_column;
-    basic::Variant value;
+    FILE *m_source;
+    int m_token_line;
+    int m_token_column;
+    int m_cursor_line;
+    int m_cursor_column;
+    basic::Variant m_value;
     
     void skipWhitespace(void);
-    void updateTokenPosition(void) { token_line = cursor_line; token_column = cursor_column; }
+    void updateTokenPosition(void) { m_token_line = m_cursor_line; m_token_column = m_cursor_column; }
     Token readNumeric(char);
     Token readAlphanumeric(char);
     Token readQuoted(char);
@@ -80,18 +80,18 @@ private:
     int readOctalByte(void);
     
     int getChar(void) {
-        int ch = fgetc(source);
+        int ch = fgetc(m_source);
         switch (ch) {
-            case '\n':  cursor_column = 0;  cursor_line++;  break;
-            case '\t':  cursor_column += cursor_column - cursor_column & 8;  break;
-            default:    cursor_column++;  break;
+            case '\n':  m_cursor_column = 1;  m_cursor_line++;  break;
+            case '\t':  m_cursor_column += 1 + 8 - (m_cursor_column % 8);  break;
+            default:    m_cursor_column++;  break;
         }
         return ch;  // FIXME handle EOF/error correctly?
     }
     
     int peekChar(void) {
-        int ch = fgetc(source);
-        ungetc(ch, source);
+        int ch = fgetc(m_source);
+        ungetc(ch, m_source);
         return ch;
     }
 };

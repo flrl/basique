@@ -163,6 +163,7 @@ void basic::PrintStatement::execute() const {
         fputs((*e)->getResult().getStringValue(), stdout);
     }
     if (m_append_eol)  putchar('\n');
+    fflush(stdout);
 }
 
 void basic::InputStatement::execute() const {
@@ -217,12 +218,13 @@ void basic::DoStatement::execute() const {
         m_body->execute();
         
         if (m_condition_when == DcPOSTCONDITION) {
-            m_condition->execute();
             switch (m_condition_type) {
                 case DcWHILE:
+                    m_condition->execute();
                     condition_reached = not m_condition->getResult().getBoolValue();
                     break;
                 case DcUNTIL:
+                    m_condition->execute();
                     condition_reached = m_condition->getResult().getBoolValue();
                     break;
                 case DcFOREVER:
