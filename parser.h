@@ -11,6 +11,7 @@
 #define _PARSER_H
 
 #include "ast.h"
+#include "symboltable.h"
 #include "tokeniser.h"
 #include "variant.h"
 

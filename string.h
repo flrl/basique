@@ -17,16 +17,18 @@ public:
     String();
     ~String();
     
-    operator const char*(void) const { return m_cstring; }
+    const char *c_str() const { return m_cstring; }
     size_t length(void) const { return m_length; }
     
+    operator const char*(void) const { return m_cstring; }
     bool operator==(const String &) const;
     bool operator<(const String &) const;
     bool operator>(const String &) const;
 
     String &operator=(const String &);
     String &operator+=(const String &);
-    
+
+
 private:
     size_t  m_size;
     size_t  m_length;

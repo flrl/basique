@@ -10,49 +10,53 @@
 #include "ast.h"
 #include "symboltable.h"
 
-/*extern*/ basic::SymbolTable *g_symbol_table;
-
 void basic::LiteralExpression::execute() const {
     ; // m_result is set at initialisation
 }
 
 void basic::IdentifierExpression::execute() const {
     // FIXME this needs lots of sanity checking
-    SymbolTable::Entry *object = g_symbol_table->find(m_identifier);
-    switch (object->type) {
-        case SymbolTable::BUILTIN_FUNCTION:
-            m_result = object->builtin_function(m_params);
-            break;
-        case SymbolTable::FUNCTION:
-            m_result = object->function->call(m_params);
-            break;
-        case SymbolTable::SUBROUTINE:
-            fprintf(stderr, "warning: attempting to call subroutine `%s' in expression at line %i, column %i\n",
-                    static_cast<const char *>(m_identifier), m_line, m_column);
-            object->sub->call(m_params);
-            m_result.setUndefined();
-            break;
-        case SymbolTable::VARIANT:
-            m_result = object->variant;
-            break;
-        case SymbolTable::ARRAY: 
-            {
-                Array::Index index;
-                for (size_t i = 0; i < m_params->size(); i++) {
-                    m_params->param(i)->execute();
-                    index.push_back(m_params->param(i)->getResult().getIntValue());
+    SymbolTable::Entry *object = NULL;
+    if ((object = g_symbol_table.find(m_identifier))) {        
+        switch (object->type) {
+            case SymbolTable::BUILTIN_FUNCTION:
+                m_result = object->builtin_function(m_params);
+                break;
+            case SymbolTable::FUNCTION:
+                m_result = object->function->call(m_params);
+                break;
+            case SymbolTable::SUBROUTINE:
+                fprintf(stderr, "warning: attempting to call subroutine `%s' in expression at line %i, column %i\n",
+                        m_identifier.c_str(), m_line, m_column);
+                object->sub->call(m_params);
+                m_result.setUndefined();
+                break;
+            case SymbolTable::VARIANT:
+                m_result = object->variant;
+                break;
+            case SymbolTable::ARRAY: 
+                {
+                    Array::Index index;
+                    for (size_t i = 0; i < m_params->size(); i++) {
+                        m_params->param(i)->execute();
+                        index.push_back(m_params->param(i)->getResult().getIntValue());
+                    }
+                    const Array &array = *object->array;
+                    if (array.isValidIndex(index)) {
+                        m_result = array[index];                
+                    }
+                    else {
+                        m_result.setUndefined();
+                    }
                 }
-                const Array &array = *object->array;
-                if (array.isValidIndex(index)) {
-                    m_result = array[index];                
-                }
-                else {
-                    m_result.setUndefined();
-                }
-            }
-            break;
-        default:
-            fprintf(stderr, "debug: unexpected symbol table entry type\n");
+                break;
+            default:
+                fprintf(stderr, "debug: unexpected symbol table entry type\n");
+        }
+    }
+    else {
+        fprintf(stderr, "warning: identifier `%s' is undefined\n", m_identifier.c_str());
+        m_result.setUndefined();
     }
 }
 

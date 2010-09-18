@@ -60,12 +60,12 @@ public:
     void startScope();
     void endScope();
     
-    const Entry *find(const String &, unsigned int=all_entry_types) const;
-    Entry *find(const String &identifier, unsigned int mask=all_entry_types) { return const_cast<Entry*>(find(identifier, mask)); }
+    const Entry *find(const String &identifier, unsigned int mask=all_entry_types) const { return find_helper(identifier, mask); }
+    Entry *find(const String &identifier, unsigned int mask=all_entry_types) { return const_cast<Entry*>(find_helper(identifier, mask)); }
 
     bool defined(const String&) const;
 
-    void defineBuiltinFunction(const String &, builtin::function);
+    void defineBuiltinFunction(const String &, builtin::function *);
     void defineFunction(const String &, FunctionDefinition *);
     void defineSubroutine(const String &, SubDefinition *);
     void defineVariant(const String &, Variant *);
@@ -75,8 +75,10 @@ private:
     static const unsigned int all_entry_types = BUILTIN_FUNCTION | FUNCTION | SUBROUTINE | VARIANT | ARRAY;
     std::vector<Frame> m_frames;
     
+    void installBuiltins();
+    const Entry *find_helper(const String &, unsigned int=all_entry_types) const;
 };
 
-
+extern basic::SymbolTable g_symbol_table;
 
 #endif
