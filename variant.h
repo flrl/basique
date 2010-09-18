@@ -23,10 +23,11 @@ public:
     
     Variant() : m_bool_value(false), m_int_value(0), m_double_value(0.0), m_string_value(""), m_type(VaUNDEF) {}
     Variant(const Variant &);
-    Variant(bool b) { setBoolValue(b); }
-    Variant(int i) { setIntValue(i); }    
-    Variant(double d) { setDoubleValue(d); }    
     Variant(const String &s) { setStringValue(s); }
+    Variant(const char *s) { setStringValue(s); }
+    Variant(double d) { setDoubleValue(d); }    
+    Variant(int i) { setIntValue(i); }    
+    Variant(bool b) { setBoolValue(b); }
     Variant(Type t) { setDefaultValueForType(t); }
     
     ~Variant(void) { }
