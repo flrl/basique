@@ -277,7 +277,7 @@ void basic::IfStatement::execute() const {
         }
     }
     
-    m_else_block->execute();
+    if (m_else_block)  m_else_block->execute();
 }
 
 void basic::DoStatement::execute() const {
@@ -334,7 +334,33 @@ void basic::DoStatement::execute() const {
 }
 
 void basic::ForStatement::execute() const {
+    g_symbol_table.startScope();
     
+    // set initial state
+    m_start->execute();
+    int start = m_start->getResult().getIntValue();
+    m_end->execute();
+    int end = m_end->getResult().getIntValue();
+    int step = 1;
+    if (m_step) {
+        m_step->execute();
+        step = m_step->getResult().getIntValue();
+    }
+
+    // set up iterator -- will be deleted by symbol table at the end of the scope
+    Variant *i = new Variant(start);
+    g_symbol_table.defineVariant(m_identifier, i);
+    
+    // sanity check to ensure that loop eventually finishes
+    if ((start <= end and step > 0) or (start >= end and step < 0)) {
+        // execute loop
+        do {
+            m_body->execute();
+            i->setIntValue(i->getIntValue() + step);
+        } while ((step > 0 and i->getIntValue() <= end) or (step < 0 and i->getIntValue() >= end));
+    }
+    
+    g_symbol_table.endScope();
 }
 
 void basic::DimStatement::execute() const {
