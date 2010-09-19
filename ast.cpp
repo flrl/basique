@@ -370,17 +370,36 @@ void basic::SubDefinition::execute() const {
 
 #pragma mark call() methods
 
+bool basic::AcceptedParamList::call(const ParamList *params) const {
+    if (m_identifiers.size() == params->size()) {
+        for (unsigned i = 0; i < m_identifiers.size(); i++) {
+            Variant *p = new Variant(params->evaluate(i));
+            g_symbol_table.defineVariant(m_identifiers[i], p);
+        }
+        return true;
+    }
+    else {
+        fprintf(stderr, "warning: wrong number of parameters: expected %zu, got %zu\n", m_identifiers.size(), params->size());
+        return false;
+    }
+}
+
 basic::Variant basic::FunctionDefinition::call(const ParamList *params) const {
-//    FIXME this is the bit that *actually* executes the statements in the block!
-//    FIXME by the time it gets here, the symbol table has already been looked up!
-    fprintf(stderr, "debug: FunctionDefinition::call() isn't implemented yet\n");
-    return Variant();
+    g_symbol_table.startScope();
+    m_accepted_params->call(params);
+    g_symbol_table.defineVariant(m_identifier, new Variant());
+    m_body->execute();
+    Variant result = *g_symbol_table.find(m_identifier, SymbolTable::VARIANT)->variant;
+    g_symbol_table.endScope();
+    
+    return result;
 }
 
 void basic::SubDefinition::call(const ParamList *params) const {
-//    FIXME this is the bit that *actually* executes the statements in the block!
-//    FIXME by the time it gets here, the symbol table has already been looked up!
-    fprintf(stderr, "debug: SubDefinition::call() isn't implemented yet\n");
+    g_symbol_table.startScope();
+    m_accepted_params->call(params);
+    m_body->execute();
+    g_symbol_table.endScope();
 }
 
 #pragma mark Destructors

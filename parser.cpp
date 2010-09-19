@@ -98,16 +98,12 @@ basic::FunctionDefinition* basic::Parser::functionDefinitionBody(void) {
     if (expect(TkIDENTIFIER)) {
         String identifier(m_accepted_token_value.getStringValue());
         if (expect(TkLPAREN)) {
-            if (m_token != TkRPAREN) {
-                if (not (a = acceptedParamList())) {
-                    return NULL;
-                }
-            }
-
-            if (expect(TkRPAREN)) {
-                if ((b = block())) {
-                    if (expect(TkEND) and expect(TkFUNCTION)) {
-                        return new FunctionDefinition(identifier, a, b);
+            if ((a = acceptedParamList())) {
+                if (expect(TkRPAREN)) {
+                    if ((b = block())) {
+                        if (expect(TkEND) and expect(TkFUNCTION)) {
+                            return new FunctionDefinition(identifier, a, b);
+                        }
                     }
                 }
             }
@@ -126,16 +122,12 @@ basic::SubDefinition* basic::Parser::subDefinitionBody(void) {
     if (expect(TkIDENTIFIER)) {
         String identifier(m_accepted_token_value.getStringValue());
         if (expect(TkLPAREN)) {
-            if (m_token != TkRPAREN) {
-                if (not (a = acceptedParamList())) {
-                    return NULL;
-                }
-            }
-            
-            if (expect(TkRPAREN)) {
-                if ((b = block())) {
-                    if (expect(TkEND) and expect(TkSUB)) {
-                        return new SubDefinition(identifier, a, b);
+            if ((a = acceptedParamList())) {        
+                if (expect(TkRPAREN)) {
+                    if ((b = block())) {
+                        if (expect(TkEND) and expect(TkSUB)) {
+                            return new SubDefinition(identifier, a, b);
+                        }
                     }
                 }
             }
