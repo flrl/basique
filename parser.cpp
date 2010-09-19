@@ -332,7 +332,13 @@ basic::ArrayDimension* basic::Parser::arrayDimension(void) {
                 }
             }
             
-            return dim;
+            if (expect(TkRPAREN)) {
+                return dim;                
+            }
+            else {
+                delete dim;
+                return NULL;
+            }
         }
     }
     
@@ -610,7 +616,10 @@ basic::DimStatement* basic::Parser::dimStatementBody(void) {
     ArrayDimension *dim = NULL;
     if (expect(TkIDENTIFIER)) {
         String identifier(m_accepted_token_value.getStringValue());
-        dim = arrayDimension();
+        if (m_token == TkLPAREN) {
+            // FIXME this logic is a mess
+            dim = arrayDimension();            
+        }
         DimStatement *s = new DimStatement(identifier, dim);
         while (accept(TkCOMMA)) {
             if (expect(TkIDENTIFIER)) {
