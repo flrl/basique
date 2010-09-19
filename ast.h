@@ -104,7 +104,7 @@ public:
 class basic::AcceptedParamList : public ASTNode {
 public:
     AcceptedParamList() {}
-    ~AcceptedParamList();
+    ~AcceptedParamList() {}
     virtual void execute() const;
     bool call(const ParamList *) const;
     void appendIdentifier(const String &s) { m_identifiers.push_back(s); }
@@ -124,7 +124,8 @@ private:
 
 class basic::FunctionDefinition : public Unit {
 public:
-    FunctionDefinition(const String &identifier, AcceptedParamList *a, Block *b) : m_installed(false), m_identifier(identifier), m_accepted_params(a), m_body(b) { }
+    FunctionDefinition(const String &identifier, AcceptedParamList *a, Block *b) 
+    : m_installed(false), m_identifier(identifier), m_accepted_params(a), m_body(b) {}
     ~FunctionDefinition() { delete m_accepted_params; delete m_body; }
     virtual void execute() const;
     virtual bool installed() const { return m_installed; }
@@ -138,7 +139,8 @@ private:
 
 class basic::SubDefinition : public Unit {
 public:
-    SubDefinition(const String &identifier, AcceptedParamList *a, Block *b) : m_installed(false), m_identifier(identifier), m_accepted_params(a), m_body(b) { }
+    SubDefinition(const String &identifier, AcceptedParamList *a, Block *b) 
+    : m_installed(false), m_identifier(identifier), m_accepted_params(a), m_body(b) {}
     ~SubDefinition() { delete m_accepted_params; delete m_body; }
     virtual void execute() const;
     virtual bool installed() const { return m_installed; }

@@ -10,6 +10,8 @@
 #include "ast.h"
 #include "symboltable.h"
 
+#pragma mark execute() methods
+
 void basic::LiteralExpression::execute() const {
     ; // m_result is set at initialisation
 }
@@ -340,11 +342,11 @@ void basic::DimStatement::execute() const {
 }
 
 void basic::AcceptedParamList::execute() const {
-    
+    ;   // does nothing
 }
 
 void basic::ParamList::execute() const {
-    ;  // does nothing
+    ;   // does nothing
 }
 
 void basic::ArraySubscript::execute() const {
@@ -443,10 +445,6 @@ basic::ArrayDimension::~ArrayDimension() {
         delete d->first;
         if (d->second)  delete d->second;
     }
-}
-
-basic::AcceptedParamList::~AcceptedParamList() {
-    // FIXME
 }
 
 basic::ParamList::~ParamList() {
