@@ -37,7 +37,8 @@ private:
     bool accept(Token t);
     bool expect(Token t);
     void error(int, ...);
-    
+    bool isValidExpressionToken(Token t) const;
+        
     Unit* unit(void);
     ArraySubscript* arraySubscript(void);
     ArrayDimension* arrayDimension(void);

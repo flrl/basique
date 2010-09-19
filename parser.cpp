@@ -26,7 +26,7 @@ bool basic::Parser::accept(Token t) {
     }
 }
 
-bool basic::Parser::expect(Token t) {
+inline bool basic::Parser::expect(Token t) {
     if (accept(t)) {
         return true;
     } 
@@ -48,6 +48,19 @@ void basic::Parser::error(int argc, ...) {
     }
     va_end(argv);
     fprintf(stderr, " got `%s'\n", Tokeniser::tokenDescriptions[m_token]);
+}
+
+inline bool basic::Parser::isValidExpressionToken(Token t) const {
+    switch (t) {
+        case TkLITERAL:
+        case TkIDENTIFIER:
+        case TkLPAREN:
+        case TkNOT:
+        case TkMINUS:
+            return true;
+        default:
+            return false;
+    }
 }
 
 
@@ -332,7 +345,7 @@ basic::ParamList* basic::Parser::paramList(void) {
     ParamList *p = new ParamList();
     Expression *e = NULL;
     
-    if (m_token == TkLITERAL or m_token == TkIDENTIFIER or m_token == TkLPAREN) {        
+    if (isValidExpressionToken(m_token)) {
         if ((e = expression())) {
             p->appendExpression(e);
             while (accept(TkCOMMA)) {
@@ -360,12 +373,12 @@ basic::ParamList* basic::Parser::paramList(void) {
 basic::PrintStatement* basic::Parser::printStatementBody(void) {
     PrintStatement *s = new PrintStatement();
 
-    if (m_token == TkLITERAL or m_token == TkIDENTIFIER or m_token == TkLPAREN) {
+    if (isValidExpressionToken(m_token)) {
         Expression *e = NULL;
         if ((e = expression())) {
             s->appendExpression(e);
             while (accept(TkCOMMA)) {
-                if (m_token == TkLITERAL or m_token == TkIDENTIFIER or m_token == TkLPAREN) {
+                if (isValidExpressionToken(m_token)) {
                     if ((e = expression())) {
                         s->appendExpression(e);
                     }
