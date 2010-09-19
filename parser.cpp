@@ -55,8 +55,8 @@ void basic::Parser::error(int argc, ...) {
 //          | "sub" <sub-definition-body> <eol>
 //          | <statement> <eol>
 //          | <null> <eol>
-basic::ASTNode* basic::Parser::unit(void) {
-    ASTNode *unit = NULL;
+basic::Unit* basic::Parser::unit(void) {
+    Unit *unit = NULL;
 
     while (accept(TkEOL)) {
         ; // skip any empty lines

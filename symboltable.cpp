@@ -12,10 +12,12 @@
 basic::SymbolTable::SymbolTable() : m_frames() {
     startScope();
     installBuiltins();
+    startScope();
 }
 
 basic::SymbolTable::~SymbolTable() {
     // FIXME clear out all the frames and the stuff in them    
+    endScope();
     endScope();
 }
 
@@ -71,12 +73,12 @@ void basic::SymbolTable::defineBuiltinFunction(const String &identifier, builtin
     frame.insert(std::make_pair(identifier, Entry(BUILTIN_FUNCTION, binding)));
 }
 
-void basic::SymbolTable::defineFunction(const String &identifier, FunctionDefinition *binding) {
+void basic::SymbolTable::defineFunction(const String &identifier, const FunctionDefinition *binding) {
     Frame &frame = m_frames.back();
     frame.insert(std::make_pair(identifier, Entry(FUNCTION, binding)));
 }
 
-void basic::SymbolTable::defineSubroutine(const String &identifier, SubDefinition *binding) {
+void basic::SymbolTable::defineSubroutine(const String &identifier, const SubDefinition *binding) {
     Frame &frame = m_frames.back();
     frame.insert(std::make_pair(identifier, Entry(SUBROUTINE, binding)));
 }

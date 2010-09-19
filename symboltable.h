@@ -38,16 +38,16 @@ public:
     };
     struct Entry {
         Entry(EntryType type, builtin::function *builtin_function) : type(type), builtin_function(builtin_function) {}
-        Entry(EntryType type, FunctionDefinition *function) : type(type), function(function) {}
-        Entry(EntryType type, SubDefinition *sub) : type(type), sub(sub) {}
+        Entry(EntryType type, const FunctionDefinition *function) : type(type), function(function) {}
+        Entry(EntryType type, const SubDefinition *sub) : type(type), sub(sub) {}
         Entry(EntryType type, Variant *variant) : type(type), variant(variant) {}
         Entry(EntryType type, Array *array) : type(type), array(array) {}
 
         EntryType type;
         union { 
             builtin::function *builtin_function;
-            FunctionDefinition *function;
-            SubDefinition *sub;
+            const FunctionDefinition *function;
+            const SubDefinition *sub;
             Variant *variant;
             Array *array;
         };
@@ -66,8 +66,8 @@ public:
     bool defined(const String&) const;
 
     void defineBuiltinFunction(const String &, builtin::function *);
-    void defineFunction(const String &, FunctionDefinition *);
-    void defineSubroutine(const String &, SubDefinition *);
+    void defineFunction(const String &, const FunctionDefinition *);
+    void defineSubroutine(const String &, const SubDefinition *);
     void defineVariant(const String &, Variant *);
     void defineArray(const String &, Array *);
     
