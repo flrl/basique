@@ -24,7 +24,7 @@ public:
     Parser(Tokeniser *tokeniser) : m_tokeniser(tokeniser) { m_token = m_tokeniser->getToken(); }
     ~Parser() {}
     
-    ASTNode *parse() { return unit(); }
+    Unit *parse() { return unit(); }
     
 private:
     Tokeniser   *m_tokeniser;
@@ -38,7 +38,7 @@ private:
     bool expect(Token t);
     void error(int, ...);
     
-    ASTNode* unit(void);
+    Unit* unit(void);
     ArraySubscript* arraySubscript(void);
     ArrayDimension* arrayDimension(void);
     Statement* statement(void);

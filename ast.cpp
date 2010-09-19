@@ -356,32 +356,31 @@ void basic::ArrayDimension::execute() const {
 }
 
 void basic::FunctionDefinition::execute() const {
-    
-}
-
-basic::Variant basic::FunctionDefinition::call(const ParamList *params) const {
-    SymbolTable::Entry *object = NULL;
-    if ((object = g_symbol_table.find(m_identifier, SymbolTable::FUNCTION))) {
-        return object->function->call(params);
-    }
-    else {
-        fprintf(stderr, "warning: function `%s' is not defined\n", m_identifier.c_str());
-        return Variant();
-    }
+    // FIXME what happens when the function is already defined? where should this case be detected and handled?
+    g_symbol_table.defineFunction(m_identifier, this);
+    m_installed = true;
 }
 
 void basic::SubDefinition::execute() const {
-    
+    // FIXME what happens when the function is already defined? where should this case be detected and handled?
+    g_symbol_table.defineSubroutine(m_identifier, this);
+    m_installed = true;
+}
+
+
+#pragma mark call() methods
+
+basic::Variant basic::FunctionDefinition::call(const ParamList *params) const {
+//    FIXME this is the bit that *actually* executes the statements in the block!
+//    FIXME by the time it gets here, the symbol table has already been looked up!
+    fprintf(stderr, "debug: FunctionDefinition::call() isn't implemented yet\n");
+    return Variant();
 }
 
 void basic::SubDefinition::call(const ParamList *params) const {
-    SymbolTable::Entry *object = NULL;
-    if ((object = g_symbol_table.find(m_identifier, SymbolTable::SUBROUTINE))) {
-        object->sub->call(params);
-    }
-    else {
-        fprintf(stderr, "warning: subroutine `%s' is not defined\n", m_identifier.c_str());        
-    }
+//    FIXME this is the bit that *actually* executes the statements in the block!
+//    FIXME by the time it gets here, the symbol table has already been looked up!
+    fprintf(stderr, "debug: SubDefinition::call() isn't implemented yet\n");
 }
 
 #pragma mark Destructors

@@ -32,10 +32,10 @@ basic::Interpreter::~Interpreter() {
 }
 
 void basic::Interpreter::interpret() const {
-    ASTNode *parse_tree = NULL;
+    Unit *parse_tree = NULL;
     
     while ((parse_tree = m_parser->parse())) {
         parse_tree->execute();
-        delete parse_tree; // FIXME under which circumstances is it safe to delete this?
+        if (not parse_tree->installed())  delete parse_tree;
     }
 }
