@@ -7,7 +7,7 @@
  *
  */
 
-#ifndef _ARRAY_H
+#ifndef BASIQUE_ARRAY_H
 
 #include <exception>
 #include <utility>

@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef _SYMBOLTABLE_H
-#define _SYMBOLTABLE_H
+#ifndef BASIQUE_SYMBOLTABLE_H
+#define BASIQUE_SYMBOLTABLE_H
 
 #include <map>
 #include <vector>

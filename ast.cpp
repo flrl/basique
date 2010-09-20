@@ -7,6 +7,9 @@
  *
  */
 
+#include <cassert>
+#include <cstring>
+
 #include "ast.h"
 #include "symboltable.h"
 

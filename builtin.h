@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef _BUILTIN_H
-#define _BUILTIN_H
+#ifndef BASIQUE_BUILTIN_H
+#define BASIQUE_BUILTIN_H
 
 #include "ast.h"
 #include "variant.h"

@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef _PARSER_H
-#define _PARSER_H
+#ifndef BASIQUE_PARSER_H
+#define BASIQUE_PARSER_H
 
 #include "ast.h"
 #include "symboltable.h"
