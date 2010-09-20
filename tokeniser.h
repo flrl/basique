@@ -6,8 +6,8 @@
  *  Copyright 2010 __MyCompanyName__. All rights reserved.
  *
  */
-#ifndef _TOKENISER_H
-#define _TOKENISER_H
+#ifndef BASIQUE_TOKENISER_H
+#define BASIQUE_TOKENISER_H
 
 #include <cstdio>
 #include <map>

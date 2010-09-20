@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef _INTERPRETER_H
-#define _INTERPRETER_H
+#ifndef BASIQUE_INTERPRETER_H
+#define BASIQUE_INTERPRETER_H
 
 #include <cstdio>
 

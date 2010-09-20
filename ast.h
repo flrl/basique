@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef _AST_H
-#define _AST_H
+#ifndef BASIQUE_AST_H
+#define BASIQUE_AST_H
 
 #include <list>
 #include <utility>

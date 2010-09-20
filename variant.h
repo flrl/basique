@@ -6,8 +6,8 @@
  *  Copyright 2010 __MyCompanyName__. All rights reserved.
  *
  */
-#ifndef _VARIANT_H
-#define _VARIANT_H
+#ifndef BASIQUE_VARIANT_H
+#define BASIQUE_VARIANT_H
 
 #include <cstdlib>
 

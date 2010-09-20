@@ -7,14 +7,19 @@
  *
  */
 
-#include <cerrno>
-
+#include <cassert>
 #include <cctype>
+#include <cerrno>
 #include <cstdio>
 #include <cstring>
+
 #include <map>
 
 #include "tokeniser.h"
+
+// FIXME
+#define digittoint(c) (c - '0')
+
 
 std::map<const String, basic::Token> basic::Tokeniser::keywords = std::map<const String, basic::Token>();
 
@@ -141,7 +146,7 @@ basic::Token basic::Tokeniser::getToken(void) {
             token = readQuoted(ch);
             break;            
         default:
-            if (isnumber(ch)) {
+            if (isdigit(ch)) {
                 token = readNumeric(ch);
             }
             else if (isalpha(ch)) {
@@ -167,7 +172,7 @@ basic::Token basic::Tokeniser::readNumeric(char first) {
     double d, div;
     
     i = digittoint(ch);
-    while (isnumber(peekChar())) {
+    while (isdigit(peekChar())) {
         ch = getChar();  // consume it
         i = 10 * i + digittoint(ch);
     }
@@ -176,7 +181,7 @@ basic::Token basic::Tokeniser::readNumeric(char first) {
         getChar();  // consume the '.'
         d = i;
         div = 10.0;
-        while (isnumber(peekChar())) {
+        while (isdigit(peekChar())) {
             ch = getChar();
             d += digittoint(ch) / div;
             div *= 10.0;

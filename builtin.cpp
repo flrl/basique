@@ -7,6 +7,8 @@
  *
  */
 
+#include <cstring>
+
 #include "builtin.h"
 
 // str left(str, len)
