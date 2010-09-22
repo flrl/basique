@@ -68,27 +68,107 @@ bool basic::SymbolTable::defined(const String &identifier) const {
     return false;
 }
 
-void basic::SymbolTable::defineBuiltinFunction(const String &identifier, builtin::function *binding) {
+// return NULL on success (SymbolTable has taken ownership of binding)
+// return binding on failure (SymbolTable can't take ownership, caller retains responsibility)
+basic::builtin::function *basic::SymbolTable::defineBuiltinFunction(const String &identifier, builtin::function *binding) {
     Frame &frame = m_frames.back();
-    frame.insert(std::make_pair(identifier, Entry(BUILTIN_FUNCTION, binding)));
+    if (frame.count(identifier) > 0) {
+        fprintf(stderr, "error: couldn't define builtin function %s in current scope: identifier already exists\n", identifier.c_str()); 
+        return binding;
+    }
+    else {
+        std::pair<Frame::iterator, bool> r = frame.insert(std::make_pair(identifier, Entry(BUILTIN_FUNCTION, binding)));
+        if (r.second) {
+            // success
+            return NULL;  
+        } 
+        else {
+            fprintf(stderr, "error: couldn't define builtin function %s in current scope: map insertion failed\n", identifier.c_str()); 
+            return binding;
+        }
+    }
 }
 
-void basic::SymbolTable::defineFunction(const String &identifier, const FunctionDefinition *binding) {
+// return NULL on success (SymbolTable has taken ownership of binding)
+// return binding on failure (SymbolTable can't take ownership, caller retains responsibility)
+const basic::FunctionDefinition *basic::SymbolTable::defineFunction(const String &identifier, const FunctionDefinition *binding) {
     Frame &frame = m_frames.back();
-    frame.insert(std::make_pair(identifier, Entry(FUNCTION, binding)));
+    if (frame.count(identifier) > 0) {
+        fprintf(stderr, "error: couldn't define function %s in current scope: identifier already exists\n", identifier.c_str()); 
+        return binding;
+    }
+    else {
+        std::pair<Frame::iterator, bool> r = frame.insert(std::make_pair(identifier, Entry(FUNCTION, binding)));
+        if (r.second) {
+            // success
+            return NULL;
+        }
+        else {
+            fprintf(stderr, "error: couldn't define builtin function %s in current scope: map insertion failed\n", identifier.c_str()); 
+            return binding;
+        }
+    }
 }
 
-void basic::SymbolTable::defineSubroutine(const String &identifier, const SubDefinition *binding) {
+// return NULL on success (SymbolTable has taken ownership of binding)
+// return binding on failure (SymbolTable can't take ownership, caller retains responsibility)
+const basic::SubDefinition *basic::SymbolTable::defineSubroutine(const String &identifier, const SubDefinition *binding) {
     Frame &frame = m_frames.back();
-    frame.insert(std::make_pair(identifier, Entry(SUBROUTINE, binding)));
+    if (frame.count(identifier) > 0) {
+        fprintf(stderr, "error: couldn't define subroutine %s in current scope: identifier already exists\n", identifier.c_str());
+        return binding;
+    }
+    else {
+        std::pair<Frame::iterator, bool> r = frame.insert(std::make_pair(identifier, Entry(SUBROUTINE, binding)));
+        if (r.second) {
+            // success
+            return NULL;
+        }
+        else {
+            fprintf(stderr, "error: couldn't define subroutine %s in current scope: map insertion failed\n", identifier.c_str());
+            return binding;
+        }
+    }
 }
 
-void basic::SymbolTable::defineVariant(const String &identifier, Variant *binding) {
+// return NULL on success (SymbolTable has taken ownership of binding)
+// return binding on failure (SymbolTable can't take ownership, caller retains responsibility)
+basic::Variant *basic::SymbolTable::defineVariant(const String &identifier, Variant *binding) {
     Frame &frame = m_frames.back();
-    frame.insert(std::make_pair(identifier, Entry(VARIANT, binding)));
+    if (frame.count(identifier) > 0) {
+        fprintf(stderr, "error: couldn't define variant %s in current scope: identifier already exists\n", identifier.c_str());
+        return binding;
+    }
+    else {
+        std::pair<Frame::iterator, bool> r = frame.insert(std::make_pair(identifier, Entry(VARIANT, binding)));
+        if (r.second) {
+            // success
+            return NULL;
+        }
+        else {
+            fprintf(stderr, "error: couldn't define variant %s in current scope: map insertion failed\n", identifier.c_str());
+            return binding;
+        }
+    }
 }
 
-void basic::SymbolTable::defineArray(const String &identifier, Array *binding) {
+// return NULL on success (SymbolTable has taken ownership of binding)
+// return binding on failure (SymbolTable can't take ownership, caller retains responsibility)
+basic::Array *basic::SymbolTable::defineArray(const String &identifier, Array *binding) {
     Frame &frame = m_frames.back();
-    frame.insert(std::make_pair(identifier, Entry(ARRAY, binding)));
+    if (frame.count(identifier) > 0) {
+        fprintf(stderr, "error: couldn't define array %s in current scope: identifier already exists\n", identifier.c_str());
+        return binding;
+    }
+    else {
+        std::pair<Frame::iterator, bool> r = frame.insert(std::make_pair(identifier, Entry(ARRAY, binding)));
+        if (r.second) {
+            // success
+            return NULL;
+        }
+        else {
+            fprintf(stderr, "error: couldn't define array %s in current scope: map insertion failed\n", identifier.c_str());
+            return binding;
+        }
+    }
 }

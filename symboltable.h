@@ -65,11 +65,12 @@ public:
 
     bool defined(const String&) const;
 
-    void defineBuiltinFunction(const String &, builtin::function *);
-    void defineFunction(const String &, const FunctionDefinition *);
-    void defineSubroutine(const String &, const SubDefinition *);
-    void defineVariant(const String &, Variant *);
-    void defineArray(const String &, Array *);
+    // These return NULL on success, or the second parameter on failure.
+    builtin::function *defineBuiltinFunction(const String &, builtin::function *);
+    const FunctionDefinition *defineFunction(const String &, const FunctionDefinition *);
+    const SubDefinition *defineSubroutine(const String &, const SubDefinition *);
+    Variant *defineVariant(const String &, Variant *);
+    /*FIXME const*/ Array *defineArray(const String &, Array *);
     
 private:
     static const unsigned int all_entry_types = BUILTIN_FUNCTION | FUNCTION | SUBROUTINE | VARIANT | ARRAY;

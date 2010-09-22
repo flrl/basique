@@ -75,7 +75,7 @@ basic::Unit* basic::Parser::unit(void) {
         ; // skip any empty lines
     }
     
-    if (accept(TkEOF)) {
+    if (m_token == TkEOF /*accept(TkEOF)*/) {
         return NULL;
     }
     else if (accept(TkFUNCTION)) {
@@ -617,8 +617,9 @@ basic::DimStatement* basic::Parser::dimStatementBody(void) {
     if (expect(TkIDENTIFIER)) {
         String identifier(m_accepted_token_value.getStringValue());
         if (m_token == TkLPAREN) {
-            // FIXME this logic is a mess
-            dim = arrayDimension();            
+            if (not (dim = arrayDimension())) {
+                return NULL;
+            }
         }
         DimStatement *s = new DimStatement(identifier, dim);
         while (accept(TkCOMMA)) {
