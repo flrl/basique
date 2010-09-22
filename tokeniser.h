@@ -80,6 +80,7 @@ private:
     int readOctalByte(void);
     
     int getChar(void) {
+        if (feof(m_source))  return EOF;
         int ch = fgetc(m_source);
         switch (ch) {
             case '\n':  m_cursor_column = 1;  m_cursor_line++;  break;
@@ -90,6 +91,7 @@ private:
     }
     
     int peekChar(void) {
+        if (feof(m_source))  return EOF;
         int ch = fgetc(m_source);
         ungetc(ch, m_source);
         return ch;
