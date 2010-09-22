@@ -67,6 +67,7 @@ String &String::operator=(const String &other) {
         strcpy(m_cstring, other);        
     }
     else {
+        m_length = other.length();
         strcpy(m_cstring, other);
     }
     
