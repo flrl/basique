@@ -20,7 +20,6 @@ void basic::LiteralExpression::execute() const {
 }
 
 void basic::IdentifierExpression::execute() const {
-    // FIXME this needs lots of sanity checking
     SymbolTable::Entry *object = NULL;
     if ((object = g_symbol_table.find(m_identifier))) {        
         switch (object->type) {
@@ -186,6 +185,8 @@ void basic::InputStatement::execute() const {
     char *buffer = new char[bufsize];
     assert(buffer != NULL);
     
+    // FIXME define/validate the destination variable before prompting for input
+    
     // display a prompt if we have one
     if (m_prompt) {
         m_prompt->execute();
@@ -227,7 +228,9 @@ void basic::InputStatement::execute() const {
             *object->variant = value;
         }
         else {
-            g_symbol_table.defineVariant(m_identifier, new Variant(value));
+            Variant *binding = new Variant(value);
+            binding = g_symbol_table.defineVariant(m_identifier, binding);
+            if (binding)  delete binding;
         }
     }
 }
@@ -244,7 +247,9 @@ void basic::LetStatement::execute() const {
             *object->variant = m_expression->getResult();
         }
         else {
-            g_symbol_table.defineVariant(m_identifier, new Variant(m_expression->getResult()));
+            Variant *binding = new Variant(m_expression->getResult());
+            binding = g_symbol_table.defineVariant(m_identifier, binding);
+            if (binding)  delete binding;
         }
     }
 }
