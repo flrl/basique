@@ -228,8 +228,7 @@ void basic::InputStatement::execute() const {
             *object->variant = value;
         }
         else {
-            Variant *binding = new Variant(value);
-            binding = g_symbol_table.defineVariant(m_identifier, binding);
+            Variant *binding = g_symbol_table.defineVariant(m_identifier, new Variant(value));
             if (binding)  delete binding;
         }
     }
@@ -247,8 +246,7 @@ void basic::LetStatement::execute() const {
             *object->variant = m_expression->getResult();
         }
         else {
-            Variant *binding = new Variant(m_expression->getResult());
-            binding = g_symbol_table.defineVariant(m_identifier, binding);
+            Variant *binding = g_symbol_table.defineVariant(m_identifier, new Variant(m_expression->getResult()));
             if (binding)  delete binding;
         }
     }
@@ -357,15 +355,18 @@ void basic::ForStatement::execute() const {
 
     // set up iterator -- will be deleted by symbol table at the end of the scope
     Variant *i = new Variant(start);
-    g_symbol_table.defineVariant(m_identifier, i);
-    
-    // sanity check to ensure that loop eventually finishes
-    if ((start <= end and step > 0) or (start >= end and step < 0)) {
-        // execute loop
-        do {
-            m_body->execute();
-            i->setIntValue(i->getIntValue() + step);
-        } while ((step > 0 and i->getIntValue() <= end) or (step < 0 and i->getIntValue() >= end));
+    if (g_symbol_table.defineVariant(m_identifier, i) == NULL) {        
+        // sanity check to ensure that loop eventually finishes
+        if ((start <= end and step > 0) or (start >= end and step < 0)) {
+            // execute loop
+            do {
+                m_body->execute();
+                i->setIntValue(i->getIntValue() + step);
+            } while ((step > 0 and i->getIntValue() <= end) or (step < 0 and i->getIntValue() >= end));
+        }
+    }
+    else {
+        delete i;
     }
     
     g_symbol_table.endScope();
@@ -392,15 +393,15 @@ void basic::ArrayDimension::execute() const {
 }
 
 void basic::FunctionDefinition::execute() const {
-    // FIXME what happens when the function is already defined? where should this case be detected and handled?
-    g_symbol_table.defineFunction(m_identifier, this);
-    m_installed = true;
+    if (g_symbol_table.defineFunction(m_identifier, this) == NULL) {
+        m_installed = true;        
+    }
 }
 
 void basic::SubDefinition::execute() const {
-    // FIXME what happens when the function is already defined? where should this case be detected and handled?
-    g_symbol_table.defineSubroutine(m_identifier, this);
-    m_installed = true;
+    if (g_symbol_table.defineSubroutine(m_identifier, this) == NULL) {
+        m_installed = true;
+    }
 }
 
 
@@ -409,8 +410,11 @@ void basic::SubDefinition::execute() const {
 bool basic::AcceptedParamList::call(const ParamList *params) const {
     if (m_identifiers.size() == params->size()) {
         for (unsigned i = 0; i < m_identifiers.size(); i++) {
-            Variant *p = new Variant(params->evaluate(i));
-            g_symbol_table.defineVariant(m_identifiers[i], p);
+            Variant *p = g_symbol_table.defineVariant(m_identifiers[i], new Variant(params->evaluate(i)));
+            if (p) {
+                delete p;
+                return false;
+            }
         }
         return true;
     }
@@ -423,12 +427,19 @@ bool basic::AcceptedParamList::call(const ParamList *params) const {
 basic::Variant basic::FunctionDefinition::call(const ParamList *params) const {
     g_symbol_table.startScope();
     m_accepted_params->call(params);
-    g_symbol_table.defineVariant(m_identifier, new Variant());
-    m_body->execute();
-    Variant result = *g_symbol_table.find(m_identifier, SymbolTable::VARIANT)->variant;
-    g_symbol_table.endScope();
     
-    return result;
+    Variant *function_return_value = new Variant();
+    Variant *status = g_symbol_table.defineVariant(m_identifier, function_return_value);
+    if (status == NULL) {
+        m_body->execute();
+        Variant value = *function_return_value;
+        g_symbol_table.endScope();  // deletes function_return_value
+        return value;
+    }
+    else {
+        delete function_return_value;
+        return Variant();
+    }
 }
 
 void basic::SubDefinition::call(const ParamList *params) const {
