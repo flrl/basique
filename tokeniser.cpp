@@ -57,13 +57,18 @@ void basic::Tokeniser::setupKeywords(void) {
         keywords["real"] = TkREAL;
         keywords["string"] = TkSTRING;
         keywords["variant"] = TkVARIANT;
+        keywords["open"] = TkOPEN;
+        keywords["close"] = TkCLOSE;
+        keywords["output"] = TkOUTPUT;
+        keywords["append"] = TkAPPEND;
     }
 }
 
 const char* basic::Tokeniser::tokenDescriptions[] = {
     "invalid token",
-    "end of file", "end of line", ":", ",", ";",
+    "end of file", "end of line", 
     "identifier", "literal",
+    ":", ",", ";", "#",
     "+", "-", "*", "/",
     "(", ")", "[", "]",
     "=", "<>", "<", ">", "<=", ">=",
@@ -108,6 +113,7 @@ basic::Token basic::Tokeniser::getToken(void) {
         case ':':   token = TkCOLON;        break;
         case ',':   token = TkCOMMA;        break;
         case ';':   token = TkSEMICOLON;    break;
+        case '#':   token = TkHASH;         break;
         case '+':   token = TkPLUS;         break;
         case '-':   token = TkMINUS;        break;
         case '*':   token = TkMULTIPLY;     break;
@@ -358,7 +364,7 @@ void basic::Tokeniser::skipWhitespace(void) {
                 break;
                 
             case '\'':
-            case '#':
+//            case '#':
                 // consume comments until (but not including) end of line
                 getChar();
                 while ((ch = peekChar()) != EOF && ch != '\n') {

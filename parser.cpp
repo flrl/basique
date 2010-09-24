@@ -160,9 +160,11 @@ basic::SubDefinition* basic::Parser::subDefinitionBody(void) {
 //               | "do" <do-statement-body>
 //               | "for" <for-statement-body>
 //               | "dim" <dim-statement-body>
+//               | "open" <open-statement-body>
+//               | "close" <close-statement-body>
 //               | "exit" [ <expression> ] // FIXME
-//               | <let-statement-body>
-//               | <call-statement-body>
+//               | <let-statement-body> // FIXME
+//               | <call-statement-body> // FIXME
 basic::Statement* basic::Parser::statement(void) {
     if (accept(TkPRINT)) {
         return printStatementBody();
@@ -188,6 +190,12 @@ basic::Statement* basic::Parser::statement(void) {
     else if (accept(TkDIM)) {
         return dimStatementBody();
     }
+    else if (accept(TkOPEN)) {
+        return openStatementBody();
+    }
+    else if (accept(TkCLOSE)) {
+        return closeStatementBody();
+    }
 //    else if (accept(TkEXIT)) {
 //        expression();
 //    }
@@ -210,7 +218,7 @@ basic::Statement* basic::Parser::statement(void) {
 //        }
 //    }
     else {
-        error(10, TkPRINT, TkINPUT, TkLET, TkCALL, TkIF, TkDO, TkFOR, TkDIM, TkEXIT, TkIDENTIFIER);
+        error(10, TkPRINT, TkINPUT, TkLET, TkCALL, TkIF, TkDO, TkFOR, TkDIM, TkOPEN, TkCLOSE, TkEXIT, TkIDENTIFIER);
         return NULL;
     }
 }
@@ -345,6 +353,17 @@ basic::ArrayDimension* basic::Parser::arrayDimension(void) {
     return NULL;
 }
 
+// <file-handle> ::= "#" <expression>
+basic::FileHandle* basic::Parser::fileHandle() {    
+    if (expect(TkHASH)) {
+        Expression *e = NULL;
+        if ((e = expression())) {
+            return new FileHandle(e);
+        }
+    }
+    return NULL;
+}
+
 // <param-list> ::= <expression> [ "," <expression> ]... 
 //                | <null>
 basic::ParamList* basic::Parser::paramList(void) {
@@ -373,10 +392,12 @@ basic::ParamList* basic::Parser::paramList(void) {
     return p;
 }
 
-// <print-statement-body> ::= <print-expression-list>
+// <print-statement-body> ::= [ <file-handle> ] <print-expression-list>
 // <print-expression-list> ::= <expression> [ "," <expression> ]... [ "," ]
 //                           | <null>
 basic::PrintStatement* basic::Parser::printStatementBody(void) {
+    // FIXME file handle
+    
     PrintStatement *s = new PrintStatement();
 
     if (isValidExpressionToken(m_token)) {
@@ -409,8 +430,10 @@ basic::PrintStatement* basic::Parser::printStatementBody(void) {
     return s;
 }
 
-// <input-statement-body> ::= <identifier> [ <array-subscript> ] [ "," <expression> ]
+// <input-statement-body> ::= [ <file-handle> ] <identifier> [ <array-subscript> ] [ "," <expression> ]
 basic::InputStatement* basic::Parser::inputStatementBody(void) {
+    // FIXME file handle
+    
     if (expect(TkIDENTIFIER)) {
         String identifier(m_accepted_token_value.getStringValue());
         ArraySubscript *subscript = NULL;
@@ -647,6 +670,41 @@ basic::DimStatement* basic::Parser::dimStatementBody(void) {
     }
     else {
         return NULL;        
+    }
+}
+
+// <open-statement-body> ::= <expression> "for" ( "input" | "output" | "append" ) "as" <file-handle>
+basic::OpenStatement* basic::Parser::openStatementBody() {
+    Expression *e = NULL;
+    Token mode = TkINVALID;
+    FileHandle *h = NULL;
+
+    if ((e = expression())) {
+        if (expect(TkFOR)) {
+            if (accept(TkINPUT) or accept(TkOUTPUT) or accept(TkAPPEND)) {
+                mode = m_accepted_token;
+                if (expect(TkAS)) {
+                    if ((h = fileHandle())) {
+                        return new OpenStatement(e, mode, h);
+                    }
+                }
+            }
+        }
+    }
+
+    if (e)  delete e;
+    if (h)  delete h;
+    return NULL;
+}
+
+// <close-statement-body> ::= <file-handle>
+basic::CloseStatement* basic::Parser::closeStatementBody() {
+    FileHandle *handle = NULL;
+    if ((handle = fileHandle())) {
+        return new CloseStatement(handle);
+    }
+    else {
+        return NULL;
     }
 }
 
