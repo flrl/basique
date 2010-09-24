@@ -8,6 +8,7 @@
  */
 
 #ifndef BASIQUE_ARRAY_H
+#define BASIQUE_ARRAY_H
 
 #include <exception>
 #include <utility>

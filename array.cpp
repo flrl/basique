@@ -57,7 +57,7 @@ const basic::Variant& basic::Array::itemAt(const Index &index) const {
     for (int d = index.size() - 1; d >= 0; d--) {
         if (m_dimensions[d].first > index[d])  throw IndexOutOfBounds();
         if (m_dimensions[d].second < index[d])  throw IndexOutOfBounds();
-        actual_index += (m_dimensions[d].first + index[d]) * size_of_last_dimension;
+        actual_index += (index[d] - m_dimensions[d].first) * size_of_last_dimension;
         size_of_last_dimension *= m_sizes[d];
     }
     assert(actual_index >= 0);
