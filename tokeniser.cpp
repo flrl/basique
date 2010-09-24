@@ -288,6 +288,7 @@ basic::Token basic::Tokeniser::readQuoted(char first) {
                     default:  // unrecognised escape sequence, keep the backslash and carry on as usual
                         buffer[i++] = ch;
                 }
+                break;
                 
             case EOF:  // FIXME handle this differently from \n?
             case '\n':

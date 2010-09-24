@@ -225,7 +225,7 @@ void basic::InputStatement::execute() const {
             Array::Index index;
             m_subscript->makeArrayIndex(&index);
             if (object->array->isValidIndex(index)) {
-                (*object->array)[index] = m_expression->getResult();
+                (*object->array)[index] = value;
             }
             else {
                 fprintf(stderr, "error: array index out of bounds at line %i, column %i\n", m_line, m_column);
