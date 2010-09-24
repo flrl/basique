@@ -14,6 +14,7 @@
 #include <utility>
 #include <vector>
 
+#include "array.h"
 #include "string.h"
 #include "tokeniser.h"
 #include "variant.h"
@@ -171,6 +172,7 @@ public:
     ~ArraySubscript();
     virtual void execute() const;
     void appendExpression(Expression *e) { m_expressions.push_back(e); }
+    void makeArrayIndex(Array::Index *) const;
 private:
     std::list<Expression *> m_expressions;
 };
@@ -183,6 +185,7 @@ public:
     ~ArrayDimension();
     virtual void execute() const;
     void appendDimension(Expression *d1, Expression *d2) { m_dimensions.push_back(std::make_pair(d1, d2)); }
+    void makeArrayDimensionSpecificationVector(std::vector<Array::DimensionSpecification> *) const;
 private:
     std::list<ArrayDimension::Specification> m_dimensions;
 };

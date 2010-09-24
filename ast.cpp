@@ -221,7 +221,19 @@ void basic::InputStatement::execute() const {
     // insert it into the symbol table
     SymbolTable::Entry *object = NULL;
     if (m_subscript) {
-        // FIXME handle assigning to array subscripts
+        if ((object = g_symbol_table.find(m_identifier, SymbolTable::ARRAY))) {
+            Array::Index index;
+            m_subscript->makeArrayIndex(&index);
+            if (object->array->isValidIndex(index)) {
+                (*object->array)[index] = m_expression->getResult();
+            }
+            else {
+                fprintf(stderr, "error: array index out of bounds at line %i, column %i\n", m_line, m_column);
+            }
+        }
+        else {
+            fprintf(stderr, "error: no such array `%s' at line %i, column %i\n", m_identifier.c_str(), m_line, m_column);
+        }
     }
     else {
         if ((object = g_symbol_table.find(m_identifier, SymbolTable::VARIANT))) {
@@ -239,7 +251,19 @@ void basic::LetStatement::execute() const {
     m_expression->execute();
 
     if (m_subscript) {
-        // FIXME handle assigning to array subscripts
+        if ((object = g_symbol_table.find(m_identifier, SymbolTable::ARRAY))) {
+            Array::Index index;
+            m_subscript->makeArrayIndex(&index);
+            if (object->array->isValidIndex(index)) {
+                (*object->array)[index] = m_expression->getResult();
+            }
+            else {
+                fprintf(stderr, "error: array index out of bounds at line %i, column %i\n", m_line, m_column);
+            }
+        }
+        else {
+            fprintf(stderr, "error: no such array `%s' at line %i, column %i\n", m_identifier.c_str(), m_line, m_column);
+        }
     }
     else {
         if ((object = g_symbol_table.find(m_identifier, SymbolTable::VARIANT))) {
@@ -373,7 +397,20 @@ void basic::ForStatement::execute() const {
 }
 
 void basic::DimStatement::execute() const {
-    
+    for (std::list<Dimensionable>::const_iterator d = m_dimensionables.begin(); d != m_dimensionables.end(); d++) {
+        if (d->second == NULL) {
+            // it's a variant
+            Variant *binding = g_symbol_table.defineVariant(d->first, new Variant());
+            if (binding)  delete binding;
+        }
+        else {
+            // it's an array
+            std::vector<Array::DimensionSpecification> dimensions;
+            d->second->makeArrayDimensionSpecificationVector(&dimensions);
+            Array *binding = g_symbol_table.defineArray(d->first, new Array(dimensions));
+            if (binding)  delete binding;
+        }
+    }
 }
 
 void basic::AcceptedParamList::execute() const {
@@ -518,7 +555,6 @@ basic::AdditiveExpression::~AdditiveExpression() {
     }
 }
 
-
 basic::AndExpression::~AndExpression() {
     for (std::list<basic::Expression *>::iterator e = m_terms.begin(); e != m_terms.end(); e++) {
         delete (*e);
@@ -530,3 +566,35 @@ basic::OrExpression::~OrExpression() {
         delete (*e);
     }    
 }
+
+#pragma mark Other stuff
+
+void basic::ArraySubscript::makeArrayIndex(Array::Index *ptr) const {
+    ptr->clear();
+    ptr->reserve(m_expressions.size());
+    for (std::list<Expression *>::const_iterator e = m_expressions.begin(); e != m_expressions.end(); e++) {
+        (*e)->execute();
+        ptr->push_back((*e)->getResult().getIntValue());
+    }
+}
+
+void basic::ArrayDimension::makeArrayDimensionSpecificationVector(std::vector<Array::DimensionSpecification> *ptr) const {
+    ptr->clear();
+    ptr->reserve(m_dimensions.size());
+    for (std::list<ArrayDimension::Specification>::const_iterator s = m_dimensions.begin(); s != m_dimensions.end(); s++) {
+        int first, last;
+        if (s->second == NULL) {
+            s->first->execute();
+            first = 0;
+            last = s->first->getResult().getIntValue() - 1;
+        }
+        else {
+            s->first->execute();
+            s->second->execute();
+            first = s->first->getResult().getIntValue();
+            last = s->second->getResult().getIntValue();
+        }
+        ptr->push_back(std::make_pair(first, last));
+    }    
+}
+
