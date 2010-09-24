@@ -170,6 +170,8 @@ void basic::Block::execute() const {
 }
 
 void basic::PrintStatement::execute() const {
+    // FIXME file handle
+    
     for (std::list<basic::Expression*>::const_iterator e = m_expressions.begin(); e != m_expressions.end(); e++) {
         (*e)->execute();
         fputs((*e)->getResult().getStringValue(), stdout);
@@ -179,6 +181,8 @@ void basic::PrintStatement::execute() const {
 }
 
 void basic::InputStatement::execute() const {
+    // FIXME file handle
+    
     const size_t bufsize = 1024;
     Variant value;
     
@@ -413,6 +417,19 @@ void basic::DimStatement::execute() const {
     }
 }
 
+void basic::OpenStatement::execute() const {
+    // FIXME need a register of file handles
+    // validate mode
+    // evaluate expression, and check result is a valid unopened handle
+    // install handle and open the file
+}
+
+void basic::CloseStatement::execute() const {
+    // FIXME need a register of file handles
+    // evaluate expression and check result is a valid opened handle
+    // close the handle and deregister it
+}
+
 void basic::AcceptedParamList::execute() const {
     ;   // does nothing
 }
@@ -422,11 +439,15 @@ void basic::ParamList::execute() const {
 }
 
 void basic::ArraySubscript::execute() const {
-    
+    ;   // does nothing
 }
 
 void basic::ArrayDimension::execute() const {
-    
+    ;   // does nothing
+}
+
+void basic::FileHandle::execute() const {
+    ;   // does nothing
 }
 
 void basic::FunctionDefinition::execute() const {

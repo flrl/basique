@@ -29,6 +29,7 @@ namespace basic {
     class ParamList;
     class ArraySubscript;
     class ArrayDimension;
+    class FileHandle;
     
     class FunctionDefinition;
     class SubDefinition;
@@ -41,6 +42,8 @@ namespace basic {
     class DoStatement;
     class ForStatement;
     class DimStatement;
+    class OpenStatement;
+    class CloseStatement;
 
     class LiteralExpression;
     class IdentifierExpression;
@@ -190,6 +193,14 @@ private:
     std::list<ArrayDimension::Specification> m_dimensions;
 };
 
+class basic::FileHandle : public ASTNode {
+public:
+    FileHandle(Expression *e) : m_expression(e) {}
+    ~FileHandle() { delete m_expression; }
+    virtual void execute() const;
+private:
+    Expression *m_expression;
+};
 
 class basic::IdentifierExpression : public Expression {
 public:
@@ -378,6 +389,26 @@ public:
     }
 private:
     std::list<Dimensionable> m_dimensionables;
+};
+
+class basic::OpenStatement : public Statement {
+public:
+    OpenStatement(Expression *filename, Token mode, FileHandle *handle) : m_filename(filename), m_mode(mode), m_filehandle(handle) {}
+    ~OpenStatement() { delete m_filename; delete m_filehandle; }
+    virtual void execute() const;
+private:
+    Expression *m_filename;
+    Token m_mode;
+    FileHandle *m_filehandle;
+};
+
+class basic::CloseStatement : public Statement {
+public:
+    CloseStatement(FileHandle *handle) : m_filehandle(handle) {}
+    ~CloseStatement() { delete m_filehandle; }
+    virtual void execute() const;
+private:
+    FileHandle *m_filehandle;
 };
 
 

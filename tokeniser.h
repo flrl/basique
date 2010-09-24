@@ -22,10 +22,11 @@ namespace basic {
     enum Token {
         /* special stuff */
         TkINVALID = 0,  Tk_MIN = 0,
-        TkEOF, TkEOL, TkCOLON, TkCOMMA, TkSEMICOLON,
+        TkEOF, TkEOL, 
         TkIDENTIFIER, TkLITERAL, 
         
         /* symbols */
+        TkCOLON, TkCOMMA, TkSEMICOLON, TkHASH,
         TkPLUS, TkMINUS, TkMULTIPLY, TkDIVIDE, 
         TkLPAREN, TkRPAREN, TkLBRACKET, TkRBRACKET,
         TkEQUALS, TkNOTEQUALS, TkLT, TkGT, TkLTEQUALS, TkGTEQUALS,
@@ -40,6 +41,7 @@ namespace basic {
         TkFOR, TkTO, TkSTEP, TkNEXT,
         TkFUNCTION, TkAS, TkRETURN, TkSUB, TkCALL, TkEXIT,
         TkDIM, TkINTEGER, TkREAL, TkSTRING, TkVARIANT,
+        TkOPEN, TkCLOSE, TkOUTPUT, TkAPPEND,
         
         /* that's all, folks */
         Tk_MAX,

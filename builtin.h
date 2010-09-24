@@ -21,6 +21,7 @@ namespace basic {
         Variant right(const ParamList *);
         Variant mid(const ParamList *);
         Variant len(const ParamList *);
+        Variant type(const ParamList *);
     }
 }
 

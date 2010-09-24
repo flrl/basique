@@ -26,6 +26,7 @@ void basic::SymbolTable::installBuiltins() {
     defineBuiltinFunction("right", &basic::builtin::right);
     defineBuiltinFunction("mid", &basic::builtin::mid);
     defineBuiltinFunction("len", &basic::builtin::len);
+    defineBuiltinFunction("type", &basic::builtin::type);
 }
 
 void basic::SymbolTable::startScope(void) {

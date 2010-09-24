@@ -82,3 +82,21 @@ basic::Variant basic::builtin::len(const ParamList *params) {
     
     return result;
 }
+
+basic::Variant basic::builtin::type(const ParamList *params) {
+    if (params->size() != 1)  return Variant();
+    
+    switch (params->evaluate(0).getType()) {
+        case Variant::VaBOOL:
+            return Variant("bool");
+        case Variant::VaINT:
+            return Variant("integer");
+        case Variant::VaDOUBLE:
+            return Variant("double");
+        case Variant::VaSTRING:
+            return Variant("string");
+        case Variant::VaUNDEF:
+        default:
+            return Variant("undefined");
+    }
+}
