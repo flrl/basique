@@ -239,6 +239,8 @@ basic::Block* basic::Parser::block(void) {
             case TkDO:
             case TkFOR:
             case TkDIM:
+            case TkOPEN:
+            case TkCLOSE:
             case TkEXIT:
             case TkIDENTIFIER:
                 if ((s = statement())) {
@@ -350,17 +352,6 @@ basic::ArrayDimension* basic::Parser::arrayDimension(void) {
         }
     }
     
-    return NULL;
-}
-
-// <file-handle> ::= "#" <expression>
-basic::FileHandle* basic::Parser::fileHandle() {    
-    if (expect(TkHASH)) {
-        Expression *e = NULL;
-        if ((e = expression())) {
-            return new FileHandle(e);
-        }
-    }
     return NULL;
 }
 
@@ -673,19 +664,19 @@ basic::DimStatement* basic::Parser::dimStatementBody(void) {
     }
 }
 
-// <open-statement-body> ::= <expression> "for" ( "input" | "output" | "append" ) "as" <file-handle>
+// <open-statement-body> ::= <expression> "for" ( "input" | "output" | "append" ) "as" [ "#" ] <identifier>
 basic::OpenStatement* basic::Parser::openStatementBody() {
     Expression *e = NULL;
     Token mode = TkINVALID;
-    FileHandle *h = NULL;
 
     if ((e = expression())) {
         if (expect(TkFOR)) {
             if (accept(TkINPUT) or accept(TkOUTPUT) or accept(TkAPPEND)) {
                 mode = m_accepted_token;
                 if (expect(TkAS)) {
-                    if ((h = fileHandle())) {
-                        return new OpenStatement(e, mode, h);
+                    accept(TkHASH);
+                    if (expect(TkIDENTIFIER)) {
+                        return new OpenStatement(e, mode, m_accepted_token_value.getStringValue());
                     }
                 }
             }
@@ -693,15 +684,15 @@ basic::OpenStatement* basic::Parser::openStatementBody() {
     }
 
     if (e)  delete e;
-    if (h)  delete h;
     return NULL;
 }
 
-// <close-statement-body> ::= <file-handle>
+// <close-statement-body> ::= [ "#" ] <identifier>
 basic::CloseStatement* basic::Parser::closeStatementBody() {
-    FileHandle *handle = NULL;
-    if ((handle = fileHandle())) {
-        return new CloseStatement(handle);
+    if (m_token == TkHASH)  accept(TkHASH);
+
+    if (expect(TkIDENTIFIER)) {
+        return new CloseStatement(m_accepted_token_value.getStringValue());
     }
     else {
         return NULL;

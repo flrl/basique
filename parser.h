@@ -42,7 +42,6 @@ private:
     Unit* unit(void);
     ArraySubscript* arraySubscript(void);
     ArrayDimension* arrayDimension(void);
-    FileHandle* fileHandle();
     Statement* statement(void);
     Block* block(void);
     FunctionDefinition* functionDefinitionBody(void);
@@ -86,10 +85,10 @@ private:
 //               | "exit" [ <expression> ]
 // <array-subscript> ::= "(" <expression> [ "," <expression> ]... ")"
 // <array-dimension> ::= "(" <expression> [ "to" <expression> ] [ "," <expression> [ "to" <expression> ] ]... ")"
-// <print-statement-body> ::= [ <file-handle> ] <print-expression-list>
+// <print-statement-body> ::= [ "#" <identifier> ] <print-expression-list>
 // <print-expression-list> ::= <expression> [ "," <expression> ]... [ "," ]
 //                           | <null>
-// <input-statement-body> ::= [ <file-handle> ] <identifier> [ <array-subscript> ] [ "," <expression> ]
+// <input-statement-body> ::= [ "#" <identifier> ] <identifier> [ <array-subscript> ] [ "," <expression> ]
 // <let-statement-body> ::= <identifier> [ <array-subscript> ] "=" <expression>
 // <call-statement-body> ::= <identifier> "(" <param-list> ")"
 // <if-statement-body> ::= <expression> "then" <block> [ "elseif" <expression> "then" <block> ]... [ "else" <block> ] "end" "if"
@@ -99,9 +98,8 @@ private:
 //                       | <block> "done"
 // <for-statement-body> ::= <identifier> "=" <expression> "to" <expression> [ "step" <expression> ] <block> "next" [ <identifier> ]
 // <dim-statement-body> ::= <identifier> [ <array-dimension> ] [ "," <identifier> [ <array-dimension> ] ]...
-// <open-statement-body> ::= <expression> "for" ( "input" | "output" | "append" ) "as" <file-handle>
-// <close-statement-body> ::= <file-handle>
-// <file-handle> ::= "#" <expression>
+// <open-statement-body> ::= <expression> "for" ( "input" | "output" | "append" ) "as" [ "#" ] <identifier>
+// <close-statement-body> ::= [ "#" ] <identifier>
 // <block> ::= <block-statement-list>
 // <block-statement-list> ::= <statement> [ ( ":" | <eol> ) <block-statement-list> ]...
 //                          | <null>
