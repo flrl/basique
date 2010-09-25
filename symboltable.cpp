@@ -44,6 +44,7 @@ void basic::SymbolTable::endScope(void) {
             case SUBROUTINE:        break;
             case VARIANT:           delete entry.variant;   break;
             case ARRAY:             delete entry.array;     break;
+            case FILEHANDLE:        delete entry.file;      break;
             default:
                 fprintf(stderr, "warning: unrecognised symbol table entry type in SymbolTable::endScope()\n");
         }
@@ -74,7 +75,7 @@ bool basic::SymbolTable::defined(const String &identifier) const {
 basic::builtin::function *basic::SymbolTable::defineBuiltinFunction(const String &identifier, builtin::function *binding) {
     Frame &frame = m_frames.back();
     if (frame.count(identifier) > 0) {
-        fprintf(stderr, "error: couldn't define builtin function %s in current scope: identifier already exists\n", identifier.c_str()); 
+        fprintf(stderr, "error: couldn't define builtin function `%s': identifier already exists in current scope\n", identifier.c_str()); 
         return binding;
     }
     else {
@@ -84,7 +85,7 @@ basic::builtin::function *basic::SymbolTable::defineBuiltinFunction(const String
             return NULL;  
         } 
         else {
-            fprintf(stderr, "error: couldn't define builtin function %s in current scope: map insertion failed\n", identifier.c_str()); 
+            fprintf(stderr, "error: couldn't define builtin function `%s': map insertion failed\n", identifier.c_str()); 
             return binding;
         }
     }
@@ -95,7 +96,7 @@ basic::builtin::function *basic::SymbolTable::defineBuiltinFunction(const String
 const basic::FunctionDefinition *basic::SymbolTable::defineFunction(const String &identifier, const FunctionDefinition *binding) {
     Frame &frame = m_frames.back();
     if (frame.count(identifier) > 0) {
-        fprintf(stderr, "error: couldn't define function %s in current scope: identifier already exists\n", identifier.c_str()); 
+        fprintf(stderr, "error: couldn't define function `%s': identifier already exists in current scope\n", identifier.c_str()); 
         return binding;
     }
     else {
@@ -105,7 +106,7 @@ const basic::FunctionDefinition *basic::SymbolTable::defineFunction(const String
             return NULL;
         }
         else {
-            fprintf(stderr, "error: couldn't define builtin function %s in current scope: map insertion failed\n", identifier.c_str()); 
+            fprintf(stderr, "error: couldn't define builtin function `%s': map insertion failed\n", identifier.c_str()); 
             return binding;
         }
     }
@@ -116,7 +117,7 @@ const basic::FunctionDefinition *basic::SymbolTable::defineFunction(const String
 const basic::SubDefinition *basic::SymbolTable::defineSubroutine(const String &identifier, const SubDefinition *binding) {
     Frame &frame = m_frames.back();
     if (frame.count(identifier) > 0) {
-        fprintf(stderr, "error: couldn't define subroutine %s in current scope: identifier already exists\n", identifier.c_str());
+        fprintf(stderr, "error: couldn't define subroutine `%s': identifier already exists in current scope\n", identifier.c_str());
         return binding;
     }
     else {
@@ -126,7 +127,7 @@ const basic::SubDefinition *basic::SymbolTable::defineSubroutine(const String &i
             return NULL;
         }
         else {
-            fprintf(stderr, "error: couldn't define subroutine %s in current scope: map insertion failed\n", identifier.c_str());
+            fprintf(stderr, "error: couldn't define subroutine `%s': map insertion failed\n", identifier.c_str());
             return binding;
         }
     }
@@ -137,7 +138,7 @@ const basic::SubDefinition *basic::SymbolTable::defineSubroutine(const String &i
 basic::Variant *basic::SymbolTable::defineVariant(const String &identifier, Variant *binding) {
     Frame &frame = m_frames.back();
     if (frame.count(identifier) > 0) {
-        fprintf(stderr, "error: couldn't define variant %s in current scope: identifier already exists\n", identifier.c_str());
+        fprintf(stderr, "error: couldn't define variant `%s': identifier already exists in current scope\n", identifier.c_str());
         return binding;
     }
     else {
@@ -147,7 +148,7 @@ basic::Variant *basic::SymbolTable::defineVariant(const String &identifier, Vari
             return NULL;
         }
         else {
-            fprintf(stderr, "error: couldn't define variant %s in current scope: map insertion failed\n", identifier.c_str());
+            fprintf(stderr, "error: couldn't define variant `%s': map insertion failed\n", identifier.c_str());
             return binding;
         }
     }
@@ -158,7 +159,7 @@ basic::Variant *basic::SymbolTable::defineVariant(const String &identifier, Vari
 basic::Array *basic::SymbolTable::defineArray(const String &identifier, Array *binding) {
     Frame &frame = m_frames.back();
     if (frame.count(identifier) > 0) {
-        fprintf(stderr, "error: couldn't define array %s in current scope: identifier already exists\n", identifier.c_str());
+        fprintf(stderr, "error: couldn't define array `%s': identifier already exists in current scope\n", identifier.c_str());
         return binding;
     }
     else {
@@ -168,8 +169,58 @@ basic::Array *basic::SymbolTable::defineArray(const String &identifier, Array *b
             return NULL;
         }
         else {
-            fprintf(stderr, "error: couldn't define array %s in current scope: map insertion failed\n", identifier.c_str());
+            fprintf(stderr, "error: couldn't define array `%s': map insertion failed\n", identifier.c_str());
             return binding;
         }
     }
 }
+
+// return NULL on success (SymbolTable has taken ownership of binding)
+// return binding on failure (SymbolTable can't take ownership, caller retains responsibility)
+basic::File *basic::SymbolTable::defineFile(const String &identifier, File *binding) {
+    Frame &frame = m_frames.back();
+    if (frame.count(identifier) > 0) {
+        fprintf(stderr, "error: couldn't define file handle `%s': identifier already exists in current scope\n", identifier.c_str());
+        return binding;
+    }
+    else {
+        std::pair<Frame::iterator, bool> r = frame.insert(std::make_pair(identifier, Entry(FILEHANDLE, binding)));
+        if (r.second) {
+            // success
+            return NULL;
+        }
+        else {
+            fprintf(stderr, "error: couldn't define file handle `%s': map insertion failed\n", identifier.c_str());
+            return binding;
+        }
+    }
+}
+
+bool basic::SymbolTable::undefine(const String &identifier, unsigned int mask) {
+    if (mask == 0)  return false;
+
+    for (std::vector<Frame>::reverse_iterator frame = m_frames.rbegin(); frame != m_frames.rend(); frame++) {
+        Frame::iterator object = frame->find(identifier);
+        // iterator of map derefs to a std::pair<key_T, value_T>
+        if (object != frame->end() and (mask & object->second.type)) {
+            Entry &entry = object->second;
+            switch (entry.type) {
+                case BUILTIN_FUNCTION:  break;
+                case FUNCTION:          break;
+                case SUBROUTINE:        break;
+                case VARIANT:           delete entry.variant;   break;
+                case ARRAY:             delete entry.array;     break;
+                case FILEHANDLE:        delete entry.file;      break;
+                default:
+                    fprintf(stderr, "warning: unrecognised symbol table entry type in SymbolTable::endScope()\n");
+            }
+            frame->erase(object);
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+
+

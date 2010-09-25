@@ -19,6 +19,7 @@
 #include "array.h"
 #include "ast.h"
 #include "builtin.h"
+#include "file.h"
 #include "string.h"
 #include "variant.h"
 
@@ -34,6 +35,7 @@ public:
         SUBROUTINE       =  4,
         VARIANT          =  8,
         ARRAY            = 16,
+        FILEHANDLE       = 32,
         // etc        
     };
     struct Entry {
@@ -42,6 +44,7 @@ public:
         Entry(EntryType type, const SubDefinition *sub) : type(type), sub(sub) {}
         Entry(EntryType type, Variant *variant) : type(type), variant(variant) {}
         Entry(EntryType type, Array *array) : type(type), array(array) {}
+        Entry(EntryType type, File *file) : type(type), file(file) {}
 
         EntryType type;
         union { 
@@ -50,6 +53,7 @@ public:
             const SubDefinition *sub;
             Variant *variant;
             Array *array;
+            File *file;
         };
     };
     typedef std::map<const String, Entry> Frame;
@@ -71,9 +75,12 @@ public:
     const SubDefinition *defineSubroutine(const String &, const SubDefinition *);
     Variant *defineVariant(const String &, Variant *);
     /*FIXME const*/ Array *defineArray(const String &, Array *);
+    File *defineFile(const String &, File *);
+    
+    bool undefine(const String &, unsigned int mask=0);
     
 private:
-    static const unsigned int all_entry_types = BUILTIN_FUNCTION | FUNCTION | SUBROUTINE | VARIANT | ARRAY;
+    static const unsigned int all_entry_types = BUILTIN_FUNCTION | FUNCTION | SUBROUTINE | VARIANT | ARRAY | FILEHANDLE;
     std::vector<Frame> m_frames;
     
     void installBuiltins();

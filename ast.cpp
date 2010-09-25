@@ -39,7 +39,7 @@ void basic::IdentifierExpression::execute() const {
                 m_result = *object->variant;
                 break;
             case SymbolTable::ARRAY: 
-                {
+                if (m_params) {
                     Array::Index index;
                     for (size_t i = 0; i < m_params->size(); i++) {
                         m_params->param(i)->execute();
@@ -53,9 +53,20 @@ void basic::IdentifierExpression::execute() const {
                         m_result.setUndefined();
                     }
                 }
+                else {
+                    fprintf(stderr, "warning: array `%s' used without subscript in expression at line %i, column %i\n",
+                            m_identifier.c_str(), m_line, m_column);
+                    m_result.setUndefined();
+                }
+                break;
+            case SymbolTable::FILEHANDLE:
+                fprintf(stderr, "warning: attempting to use file handle `%s' in expression at line %i, column %i\n",
+                        m_identifier.c_str(), m_line, m_column);
+                m_result.setUndefined();
                 break;
             default:
-                fprintf(stderr, "debug: unexpected symbol table entry type\n");
+                fprintf(stderr, "debug: unexpected symbol table entry type in identifier expression\n");
+                m_result.setUndefined();
         }
     }
     else {
@@ -418,16 +429,28 @@ void basic::DimStatement::execute() const {
 }
 
 void basic::OpenStatement::execute() const {
-    // FIXME need a register of file handles
-    // validate mode
-    // evaluate expression, and check result is a valid unopened handle
-    // install handle and open the file
+    File::Mode mode;
+    
+    switch (m_mode) {
+        case TkINPUT:   mode = File::INPUT;     break;
+        case TkOUTPUT:  mode = File::OUTPUT;    break;
+        case TkAPPEND:  mode = File::APPEND;    break;
+        default:
+            fprintf(stderr, "debug: invalid file mode `%s' in open statement\n", Tokeniser::tokenDescriptions[m_mode]);
+            return;
+    }
+    
+    m_filename->execute();
+    String filename = m_filename->getResult().getStringValue();
+
+    File *binding = g_symbol_table.defineFile(m_identifier, new File(filename, mode));
+    if (binding)  delete binding;
 }
 
 void basic::CloseStatement::execute() const {
-    // FIXME need a register of file handles
-    // evaluate expression and check result is a valid opened handle
-    // close the handle and deregister it
+    if (not g_symbol_table.undefine(m_identifier, SymbolTable::FILEHANDLE)) {
+        fprintf(stderr, "warning: attempt to close undefined file handle `%s'\n", m_identifier.c_str());
+    }
 }
 
 void basic::AcceptedParamList::execute() const {
@@ -443,10 +466,6 @@ void basic::ArraySubscript::execute() const {
 }
 
 void basic::ArrayDimension::execute() const {
-    ;   // does nothing
-}
-
-void basic::FileHandle::execute() const {
     ;   // does nothing
 }
 

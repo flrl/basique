@@ -83,6 +83,7 @@ basic::Variant basic::builtin::len(const ParamList *params) {
     return result;
 }
 
+// str type(expression)
 basic::Variant basic::builtin::type(const ParamList *params) {
     if (params->size() != 1)  return Variant();
     
@@ -96,7 +97,9 @@ basic::Variant basic::builtin::type(const ParamList *params) {
         case Variant::VaSTRING:
             return Variant("string");
         case Variant::VaUNDEF:
+            return Variant("undefined");
         default:
+            fprintf(stderr, "debug: unhandled variant type in builtin::type\n");
             return Variant("undefined");
     }
 }
