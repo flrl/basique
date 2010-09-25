@@ -35,7 +35,7 @@ basic::File::File(const String &filename, Mode mode) : m_filename(filename), m_m
 }
 
 basic::File::~File() {
-    fprintf(stderr, "debug: file %s closing...\n", m_filename.c_str());
+//    fprintf(stderr, "debug: file %s closing...\n", m_filename.c_str());
     if (m_file != NULL) {
         if (fclose(m_file) == EOF) {
             fprintf(stderr, "warning: error closing %s: %s\n", m_filename.c_str(), strerror(errno));

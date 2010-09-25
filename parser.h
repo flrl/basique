@@ -85,10 +85,10 @@ private:
 //               | "exit" [ <expression> ]
 // <array-subscript> ::= "(" <expression> [ "," <expression> ]... ")"
 // <array-dimension> ::= "(" <expression> [ "to" <expression> ] [ "," <expression> [ "to" <expression> ] ]... ")"
-// <print-statement-body> ::= [ "#" <identifier> ] <print-expression-list>
+// <print-statement-body> ::= [ "#" <identifier> [ "," ] ] <print-expression-list>
 // <print-expression-list> ::= <expression> [ "," <expression> ]... [ "," ]
 //                           | <null>
-// <input-statement-body> ::= [ "#" <identifier> ] <identifier> [ <array-subscript> ] [ "," <expression> ]
+// <input-statement-body> ::= [ "#" <identifier> [ "," ] ] <identifier> [ <array-subscript> ] [ "," <expression> ]
 // <let-statement-body> ::= <identifier> [ <array-subscript> ] "=" <expression>
 // <call-statement-body> ::= <identifier> "(" <param-list> ")"
 // <if-statement-body> ::= <expression> "then" <block> [ "elseif" <expression> "then" <block> ]... [ "else" <block> ] "end" "if"
