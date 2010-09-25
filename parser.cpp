@@ -383,13 +383,21 @@ basic::ParamList* basic::Parser::paramList(void) {
     return p;
 }
 
-// <print-statement-body> ::= [ <file-handle> ] <print-expression-list>
+// <print-statement-body> ::= [ "#" <identifier> ] <print-expression-list>
 // <print-expression-list> ::= <expression> [ "," <expression> ]... [ "," ]
 //                           | <null>
 basic::PrintStatement* basic::Parser::printStatementBody(void) {
-    // FIXME file handle
+    String file_identifier;
+    if (accept(TkHASH)) {
+        if (expect(TkIDENTIFIER)) {
+            file_identifier = m_accepted_token_value.getStringValue();
+        }
+        else {
+            return NULL;
+        }
+    }
     
-    PrintStatement *s = new PrintStatement();
+    PrintStatement *s = new PrintStatement(file_identifier);
 
     if (isValidExpressionToken(m_token)) {
         Expression *e = NULL;
@@ -421,9 +429,17 @@ basic::PrintStatement* basic::Parser::printStatementBody(void) {
     return s;
 }
 
-// <input-statement-body> ::= [ <file-handle> ] <identifier> [ <array-subscript> ] [ "," <expression> ]
+// <input-statement-body> ::= [ "#" <identifier> ] <identifier> [ <array-subscript> ] [ "," <expression> ]
 basic::InputStatement* basic::Parser::inputStatementBody(void) {
-    // FIXME file handle
+    String file_identifier;
+    if (accept(TkHASH)) {
+        if (expect(TkIDENTIFIER)) {
+            file_identifier = m_accepted_token_value.getStringValue();
+        }
+        else {
+            return NULL;
+        }
+    }
     
     if (expect(TkIDENTIFIER)) {
         String identifier(m_accepted_token_value.getStringValue());
@@ -440,7 +456,7 @@ basic::InputStatement* basic::Parser::inputStatementBody(void) {
                 return NULL;
             }
         }
-        return new InputStatement(identifier, subscript, prompt);
+        return new InputStatement(file_identifier, identifier, subscript, prompt);
     }
     else {
         return NULL;

@@ -274,23 +274,26 @@ private:
 
 class basic::PrintStatement : public Statement {
 public:
-    PrintStatement() : m_append_eol(true) { }
+    PrintStatement(const String &fid) : m_file_identifier(fid), m_append_eol(true) { }
     ~PrintStatement();
     virtual void execute() const;
     void appendExpression(Expression *e) { m_expressions.push_back(e); }
     void setAppendEol(bool b) { m_append_eol = b; }
     
 private:
+    const String m_file_identifier;
     std::list<Expression *> m_expressions;
     bool m_append_eol;
 };
 
 class basic::InputStatement : public Statement {
 public:
-    InputStatement(const String &id, ArraySubscript *s, Expression *e) : m_identifier(id), m_subscript(s), m_prompt(e) { }
+    InputStatement(const String &fid, const String &id, ArraySubscript *s, Expression *e) 
+        : m_file_identifier(fid), m_identifier(id), m_subscript(s), m_prompt(e) {}
     ~InputStatement() { if (m_subscript) delete m_subscript; if (m_prompt) delete m_prompt; }
     virtual void execute() const;
 private:
+    const String m_file_identifier;
     const String m_identifier;
     ArraySubscript *m_subscript;
     Expression *m_prompt;

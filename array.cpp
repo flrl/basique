@@ -36,6 +36,7 @@ bool basic::Array::isValidIndex(const Index &index) const {
     for (size_t d = 0; d < m_dimensions.size(); d++) {
         if (m_dimensions[d].first > index[d])  return false;
         if (m_dimensions[d].second < index[d])  return false;
+//        fprintf(stderr, "debug: array index %u for dimension %u is valid\n", index[d], d);
     }
     
     return true;
