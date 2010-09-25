@@ -20,14 +20,15 @@ public:
     const char *c_str() const { return m_cstring; }
     size_t length(void) const { return m_length; }
     
-    operator const char*(void) const { return m_cstring; }
+    operator const char*() const { return m_cstring; }
+    operator bool() const { return m_length > 0; }
+
     bool operator==(const String &) const;
     bool operator<(const String &) const;
     bool operator>(const String &) const;
 
     String &operator=(const String &);
     String &operator+=(const String &);
-
 
 private:
     size_t  m_size;

@@ -157,21 +157,25 @@ void basic::ComparitiveExpression::execute() const {
 }
 
 void basic::AndExpression::execute() const {
-    bool intermediate = true;
     for (std::list<basic::Expression*>::const_iterator e = m_terms.begin(); e != m_terms.end(); e++) {
         (*e)->execute();
-        intermediate = (intermediate and (*e)->getResult().getBoolValue());
+        if ((*e)->getResult().getBoolValue() == false) {
+            m_result.setBoolValue(false);
+            return;
+        }
     }
-    m_result.setBoolValue(intermediate);
+    m_result.setBoolValue(true);
 }
 
 void basic::OrExpression::execute() const {
-    bool intermediate = false;
     for (std::list<basic::Expression*>::const_iterator e = m_terms.begin(); e != m_terms.end(); e++) {
         (*e)->execute();
-        intermediate = (intermediate and (*e)->getResult().getBoolValue());
+        if ((*e)->getResult().getBoolValue() == true) {
+            m_result.setBoolValue(true);
+            return;
+        }
     }
-    m_result.setBoolValue(intermediate);
+    m_result.setBoolValue(false);
 }
 
 void basic::Block::execute() const {
@@ -181,66 +185,59 @@ void basic::Block::execute() const {
 }
 
 void basic::PrintStatement::execute() const {
-    // FIXME file handle
+    FILE *output = stdout;
+    
+    if (m_file_identifier) {
+        SymbolTable::Entry *object = NULL;
+        if ((object = g_symbol_table.find(m_file_identifier, SymbolTable::FILEHANDLE))) {
+            output = object->file->c_file();
+        }
+        else {
+            fprintf(stderr, "error: identifier `%s' does not name a file handle in print at line %i, column %i\n", 
+                    m_file_identifier.c_str(), m_line, m_column);
+            return;
+        }
+    }
     
     for (std::list<basic::Expression*>::const_iterator e = m_expressions.begin(); e != m_expressions.end(); e++) {
         (*e)->execute();
-        fputs((*e)->getResult().getStringValue(), stdout);
+        fputs((*e)->getResult().getStringValue(), output);
     }
-    if (m_append_eol)  putchar('\n');
-    fflush(stdout);
+    if (m_append_eol)  putc('\n', output);
+    fflush(output);
 }
 
 void basic::InputStatement::execute() const {
-    // FIXME file handle
-    
-    const size_t bufsize = 1024;
-    Variant value;
-    
-    char *buffer = new char[bufsize];
-    assert(buffer != NULL);
-    
-    // FIXME define/validate the destination variable before prompting for input
-    
-    // display a prompt if we have one
-    if (m_prompt) {
-        m_prompt->execute();
-        fputs(m_prompt->getResult().getStringValue(), stdout);
-        fflush(stdout);
-    }
-    
-    // read some input
-    fgets(buffer, bufsize, stdin);
-    int len = strlen(buffer);
-    if (buffer[len - 1] == '\n')  buffer[--len] = '\0';
+    FILE *input = stdin;
+    Variant *destination = NULL;
 
-    // convert value to "smallest" type that can contain it
-    char *endptr;
-    int int_value;
-    double double_value;
-    int_value = strtol(buffer, &endptr, 0);
-    if (buffer[0] != '\0' and endptr[0] == '\0') {
-        value.setIntValue(int_value);
-    }
-    else {
-        double_value = strtod(buffer, &endptr);
-        if (buffer[0] != '\0' and endptr[0] == '\0') {
-            value.setDoubleValue(double_value);
+    // hook up the input file handle if there is one
+    if (m_file_identifier) {
+        SymbolTable::Entry *object = NULL;
+        if ((object = g_symbol_table.find(m_file_identifier, SymbolTable::FILEHANDLE))) {
+            if (object->file->isValid()) {
+                input = object->file->c_file();                
+            }
+            else {
+                fprintf(stderr, "debug: got an invalid file handle identifer in input statement\n");
+                return;
+            }
         }
         else {
-            value.setStringValue(buffer);
+            fprintf(stderr, "error: identifier `%s' does not name a file handle in print at line %i, column %i\n", 
+                    m_file_identifier.c_str(), m_line, m_column);
+            return;
         }
     }
-    delete[] buffer;
     
-    // insert it into the symbol table
+    // hook up the destination in the symbol table
     SymbolTable::Entry *object = NULL;
     if (m_subscript) {
         if ((object = g_symbol_table.find(m_identifier, SymbolTable::ARRAY))) {
             Array::Index index;
             m_subscript->makeArrayIndex(&index);
             if (object->array->isValidIndex(index)) {
-                (*object->array)[index] = value;
+                destination = &((*object->array)[index]);
             }
             else {
                 fprintf(stderr, "error: array index out of bounds at line %i, column %i\n", m_line, m_column);
@@ -252,13 +249,64 @@ void basic::InputStatement::execute() const {
     }
     else {
         if ((object = g_symbol_table.find(m_identifier, SymbolTable::VARIANT))) {
-            *object->variant = value;
+            destination = object->variant;
         }
         else {
-            Variant *binding = g_symbol_table.defineVariant(m_identifier, new Variant(value));
-            if (binding)  delete binding;
+            destination = new Variant();
+            Variant *r = g_symbol_table.defineVariant(m_identifier, destination);
+            if (r) {
+                delete r;
+                destination = NULL;
+            } 
         }
     }
+    assert(destination != NULL);
+    
+    // don't try to read if we're at the end of the file
+    if (feof(input)) {
+        destination->setUndefined();
+        return;
+    }
+    
+    // display a prompt if we have one and the input source is stdin // FIXME only if it's a tty
+    if (m_prompt and input == stdin) {
+        m_prompt->execute();
+        fputs(m_prompt->getResult().getStringValue(), stdout);
+        fflush(stdout);
+    }
+    
+    // read some input
+    const size_t bufsize = 1024;
+    char *buffer = new char[bufsize];
+    assert(buffer != NULL);
+    if (fgets(buffer, bufsize, input) == NULL) {
+        destination->setUndefined();
+        delete[] buffer;
+        return;
+    }
+    int len = strlen(buffer);
+    if (buffer[len - 1] == '\n')  buffer[--len] = '\0';
+
+    // convert value to "smallest" type that can contain it
+    char *endptr;
+    int int_value;
+    double double_value;
+    int_value = strtol(buffer, &endptr, 0);
+    if (buffer[0] != '\0' and endptr[0] == '\0') {
+        destination->setIntValue(int_value);
+    }
+    else {
+        double_value = strtod(buffer, &endptr);
+        if (buffer[0] != '\0' and endptr[0] == '\0') {
+            destination->setDoubleValue(double_value);
+        }
+        else {
+            destination->setStringValue(buffer);
+        }
+    }
+    
+    // clean up
+    delete[] buffer;
 }
 
 void basic::LetStatement::execute() const {
