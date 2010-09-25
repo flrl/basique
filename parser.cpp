@@ -410,7 +410,7 @@ basic::ParamList* basic::Parser::paramList(void) {
     return p;
 }
 
-// <print-statement-body> ::= [ "#" <identifier> ] <print-expression-list>
+// <print-statement-body> ::= [ "#" <identifier> [ "," ] ] <print-expression-list>
 // <print-expression-list> ::= <expression> [ "," <expression> ]... [ "," ]
 //                           | <null>
 basic::PrintStatement* basic::Parser::printStatementBody(void) {
@@ -421,6 +421,7 @@ basic::PrintStatement* basic::Parser::printStatementBody(void) {
     if (accept(TkHASH)) {
         if (expect(TkIDENTIFIER)) {
             file_identifier = m_accepted_token_value.getStringValue();
+            accept(TkCOMMA);
         }
         else {
             return NULL;
@@ -460,7 +461,7 @@ basic::PrintStatement* basic::Parser::printStatementBody(void) {
     return s;
 }
 
-// <input-statement-body> ::= [ "#" <identifier> ] <identifier> [ <array-subscript> ] [ "," <expression> ]
+// <input-statement-body> ::= [ "#" <identifier> [ "," ] ] <identifier> [ <array-subscript> ] [ "," <expression> ]
 basic::InputStatement* basic::Parser::inputStatementBody(void) {
     int line = m_accepted_token_line;
     int column = m_accepted_token_column;
@@ -469,6 +470,7 @@ basic::InputStatement* basic::Parser::inputStatementBody(void) {
     if (accept(TkHASH)) {
         if (expect(TkIDENTIFIER)) {
             file_identifier = m_accepted_token_value.getStringValue();
+            accept(TkCOMMA);
         }
         else {
             return NULL;
