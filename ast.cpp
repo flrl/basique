@@ -241,10 +241,12 @@ void basic::InputStatement::execute() const {
             }
             else {
                 fprintf(stderr, "error: array index out of bounds at line %i, column %i\n", m_line, m_column);
+                return;
             }
         }
         else {
             fprintf(stderr, "error: no such array `%s' at line %i, column %i\n", m_identifier.c_str(), m_line, m_column);
+            return;
         }
     }
     else {
@@ -255,8 +257,8 @@ void basic::InputStatement::execute() const {
             destination = new Variant();
             Variant *r = g_symbol_table.defineVariant(m_identifier, destination);
             if (r) {
-                delete r;
-                destination = NULL;
+                delete destination;
+                return;
             } 
         }
     }

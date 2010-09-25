@@ -108,6 +108,10 @@ basic::Unit* basic::Parser::unit(void) {
 basic::FunctionDefinition* basic::Parser::functionDefinitionBody(void) {
     AcceptedParamList *a = NULL;
     Block *b = NULL;
+    
+    int line = m_accepted_token_line;
+    int column = m_accepted_token_column;
+    
     if (expect(TkIDENTIFIER)) {
         String identifier(m_accepted_token_value.getStringValue());
         if (expect(TkLPAREN)) {
@@ -115,7 +119,9 @@ basic::FunctionDefinition* basic::Parser::functionDefinitionBody(void) {
                 if (expect(TkRPAREN)) {
                     if ((b = block())) {
                         if (expect(TkEND) and expect(TkFUNCTION)) {
-                            return new FunctionDefinition(identifier, a, b);
+                            FunctionDefinition *f = new FunctionDefinition(identifier, a, b);
+                            f->setPosition(line, column);
+                            return f;
                         }
                     }
                 }
@@ -132,6 +138,10 @@ basic::FunctionDefinition* basic::Parser::functionDefinitionBody(void) {
 basic::SubDefinition* basic::Parser::subDefinitionBody(void) {
     AcceptedParamList *a = NULL;
     Block *b = NULL;
+
+    int line = m_accepted_token_line;
+    int column = m_accepted_token_column;
+    
     if (expect(TkIDENTIFIER)) {
         String identifier(m_accepted_token_value.getStringValue());
         if (expect(TkLPAREN)) {
@@ -139,7 +149,9 @@ basic::SubDefinition* basic::Parser::subDefinitionBody(void) {
                 if (expect(TkRPAREN)) {
                     if ((b = block())) {
                         if (expect(TkEND) and expect(TkSUB)) {
-                            return new SubDefinition(identifier, a, b);
+                            SubDefinition *s = new SubDefinition(identifier, a, b);
+                            s->setPosition(line, column);
+                            return s;
                         }
                     }
                 }
@@ -228,6 +240,8 @@ basic::Statement* basic::Parser::statement(void) {
 //                          | <null>
 basic::Block* basic::Parser::block(void) {
     Block *block = new Block();
+    block->setPosition(m_accepted_token_line, m_accepted_token_column);
+    
     Statement *s = NULL;
     do {
         switch (m_token) {
@@ -263,6 +277,8 @@ basic::Block* basic::Parser::block(void) {
 //                         | <null> 
 basic::AcceptedParamList* basic::Parser::acceptedParamList(void) {
     AcceptedParamList *a = new AcceptedParamList();
+    a->setPosition(m_accepted_token_line, m_accepted_token_column);
+    
     if (accept(TkIDENTIFIER)) {
         a->appendIdentifier(m_accepted_token_value.getStringValue());
         while(accept(TkCOMMA)) {
@@ -281,9 +297,15 @@ basic::AcceptedParamList* basic::Parser::acceptedParamList(void) {
 // <array-subscript> ::= "(" <expression> [ "," <expression> ]... ")"
 basic::ArraySubscript* basic::Parser::arraySubscript(void) {
     Expression *e = NULL;
+
     if (expect(TkLPAREN)) {
+        int line = m_accepted_token_line;
+        int column = m_accepted_token_column;
+
         if ((e = expression())) {
             ArraySubscript *sub = new ArraySubscript(e);
+            sub->setPosition(line, column);
+            
             while (accept(TkCOMMA)) {
                 if ((e = expression())) {
                     sub->appendExpression(e);
@@ -315,6 +337,9 @@ basic::ArrayDimension* basic::Parser::arrayDimension(void) {
     Expression *a = NULL;
     Expression *b = NULL;
     if (expect(TkLPAREN)) {
+        int line = m_accepted_token_line;
+        int column = m_accepted_token_column;
+                
         if ((a = expression())) {
             if (accept(TkTO)) {
                 if (not (b = expression())) {
@@ -323,6 +348,7 @@ basic::ArrayDimension* basic::Parser::arrayDimension(void) {
                 }
             }
             ArrayDimension *dim = new ArrayDimension(a, b);
+            dim->setPosition(line, column);
             
             while (accept(TkCOMMA)) {
                 if ((a = expression())) {
@@ -359,9 +385,10 @@ basic::ArrayDimension* basic::Parser::arrayDimension(void) {
 //                | <null>
 basic::ParamList* basic::Parser::paramList(void) {
     ParamList *p = new ParamList();
-    Expression *e = NULL;
-    
+    p->setPosition(m_accepted_token_line, m_accepted_token_column);
+
     if (isValidExpressionToken(m_token)) {
+        Expression *e = NULL;
         if ((e = expression())) {
             p->appendExpression(e);
             while (accept(TkCOMMA)) {
@@ -387,6 +414,9 @@ basic::ParamList* basic::Parser::paramList(void) {
 // <print-expression-list> ::= <expression> [ "," <expression> ]... [ "," ]
 //                           | <null>
 basic::PrintStatement* basic::Parser::printStatementBody(void) {
+    int line = m_accepted_token_line;
+    int column = m_accepted_token_column;
+        
     String file_identifier;
     if (accept(TkHASH)) {
         if (expect(TkIDENTIFIER)) {
@@ -398,6 +428,7 @@ basic::PrintStatement* basic::Parser::printStatementBody(void) {
     }
     
     PrintStatement *s = new PrintStatement(file_identifier);
+    s->setPosition(line, column);
 
     if (isValidExpressionToken(m_token)) {
         Expression *e = NULL;
@@ -431,6 +462,9 @@ basic::PrintStatement* basic::Parser::printStatementBody(void) {
 
 // <input-statement-body> ::= [ "#" <identifier> ] <identifier> [ <array-subscript> ] [ "," <expression> ]
 basic::InputStatement* basic::Parser::inputStatementBody(void) {
+    int line = m_accepted_token_line;
+    int column = m_accepted_token_column;
+    
     String file_identifier;
     if (accept(TkHASH)) {
         if (expect(TkIDENTIFIER)) {
@@ -456,7 +490,9 @@ basic::InputStatement* basic::Parser::inputStatementBody(void) {
                 return NULL;
             }
         }
-        return new InputStatement(file_identifier, identifier, subscript, prompt);
+        InputStatement *s = new InputStatement(file_identifier, identifier, subscript, prompt);
+        s->setPosition(line, column);
+        return s;
     }
     else {
         return NULL;
@@ -465,22 +501,27 @@ basic::InputStatement* basic::Parser::inputStatementBody(void) {
 
 // <let-statement-body> ::= <identifier> [ <array-subscript> ] "=" <expression>
 basic::LetStatement* basic::Parser::letStatementBody(void) {
-    ArraySubscript *s = NULL;
+    ArraySubscript *subscript = NULL;
     Expression *e = NULL;
 
+    int line = m_accepted_token_line;
+    int column = m_accepted_token_column;
+        
     if (expect(TkIDENTIFIER)) {
         String identifier(m_accepted_token_value.getStringValue());
-        if (m_token == TkLPAREN and not (s = arraySubscript())) {
+        if (m_token == TkLPAREN and not (subscript = arraySubscript())) {
             return NULL;
         }
         if (expect(TkEQUALS)) {
             if ((e = expression())) {
-                return new LetStatement(identifier, s, e);
+                LetStatement *s = new LetStatement(identifier, subscript, e);
+                s->setPosition(line, column);
+                return s;
             }
         }
     }
     
-    if (s)  delete s;
+    if (subscript)  delete subscript;
     if (e)  delete e;
     return NULL;
 }
@@ -489,16 +530,20 @@ basic::LetStatement* basic::Parser::letStatementBody(void) {
 basic::CallStatement* basic::Parser::callStatementBody(void) {
     ParamList *p = NULL;
 
+    int line = m_accepted_token_line;
+    int column = m_accepted_token_column;
+        
     if (expect(TkIDENTIFIER)) {
         String identifier(m_accepted_token_value.getStringValue());
         if (expect(TkLPAREN)) {
             if((p = paramList())) {
                 if (expect(TkRPAREN)) {
-                    return new CallStatement(identifier, p);     
+                    CallStatement *s = new CallStatement(identifier, p);
+                    s->setPosition(line, column);
+                    return s;
                 }
             }
         }
-        
     }
     
     if (p)  delete p;
@@ -511,8 +556,13 @@ basic::IfStatement* basic::Parser::ifStatementBody(void) {
     Expression *e = NULL;
     Block *b = NULL;
     
+    int line = m_accepted_token_line;
+    int column = m_accepted_token_column;
+        
     if ((e = expression())) {
         s = new IfStatement();
+        s->setPosition(line, column);
+        
         if (expect(TkTHEN) and (b = block())) {
             s->appendCondition(e, b);
             
@@ -549,14 +599,19 @@ basic::DoStatement* basic::Parser::doStatementBody(void) {
     DoStatement::When w;
     Expression *c = NULL;
     Block *b = NULL;
-    
+
+    int line = m_accepted_token_line;
+    int column = m_accepted_token_column;
+        
     if (accept(TkWHILE)) {
         t = DoStatement::DcWHILE;
         w = DoStatement::DcPRECONDITION;
         if ((c = expression())) {
             if ((b = block())) {
                 if (expect(TkLOOP)) {
-                    return new DoStatement(t, w, c, b);
+                    DoStatement *s = new DoStatement(t, w, c, b);
+                    s->setPosition(line, column);
+                    return s;
                 }
             }
         }
@@ -567,7 +622,9 @@ basic::DoStatement* basic::Parser::doStatementBody(void) {
         if ((c = expression())) {
             if ((b = block())) {
                 if (expect(TkLOOP)) {
-                    return new DoStatement(t, w, c, b);
+                    DoStatement *s = new DoStatement(t, w, c, b);
+                    s->setPosition(line, column);
+                    return s;
                 }
             }
         }
@@ -576,18 +633,26 @@ basic::DoStatement* basic::Parser::doStatementBody(void) {
         if (accept(TkDONE)) {
             t = DoStatement::DcONCE;
             w = DoStatement::DcPOSTCONDITION;
-            return new DoStatement(t, w, NULL, b);
+            DoStatement *s = new DoStatement(t, w, NULL, b);
+            s->setPosition(line, column);
+            return s;
         }
         else if (accept(TkLOOP)) {
             w = DoStatement::DcPOSTCONDITION;
             if (accept(TkWHILE) and ((c = expression()))) {
-                return new DoStatement(DoStatement::DcWHILE, w, c, b);
+                DoStatement *s = new DoStatement(DoStatement::DcWHILE, w, c, b);
+                s->setPosition(line, column);
+                return s;
             }
             else if (accept(TkUNTIL) and ((c = expression()))) {
-                return new DoStatement(DoStatement::DcUNTIL, w, c, b);
+                DoStatement *s = new DoStatement(DoStatement::DcUNTIL, w, c, b);
+                s->setPosition(line, column);
+                return s;
             }
             else {
-                return new DoStatement(DoStatement::DcFOREVER, w, c, b);
+                DoStatement *s = new DoStatement(DoStatement::DcFOREVER, w, c, b);
+                s->setPosition(line, column);
+                return s;
             }
         }
         else {
@@ -609,6 +674,10 @@ basic::ForStatement* basic::Parser::forStatementBody(void) {
     Expression *end = NULL;
     Expression *step = NULL;
     Block *body = NULL;
+    
+    int line = m_accepted_token_line;
+    int column = m_accepted_token_column;
+        
     if (expect(TkIDENTIFIER)) {
         String identifier(m_accepted_token_value.getStringValue());
         if (expect(TkEQUALS)) {
@@ -625,7 +694,9 @@ basic::ForStatement* basic::Parser::forStatementBody(void) {
                         if ((body = block())) {
                             if (expect(TkNEXT)) {
                                 accept(TkIDENTIFIER);  // FIXME just ignoring it for now
-                                return new ForStatement(identifier, start, end, step, body);
+                                ForStatement *s = new ForStatement(identifier, start, end, step, body);
+                                s->setPosition(line, column);
+                                return s;
                             }
                         }
                     }
@@ -644,6 +715,10 @@ basic::ForStatement* basic::Parser::forStatementBody(void) {
 // <dim-statement-body> ::= <identifier> [ <array-dimension> ] [ "," <identifier> [ <array-dimension> ] ]...
 basic::DimStatement* basic::Parser::dimStatementBody(void) {
     ArrayDimension *dim = NULL;
+
+    int line = m_accepted_token_line;
+    int column = m_accepted_token_column;
+    
     if (expect(TkIDENTIFIER)) {
         String identifier(m_accepted_token_value.getStringValue());
         if (m_token == TkLPAREN) {
@@ -652,6 +727,7 @@ basic::DimStatement* basic::Parser::dimStatementBody(void) {
             }
         }
         DimStatement *s = new DimStatement(identifier, dim);
+        s->setPosition(line, column);
         while (accept(TkCOMMA)) {
             if (expect(TkIDENTIFIER)) {
                 String identifier(m_accepted_token_value.getStringValue());
@@ -685,6 +761,9 @@ basic::OpenStatement* basic::Parser::openStatementBody() {
     Expression *e = NULL;
     Token mode = TkINVALID;
 
+    int line = m_accepted_token_line;
+    int column = m_accepted_token_column;
+        
     if ((e = expression())) {
         if (expect(TkFOR)) {
             if (accept(TkINPUT) or accept(TkOUTPUT) or accept(TkAPPEND)) {
@@ -692,7 +771,9 @@ basic::OpenStatement* basic::Parser::openStatementBody() {
                 if (expect(TkAS)) {
                     accept(TkHASH);
                     if (expect(TkIDENTIFIER)) {
-                        return new OpenStatement(e, mode, m_accepted_token_value.getStringValue());
+                        OpenStatement *s = new OpenStatement(e, mode, m_accepted_token_value.getStringValue());
+                        s->setPosition(line, column);
+                        return s;
                     }
                 }
             }
@@ -705,10 +786,15 @@ basic::OpenStatement* basic::Parser::openStatementBody() {
 
 // <close-statement-body> ::= [ "#" ] <identifier>
 basic::CloseStatement* basic::Parser::closeStatementBody() {
+    int line = m_accepted_token_line;
+    int column = m_accepted_token_column;
+        
     if (m_token == TkHASH)  accept(TkHASH);
 
     if (expect(TkIDENTIFIER)) {
-        return new CloseStatement(m_accepted_token_value.getStringValue());
+        CloseStatement *s = new CloseStatement(m_accepted_token_value.getStringValue());
+        s->setPosition(line, column);
+        return s;
     }
     else {
         return NULL;
@@ -720,15 +806,22 @@ basic::CloseStatement* basic::Parser::closeStatementBody() {
 //                        | "(" <expression> ")"
 basic::Expression* basic::Parser::primaryExpression(void) {
     if (accept(TkLITERAL)) {
-        return new LiteralExpression(m_accepted_token_value);
+        LiteralExpression *e = new LiteralExpression(m_accepted_token_value);
+        e->setPosition(m_accepted_token_line, m_accepted_token_column);
+        return e;
     }
     else if (accept(TkIDENTIFIER)) {
+        int line = m_accepted_token_line;
+        int column = m_accepted_token_column;
+        
         String identifier(m_accepted_token_value.getStringValue());
         if (accept(TkLPAREN)) {
             ParamList *p = NULL;
             if ((p = paramList())) {
                 if (expect(TkRPAREN)) {
-                    return new IdentifierExpression(identifier, p);
+                    IdentifierExpression *e = new IdentifierExpression(identifier, p);
+                    e->setPosition(line, column);
+                    return e;
                 }
                 else {
                     delete p;
@@ -740,7 +833,9 @@ basic::Expression* basic::Parser::primaryExpression(void) {
             }
         }
         else {
-            return new IdentifierExpression(identifier);
+            IdentifierExpression *e = new IdentifierExpression(identifier);
+            e->setPosition(line, column);
+            return e;
         }
     }
     else if (accept(TkLPAREN)) {
@@ -768,14 +863,15 @@ basic::Expression* basic::Parser::primaryExpression(void) {
 // <unary-operator> ::= "not" | "-"
 basic::Expression* basic::Parser::unaryExpression(void) {
     Expression *e = NULL;
-    if (accept(TkNOT)) {
+    if (accept(TkNOT) or accept(TkMINUS)) {
+        int line = m_accepted_token_line;
+        int column = m_accepted_token_column;
+        Token op = m_accepted_token;
+        
         if ((e = primaryExpression())) {
-            return new UnaryExpression(TkNOT, e);            
-        }
-    }
-    else if (accept(TkMINUS)) {
-        if ((e = primaryExpression())) {
-            return new UnaryExpression(TkMINUS, e);            
+            UnaryExpression *e = new UnaryExpression(op, e);
+            e->setPosition(line, column);
+            return e;
         }
     }
     else {
@@ -794,6 +890,7 @@ basic::Expression* basic::Parser::multiplicativeExpression(void) {
     if ((term = unaryExpression())) {
         if (m_token == TkMULTIPLY or m_token == TkDIVIDE or m_token == TkMOD) {
             MultiplicativeExpression *e = new MultiplicativeExpression(term);
+            e->setPosition(term->getLine(), term->getColumn());
             while (accept(TkMULTIPLY) or accept(TkDIVIDE) or accept(TkMOD)) {
                 Token op = m_accepted_token;
                 if ((term = unaryExpression())) {
@@ -824,6 +921,7 @@ basic::Expression* basic::Parser::additiveExpression(void) {
     if ((term = multiplicativeExpression())) {
         if (m_token == TkPLUS or m_token == TkMINUS) {
             AdditiveExpression *e = new AdditiveExpression(term);
+            e->setPosition(term->getLine(), term->getColumn());
             while (accept(TkPLUS) or accept(TkMINUS)) {
                 Token op = m_accepted_token;
                 if ((term = multiplicativeExpression())) {
@@ -855,7 +953,9 @@ basic::Expression* basic::Parser::comparitiveExpression(void) {
         Token t = m_token;
         if (accept(TkEQUALS) || accept(TkNOTEQUALS) || accept(TkLT) || accept(TkGT) || accept(TkLTEQUALS) || accept(TkGTEQUALS)) {
             if ((second = additiveExpression())) {
-                return new ComparitiveExpression(first, t, second);                
+                ComparitiveExpression *e = new ComparitiveExpression(first, t, second);
+                e->setPosition(first->getLine(), first->getColumn());
+                return e;
             }
             else {
                 delete first;
@@ -878,6 +978,7 @@ basic::Expression* basic::Parser::andExpression(void) {
     if ((term = comparitiveExpression())) {
         if (m_token == TkAND) {
             AndExpression *e = new AndExpression();
+            e->setPosition(term->getLine(), term->getColumn());
             e->appendTerm(term);
             while (accept(TkAND)) {
                 if ((term = comparitiveExpression())) {
@@ -906,6 +1007,7 @@ basic::Expression* basic::Parser::orExpression(void) {
     if ((term = andExpression())) {
         if (m_token == TkOR) {
             OrExpression *e = new OrExpression();
+            e->setPosition(term->getLine(), term->getColumn());
             e->appendTerm(term);
             while (accept(TkOR)) {
                 if ((term = andExpression())) {
