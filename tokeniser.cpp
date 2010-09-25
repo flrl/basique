@@ -363,8 +363,10 @@ void basic::Tokeniser::skipWhitespace(void) {
                 ch = getChar();
                 break;
                 
+            case '#':
+                if (m_cursor_column > 1)  return;
+                /* fall through */
             case '\'':
-//            case '#':
                 // consume comments until (but not including) end of line
                 getChar();
                 while ((ch = peekChar()) != EOF && ch != '\n') {
