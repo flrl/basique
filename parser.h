@@ -3,7 +3,7 @@
  *  Untitled
  *
  *  Created by Daniel on 10/01/10.
- *  Copyright 2010 __MyCompanyName__. All rights reserved.
+ *  Copyright 2010 Daniel Hyde. All rights reserved.
  *
  */
 
