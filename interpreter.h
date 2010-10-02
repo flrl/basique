@@ -3,7 +3,7 @@
  *  Untitled
  *
  *  Created by Ellie on 18/09/10.
- *  Copyright 2010 __MyCompanyName__. All rights reserved.
+ *  Copyright 2010 Ellie. All rights reserved.
  *
  */
 
