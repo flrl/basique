@@ -34,6 +34,7 @@ private:
     int         m_accepted_token_column;
     Token       m_accepted_token;
     
+    bool peek(Token t) const;
     bool accept(Token t);
     bool expect(Token t);
     void error(int, ...);

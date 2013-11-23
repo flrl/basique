@@ -12,8 +12,12 @@
 
 #include "parser.h"
 
+inline bool basic::Parser::peek(Token t) const {
+    return m_token == t;
+}
+
 bool basic::Parser::accept(Token t) {
-    if (m_token == t) {
+    if (peek(t)) {
         m_accepted_token_value = m_tokeniser->getValue();
         m_accepted_token_line = m_tokeniser->getLine();
         m_accepted_token_column = m_tokeniser->getColumn();
@@ -75,7 +79,7 @@ basic::Unit* basic::Parser::unit(void) {
         ; // skip any empty lines
     }
     
-    if (m_token == TkEOF /*accept(TkEOF)*/) {
+    if (peek(TkEOF)) {
         return NULL;
     }
     else if (accept(TkFUNCTION)) {
@@ -90,7 +94,7 @@ basic::Unit* basic::Parser::unit(void) {
 
     if (unit) {
         // N.B. don't use accept() here, otherwise it will wait until there's another token ready before executing the current line
-        if (m_token == TkEOL or m_token == TkEOF) {
+        if (peek(TkEOL) or peek(TkEOF)) {
             return unit;
         }
         else {
@@ -481,7 +485,7 @@ basic::InputStatement* basic::Parser::inputStatementBody(void) {
         String identifier(m_accepted_token_value.getStringValue());
         ArraySubscript *subscript = NULL;
         Expression *prompt = NULL;
-        if (m_token == TkLPAREN) {
+        if (peek(TkLPAREN)) {
             if (not (subscript = arraySubscript())) {
                 return NULL;
             }
@@ -511,7 +515,7 @@ basic::LetStatement* basic::Parser::letStatementBody(void) {
         
     if (expect(TkIDENTIFIER)) {
         String identifier(m_accepted_token_value.getStringValue());
-        if (m_token == TkLPAREN and not (subscript = arraySubscript())) {
+        if (peek(TkLPAREN) and not (subscript = arraySubscript())) {
             return NULL;
         }
         if (expect(TkEQUALS)) {
@@ -723,7 +727,7 @@ basic::DimStatement* basic::Parser::dimStatementBody(void) {
     
     if (expect(TkIDENTIFIER)) {
         String identifier(m_accepted_token_value.getStringValue());
-        if (m_token == TkLPAREN) {
+        if (peek(TkLPAREN)) {
             if (not (dim = arrayDimension())) {
                 return NULL;
             }
@@ -733,7 +737,7 @@ basic::DimStatement* basic::Parser::dimStatementBody(void) {
         while (accept(TkCOMMA)) {
             if (expect(TkIDENTIFIER)) {
                 String identifier(m_accepted_token_value.getStringValue());
-                if (m_token == TkLPAREN) {
+                if (peek(TkLPAREN)) {
                     if ((dim = arrayDimension())) {
                         s->appendDimensionable(identifier, dim);
                     }
@@ -791,7 +795,7 @@ basic::CloseStatement* basic::Parser::closeStatementBody() {
     int line = m_accepted_token_line;
     int column = m_accepted_token_column;
         
-    if (m_token == TkHASH)  accept(TkHASH);
+    if (peek(TkHASH))  accept(TkHASH);
 
     if (expect(TkIDENTIFIER)) {
         CloseStatement *s = new CloseStatement(m_accepted_token_value.getStringValue());
@@ -890,7 +894,7 @@ basic::Expression* basic::Parser::multiplicativeExpression(void) {
     Expression *term = NULL;
     
     if ((term = unaryExpression())) {
-        if (m_token == TkMULTIPLY or m_token == TkDIVIDE or m_token == TkMOD) {
+        if (peek(TkMULTIPLY) or peek(TkDIVIDE) or peek(TkMOD)) {
             MultiplicativeExpression *e = new MultiplicativeExpression(term);
             e->setPosition(term->getLine(), term->getColumn());
             while (accept(TkMULTIPLY) or accept(TkDIVIDE) or accept(TkMOD)) {
@@ -921,7 +925,7 @@ basic::Expression* basic::Parser::additiveExpression(void) {
     
     
     if ((term = multiplicativeExpression())) {
-        if (m_token == TkPLUS or m_token == TkMINUS) {
+        if (peek(TkPLUS) or peek(TkMINUS)) {
             AdditiveExpression *e = new AdditiveExpression(term);
             e->setPosition(term->getLine(), term->getColumn());
             while (accept(TkPLUS) or accept(TkMINUS)) {
@@ -978,7 +982,7 @@ basic::Expression* basic::Parser::andExpression(void) {
     Expression *term = NULL;
     
     if ((term = comparitiveExpression())) {
-        if (m_token == TkAND) {
+        if (peek(TkAND)) {
             AndExpression *e = new AndExpression();
             e->setPosition(term->getLine(), term->getColumn());
             e->appendTerm(term);
@@ -1007,7 +1011,7 @@ basic::Expression* basic::Parser::orExpression(void) {
     Expression *term = NULL;
     
     if ((term = andExpression())) {
-        if (m_token == TkOR) {
+        if (peek(TkOR)) {
             OrExpression *e = new OrExpression();
             e->setPosition(term->getLine(), term->getColumn());
             e->appendTerm(term);
