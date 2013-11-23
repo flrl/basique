@@ -868,14 +868,14 @@ basic::Expression* basic::Parser::primaryExpression(void) {
 // <unary-expression> ::= <unary-operator> <primary-expression> | <primary-expression>
 // <unary-operator> ::= "not" | "-"
 basic::Expression* basic::Parser::unaryExpression(void) {
-    Expression *e = NULL;
+    Expression *term = NULL;
     if (accept(TkNOT) or accept(TkMINUS)) {
         int line = m_accepted_token_line;
         int column = m_accepted_token_column;
         Token op = m_accepted_token;
         
-        if ((e = primaryExpression())) {
-            UnaryExpression *e = new UnaryExpression(op, e);
+        if ((term = primaryExpression())) {
+            UnaryExpression *e = new UnaryExpression(op, term);
             e->setPosition(line, column);
             return e;
         }
@@ -884,7 +884,7 @@ basic::Expression* basic::Parser::unaryExpression(void) {
         return primaryExpression();
     }
     
-    if (e)  delete e;
+    if (term)  delete term;
     return NULL;
 }
 
