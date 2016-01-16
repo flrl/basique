@@ -30,6 +30,23 @@ bool basic::Parser::accept(Token t) {
     }
 }
 
+bool basic::Parser::accept_any(Token t0, ...) {
+    if (accept(t0)) return true;
+
+    bool accepted = false;
+
+    va_list argv;
+    va_start(argv, t0);
+    while (not accepted) {
+        int token = va_arg(argv, int);
+        if (token <= Tk_MIN || token >= Tk_MAX) break;
+        accepted = accept(static_cast<Token>(token));
+    }
+    va_end(argv);
+
+    return accepted;
+}
+
 inline bool basic::Parser::expect(Token t) {
     if (accept(t)) {
         return true;
@@ -772,7 +789,7 @@ basic::OpenStatement* basic::Parser::openStatementBody() {
         
     if ((e = expression())) {
         if (expect(TkFOR)) {
-            if (accept(TkINPUT) or accept(TkOUTPUT) or accept(TkAPPEND)) {
+            if (accept_any(TkINPUT, TkOUTPUT, TkAPPEND, 0)) {
                 mode = m_accepted_token;
                 if (expect(TkAS)) {
                     accept(TkHASH);
@@ -897,7 +914,7 @@ basic::Expression* basic::Parser::multiplicativeExpression(void) {
         if (peek(TkMULTIPLY) or peek(TkDIVIDE) or peek(TkMOD)) {
             MultiplicativeExpression *e = new MultiplicativeExpression(term);
             e->setPosition(term->getLine(), term->getColumn());
-            while (accept(TkMULTIPLY) or accept(TkDIVIDE) or accept(TkMOD)) {
+            while (accept_any(TkMULTIPLY, TkDIVIDE, TkMOD, 0)) {
                 Token op = m_accepted_token;
                 if ((term = unaryExpression())) {
                     e->appendTerm(op, term);
@@ -928,7 +945,7 @@ basic::Expression* basic::Parser::additiveExpression(void) {
         if (peek(TkPLUS) or peek(TkMINUS)) {
             AdditiveExpression *e = new AdditiveExpression(term);
             e->setPosition(term->getLine(), term->getColumn());
-            while (accept(TkPLUS) or accept(TkMINUS)) {
+            while (accept_any(TkPLUS, TkMINUS, 0)) {
                 Token op = m_accepted_token;
                 if ((term = multiplicativeExpression())) {
                     e->appendTerm(op, term);
@@ -957,7 +974,7 @@ basic::Expression* basic::Parser::comparitiveExpression(void) {
     
     if ((first = additiveExpression())) {
         Token t = m_token;
-        if (accept(TkEQUALS) || accept(TkNOTEQUALS) || accept(TkLT) || accept(TkGT) || accept(TkLTEQUALS) || accept(TkGTEQUALS)) {
+        if (accept_any(TkEQUALS, TkNOTEQUALS, TkLT, TkGT, TkLTEQUALS, TkGTEQUALS, 0)) {
             if ((second = additiveExpression())) {
                 ComparitiveExpression *e = new ComparitiveExpression(first, t, second);
                 e->setPosition(first->getLine(), first->getColumn());

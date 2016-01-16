@@ -36,6 +36,7 @@ private:
     
     bool peek(Token t) const;
     bool accept(Token t);
+    bool accept_any(Token t0, ...);
     bool expect(Token t);
     void error(int, ...);
     bool isValidExpressionToken(Token t) const;
