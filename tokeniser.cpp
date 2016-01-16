@@ -81,6 +81,7 @@ const char* basic::Tokeniser::tokenDescriptions[] = {
     "for", "to", "step", "next",
     "function", "as", "return", "sub", "call", "exit",
     "dim", "integer", "real", "string", "variant",
+    "open", "close", "output", "append",
 };
 
 basic::Tokeniser::Tokeniser(const char *filename) {
